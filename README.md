@@ -42,9 +42,9 @@ It correctly bundles Vue in production mode and optimizes the build for the best
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
-### `firebase deploy`
+### `yarn run deploy-dev`
 
-Deploys the app to the Firebase cloud. You need to run "yarn run build" before the deployment.
+Build and deploy the app to the Firebase cloud. Now only deploy web assets to hosting.
 
 ### `yarn run format`
 
