@@ -5,7 +5,7 @@ name: Deploy to Firebase Hosting on merge
 'on':
   push:
     branches:
-      - master
+      - main
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -17,11 +17,12 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: Yarn
         run: yarn install
+      - run: cp configs/dev.ts  src/config/project.ts
       - run: yarn run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FIR_VUE_STARTUP_KIT }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_NOUNSMAP_WEB_DEV }}'
           channelId: live
           projectId: '${{ secrets.FIREBASE_PROJECT }}'
         env:
