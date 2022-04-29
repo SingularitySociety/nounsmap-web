@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "fir-vue-startup-kit"
+    "default": "nounsmap-web-dev",
+    "dev": "nounsmap-web-dev",
+    "prod": "nounsmap-web-prod"
   }
 }
