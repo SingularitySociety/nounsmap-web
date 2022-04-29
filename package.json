@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build; firebase deploy --project=dev --only hosting",
     "format": "prettier --write 'src/**/*.{js,ts,vue}'"
   },
   "dependencies": {
