@@ -15,8 +15,8 @@ export default {
         clearInterval(timer);
         this.map = new window.google.maps.Map(this.$refs.map, {
           // lat 緯度 lng 経度
-          center: {lat: 49, lng: 31.5},
-          zoom: 7
+          center: {lat: 49, lng: 34.5},
+          zoom: 5.5
         });       
       }
     },500)
