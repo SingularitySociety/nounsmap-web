@@ -9,6 +9,7 @@ import { Loader } from "@googlemaps/js-api-loader";
 export default defineComponent({
   setup() {
     const mapRef = ref();
+    const google = ref();
     onMounted(async () => {
       const loader = new Loader({
         apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
@@ -20,8 +21,8 @@ export default defineComponent({
         center: { lat: 49, lng: 34.5 },
         zoom: 5.5,
       };
-      const google = await loader.load();
-      new google.maps.Map(mapRef.value, mapOptions);
+      google.value = await loader.load();
+      new google.value.maps.Map(mapRef.value, mapOptions);
     });
     return {
       mapRef,
