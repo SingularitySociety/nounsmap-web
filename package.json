@@ -11,6 +11,7 @@
     "format": "prettier --write 'src/**/*.{js,ts,vue}'"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.14.1",
     "@vueuse/head": "^0.7.6",
     "core-js": "^3.21.0",
     "firebase": "^9.6.11",
