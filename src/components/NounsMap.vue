@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, watch } from "vue";
 import { Loader } from "@googlemaps/js-api-loader";
 
 export default defineComponent({
@@ -12,6 +12,8 @@ export default defineComponent({
 
     const google = ref();
     const mapObj = ref();
+
+    const heatmapPoints = ref([]);
     
     onMounted(async () => {
       const loader = new Loader({
@@ -20,14 +22,15 @@ export default defineComponent({
       });
 
       const mapOptions = {
-        // lat 緯度 lng 経度
+        // lat: latitude, lng: longititude
         center: { lat: 49, lng: 34.5 },
         zoom: 5.5,
       };
       google.value = await loader.load();
       mapObj.value = new google.value.maps.Map(mapRef.value, mapOptions);
 
-      const heatmapPoints = [
+      // TODO: get data from Firestore.
+      heatmapPoints.value = [
         {
           location: new google.value.maps.LatLng(49, 34.5),
           weight: 1,
@@ -41,15 +44,18 @@ export default defineComponent({
           weight: 2,
         },
       ]
-      
-      const heatmap = new google.value.maps.visualization.HeatmapLayer({
-        data: heatmapPoints,
-        map: mapObj.value
-      });
-      heatmap.setMap(mapObj.value);
     });
 
-
+    watch([heatmapPoints, mapObj], () => {
+      if (heatmapPoints.value.length > 0 && google.value && mapObj.value) {
+        const heatmap = new google.value.maps.visualization.HeatmapLayer({
+          data: heatmapPoints.value,
+          map: mapObj.value
+        });
+        heatmap.setMap(mapObj.value);
+      }
+    });
+    
     return {
       mapRef,
     };
