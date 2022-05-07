@@ -1,6 +1,6 @@
 {
-  "name": "firebase-vue3-startup-kit",
-  "version": "1.0.1",
+  "name": "nounsmap",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -21,9 +21,9 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.48.7",
     "@typescript-eslint/eslint-plugin": "^5.19.0",
     "@typescript-eslint/parser": "^5.19.0",
-    "@vue/cli-plugin-babel": "^5.0.4",
     "@vue/cli-plugin-eslint": "^5.0.4",
     "@vue/cli-plugin-router": "^5.0.4",
     "@vue/cli-plugin-typescript": "^5.0.4",
