@@ -6,6 +6,7 @@
 import { defineComponent, ref, onMounted, watch } from "vue";
 import { Loader } from "@googlemaps/js-api-loader";
 
+import heatmaps from "@/data/heatmapPoints";
 
 export default defineComponent({
   setup() {
@@ -30,20 +31,12 @@ export default defineComponent({
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
 
       // TODO: get data from Firestore.
-      heatmapPoints.value = [
-        {
-          location: new mapInstance.value.maps.LatLng(49, 34.5),
-          weight: 1,
-        },
-        {
-          location: new mapInstance.value.maps.LatLng(49.3, 34.3),
-          weight: 1,
-        },
-        {
-          location: new mapInstance.value.maps.LatLng(49.5, 34.4),
-          weight: 2,
-        },
-      ]
+      heatmapPoints.value = heatmaps.map((point) => {
+        return {
+          location: new mapInstance.value.maps.LatLng(point.location.lat, point.location.lng),
+          weight: point.weight,
+        };
+      });
     });
 
     watch([heatmapPoints, mapObj], () => {
