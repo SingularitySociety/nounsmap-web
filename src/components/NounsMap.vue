@@ -13,7 +13,7 @@ export default defineComponent({
     const google = ref();
     const mapObj = ref();
 
-    const heatmapPoints = ref([]);
+    const heatmapPoints = ref<{location: any, weight: number}[]>([]);
     
     onMounted(async () => {
       const loader = new Loader({
