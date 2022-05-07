@@ -37,6 +37,18 @@ export default defineComponent({
           weight: point.weight,
         };
       });
+
+
+      const icon = {
+        url: "/images/4-glasses/glasses-square-honey.png",
+        scaledSize: new mapInstance.value.maps.Size(72, 80),
+      };
+      const marker = new mapInstance.value.maps.Marker({
+        position: new mapInstance.value.maps.LatLng(49, 34.5),
+        map: mapObj.value,
+        icon,
+      });
+      
     });
 
     watch([heatmapPoints, mapObj], () => {
