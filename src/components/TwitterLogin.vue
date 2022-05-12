@@ -20,14 +20,6 @@
             >
             Twitterでログイン
         </button>
-        <button
-            block
-            text
-            class="text-transform py-4 my-2"
-            color="primary"
-            >
-            新規登録はこちら
-        </button>
     </section>
 </template>
 
@@ -67,16 +59,7 @@ export default defineComponent({
       });
     };
     const tweet = () => {
-    const apiClientbak = axios.create({
-        // APIのURI
-        baseURL: "https://api.coindesk.com/",
-        // リクエストヘッダ
-        headers: {
-            "Content-type": "application/json",
-        },
-    });        
-    //apiClientbak.get('v1/bpi/currentprice.json').then(response => (info.value = response))        
-    const apiClient = axios.create({
+       const apiClient = axios.create({
         // APIのURI
         baseURL: "https://api.twitter.com/2/",
         // リクエストヘッダ
