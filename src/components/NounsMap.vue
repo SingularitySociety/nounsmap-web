@@ -110,9 +110,9 @@ export default defineComponent({
         el,
         {
           x:40,
-          y:240,
-          width:1480,
-          height:1480,
+          y:40,
+          width:480,
+          height:480,
           useCORS: true,       
         }
       ]
