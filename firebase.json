@@ -12,13 +12,19 @@
     ]
   },
   "hosting": {
+    "target": "app",    
     "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
+    "appAssociation": "AUTO",
     "rewrites": [
+      {
+        "source": "/p/*",
+        "function": "api"
+      },
       {
         "source": "**",
         "destination": "/index.html"
