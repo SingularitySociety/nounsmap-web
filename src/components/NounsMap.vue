@@ -1,15 +1,11 @@
 <template>
   <div>
-    <div @click="capture">
-      投稿用画像確認
-    </div>
     <div>
-      <img :src="dataURL"/>
+      <img :src="dataURL" />
     </div>
-  </div>  
-  <div id='captureRef'>
+  </div>
+  <div id="captureRef">
     <div ref="mapRef" class="nouns-map" />
-    <div id="content"><img width="242" height="120"  :src="pictureURL" /></div>  
   </div>
 </template>
 
@@ -27,11 +23,13 @@ export default defineComponent({
     const mapInstance = ref();
     const mapObj = ref();
 
-    const heatmapPoints = ref<{location: google.maps.LatLng, weight: number}[]>([]);
+    const heatmapPoints = ref<
+      { location: google.maps.LatLng; weight: number }[]
+    >([]);
     const captureRef = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
-    
+
     onMounted(async () => {
       const loader = new Loader({
         apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
@@ -48,7 +46,10 @@ export default defineComponent({
       // TODO: get data from Firestore.
       heatmapPoints.value = heatmaps.map((point) => {
         return {
-          location: new mapInstance.value.maps.LatLng(point.location.lat, point.location.lng),
+          location: new mapInstance.value.maps.LatLng(
+            point.location.lat,
+            point.location.lng
+          ),
           weight: point.weight,
         };
       });
@@ -62,14 +63,15 @@ export default defineComponent({
         map: mapObj.value,
         icon,
       });
-      pictureURL.value = require('@/assets/sample/FSQp5oGXIAA3qD6.jpeg')
+      pictureURL.value = require("@/assets/sample/FSQp5oGXIAA3qD6.jpeg");
 
       const contentString =
-          '<div id="content">' +
-          '<div id="siteNotice">' +
-          '<img width="242" height="120"  src="' + pictureURL.value + '" />'
-          "</div>" +
-          "</div>";
+        '<div id="content">' +
+        '<div id="siteNotice">' +
+        '<img width="242" height="120"  src="' +
+        pictureURL.value +
+        '" />';
+      "</div>" + "</div>";
 
       const infowindow = new google.maps.InfoWindow({
         content: contentString,
@@ -86,14 +88,14 @@ export default defineComponent({
           map: mapObj.value,
           shouldFocus: false,
         });
-      });   
-    });    
+      });
+    });
 
     watch([heatmapPoints, mapObj], () => {
       if (heatmapPoints.value.length > 0 && mapInstance.value && mapObj.value) {
         const heatmap = new mapInstance.value.maps.visualization.HeatmapLayer({
           data: heatmapPoints.value,
-          map: mapObj.value
+          map: mapObj.value,
         });
         heatmap.setMap(mapObj.value);
       }
@@ -104,14 +106,14 @@ export default defineComponent({
       const params: Parameters<typeof html2canvas> = [
         el,
         {
-          x:40,
-          y:40,
-          width:480,
-          height:480,
-          useCORS: true,       
-        }
-      ]
-      const canvasElement = await html2canvas(...params).catch(e => {
+          x: 40,
+          y: 40,
+          width: 480,
+          height: 480,
+          useCORS: true,
+        },
+      ];
+      const canvasElement = await html2canvas(...params).catch((e) => {
         console.error(e);
         return;
       });
@@ -121,7 +123,6 @@ export default defineComponent({
       dataURL.value = canvasElement.toDataURL();
     };
 
-    
     return {
       mapRef,
       dataURL,
