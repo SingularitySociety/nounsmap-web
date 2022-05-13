@@ -1,0 +1,18 @@
+{
+  "name": "images/photos/",
+  "bucket": "nounsmap-web-dev.appspot.com",
+  "contentType": "text/plain",
+  "metageneration": 1,
+  "generation": 1652435101521,
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "cacheControl": "public, max-age=3600",
+  "contentEncoding": "identity",
+  "downloadTokens": [],
+  "etag": "CG/+SICVOkzLVsYgeu0g0CX233U",
+  "timeCreated": "2022-05-13T09:45:01.520Z",
+  "updated": "2022-05-13T09:45:01.520Z",
+  "size": 0,
+  "md5Hash": "1B2M2Y8AsgTpgAmY7PhCfg==",
+  "crc32c": "0"
+}
