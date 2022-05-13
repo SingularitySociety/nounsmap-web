@@ -3,8 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
-import { useUser, useIsSignedIn } from "@/utils/utils";
+import { defineComponent } from "vue";
 import NounsMap from "./components/NounsMap.vue";
 
 export default defineComponent({

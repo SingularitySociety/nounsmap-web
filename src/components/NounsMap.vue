@@ -1,5 +1,4 @@
 <template>
-  <twitter-login/>
   <div>
     <div @click="capture">
       投稿用画像確認
@@ -17,15 +16,11 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from "vue";
 import { Loader } from "@googlemaps/js-api-loader";
-import TwitterLogin from "@/components/TwitterLogin.vue";
 import html2canvas from "html2canvas";
 
 import heatmaps from "@/data/heatmapPoints";
 
 export default defineComponent({
-  components: {
-    TwitterLogin,
-  },
   setup() {
     const mapRef = ref();
 

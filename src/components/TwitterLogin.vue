@@ -24,10 +24,10 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, watch } from "vue";
+import { defineComponent, ref } from "vue";
 // import firebaseApp from '@/src/main.js'
 import { getAuth, signInWithPopup, TwitterAuthProvider } from "firebase/auth";
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 
 export default defineComponent({
   setup() {
