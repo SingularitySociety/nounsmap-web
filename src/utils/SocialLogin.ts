@@ -17,7 +17,7 @@ const authSignIn = async (
     if (callback) {
       callback();
     }
-  } catch (error) {
+  } catch (error: any) {
     if (errorCallback) {
       errorCallback(error);
     }
