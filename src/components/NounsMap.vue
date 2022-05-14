@@ -55,8 +55,8 @@ export default defineComponent({
       });
 
       const icon = {
-        url: "/images/4-glasses/glasses-square-honey.png",
-        scaledSize: new mapInstance.value.maps.Size(72, 80),
+        url: "/images/glasses/red320px.png",
+        scaledSize: new mapInstance.value.maps.Size(80, 30),
       };
       const marker = new mapInstance.value.maps.Marker({
         position: new mapInstance.value.maps.LatLng(47, 34.5),
