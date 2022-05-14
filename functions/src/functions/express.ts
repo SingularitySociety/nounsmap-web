@@ -7,7 +7,7 @@ import * as fs from "fs";
 import UUID from "uuid-v4";
 import moment from "moment";
 
-import { nounsMapConfig } from "../common/project";
+import { firebaseConfig, nounsMapConfig } from "../common/project";
 
 import * as Sentry from "@sentry/node";
 
@@ -35,11 +35,9 @@ export const hello_response = async (req, res) => {
 const debugPhotoSync = async (req: any, res: any) => {
   const { photo_id } = req.params;
   let storage = admin.storage();
-  let bucketname = "nounsmap-web-dev.appspot.com";
-  let objname = `images/photos/${photo_id}/ogp/tmp.jpg`;  
-  let toFilePath = `images/photos/${photo_id}/ogp/600.jpg`;  
-  let url;
-  const bucketObj = storage.bucket(bucketname);
+  const objname = `images/photos/${photo_id}/ogp/tmp.jpg`;  
+  const toFilePath = `images/photos/${photo_id}/ogp/600.jpg`;  
+  const bucketObj = storage.bucket(firebaseConfig.storageBucket);
   const tempFilePath = path.join(os.tmpdir(), UUID());
 
   await bucketObj.file(objname).download({ destination: tempFilePath });
@@ -57,12 +55,9 @@ const debugPhotoSync = async (req: any, res: any) => {
   });
   // generate public image url see: https://stackoverflow.com/questions/42956250/get-download-url-from-file-uploaded-with-cloud-functions-for-firebase
   const file = ret[0];
-  if (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) {
-    url=`http://localhost:9199/v0/b/${bucketname}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
-  } else {
-    url=`https://firebasestorage.googleapis.com/v0/b/${bucketname}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
-  }
-  console.log(url)
+  const url = (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) ?
+    `http://localhost:9199/v0/b/${bucketObj.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`:
+    `https://firebasestorage.googleapis.com/v0/b/${bucketObj.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
   await db.doc(`photos/${photo_id}`).set(
     {
       title:"NounsMap Photo & News share!",

@@ -102,7 +102,7 @@ export default defineComponent({
     });
 
     const capture = async () => {
-      const el = document.querySelector("#captureRef") as HTMLElement;
+      const el = captureRef.value as HTMLElement;
       const params: Parameters<typeof html2canvas> = [
         el,
         {
