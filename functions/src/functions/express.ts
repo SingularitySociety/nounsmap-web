@@ -66,7 +66,7 @@ const debugPhotoSync = async (req: any, res: any) => {
   await db.doc(`photos/${photo_id}`).set(
     {
       title:"NounsMap Photo & News share!",
-      description:"We are planining to release easy photo and map share service",
+      description:"We are planning to release easy photo and map share service",
       deletedFlag:false,
       publicFlag:true,
       images: {
