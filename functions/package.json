@@ -7,7 +7,7 @@
     "serve": "npm run build && firebase emulators:start --import=exportedlocal",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
+    "deploy-dev": "firebase use dev && firebase deploy --only functions",
     "local-predeploy": " cp ../dist/index.html templates/index.html && cp ../src/config/project.ts ./src/common/project.ts",
     "logs": "firebase functions:log"
   },
