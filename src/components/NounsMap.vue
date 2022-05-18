@@ -63,7 +63,7 @@ export default defineComponent({
         map: mapObj.value,
         icon,
       });
-      pictureURL.value = require("@/assets/sample/FSQp5oGXIAA3qD6.jpeg");
+      pictureURL.value = require("@/assets/sample/pexels-11518762.jpg");
 
       const contentString =
         '<div id="content">' +
