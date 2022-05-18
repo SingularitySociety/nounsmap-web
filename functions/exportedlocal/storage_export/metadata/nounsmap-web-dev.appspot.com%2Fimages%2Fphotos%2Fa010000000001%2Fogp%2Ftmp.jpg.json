@@ -1,0 +1,20 @@
+{
+  "name": "images/photos/a010000000001/ogp/tmp.jpg",
+  "bucket": "nounsmap-web-dev.appspot.com",
+  "contentType": "image/jpeg",
+  "metageneration": 1,
+  "generation": 1652435667830,
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "cacheControl": "public, max-age=3600",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "ade706d5-41f6-48c7-b38f-ec10059cd222"
+  ],
+  "etag": "VYU/CvzwJZoqhjoxYGB9GDEeQI0",
+  "timeCreated": "2022-05-13T09:54:27.829Z",
+  "updated": "2022-05-13T09:54:27.831Z",
+  "size": 108998,
+  "md5Hash": "bdVLktSfPGVHXCuv41aA2w==",
+  "crc32c": "1474478552"
+}

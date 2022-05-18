@@ -1,13 +1,11 @@
-// import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 
 import exportIfNeeded from "./common/exportifneeded";
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
+exportIfNeeded("api", "api", exports);
 exportIfNeeded("test", "tests/test", exports);
+
+ 

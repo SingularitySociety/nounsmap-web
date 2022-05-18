@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build && cp dist/index.html functions/templates/index.html",
     "lint": "vue-cli-service lint",
     "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build; firebase deploy --project=dev --only hosting",
     "deploy-prod": "cp configs/prod.ts src/config/project.ts; yarn build; firebase deploy --project=prod --only hosting; cp configs/dev.ts src/config/project.ts",
@@ -13,8 +13,10 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.14.1",
     "@vueuse/head": "^0.7.6",
+    "axios": "^0.27.2",
     "core-js": "^3.21.0",
     "firebase": "^9.6.11",
+    "html2canvas": "^1.4.1",
     "vue": "^3.2.33",
     "vue-i18n": "9",
     "vue-router": "^4.0.14",
