@@ -25,8 +25,12 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
       - name: functions Yarn
         working-directory: ./functions
-        run: yarn; yarn local-predeploy; yarn build
+        run: |
+          yarn
+          yarn local-predeploy
+          yarn build
       - name: functions deploy to Firebase 
         working-directory: ./functions
-        run: firebase use dev; |
+        run: |
+          firebase use dev 
           yarn deploy --token=${{ secrets.FIREBASE_SERVICE_ACCOUNT_NOUNSMAP_WEB_DEV }}
