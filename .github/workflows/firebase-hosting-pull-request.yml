@@ -25,7 +25,7 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
       - name: functions Yarn
         working-directory: ./functions
-        run: yarn & yarn build
+        run: yarn; yarn build
       - name: functions deploy to Firebase 
         working-directory: ./functions
         run: |
