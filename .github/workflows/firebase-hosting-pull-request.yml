@@ -32,4 +32,4 @@ jobs:
       - name: functions deploy to Firebase 
         working-directory: ./functions
         run: |
-          yarn deploy --token=${{ secrets.FIREBASE_SERVICE_ACCOUNT_NOUNSMAP_WEB_DEV }}
+          yarn deploy-dev --token=${{ secrets.FIREBASE_SERVICE_ACCOUNT_NOUNSMAP_WEB_DEV }}
