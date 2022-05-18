@@ -35,4 +35,4 @@ jobs:
           yarn use-dev --token=$F_TOKEN
           yarn deploy --token=$F_TOKEN
         env:
-          F_TOKEN : ${{secrets.FIREBASE_SERVICE_ACCOUNT_NOUNSMAP_WEB_DEV}}          
+          F_TOKEN : ${{secrets.FIREBASE_TOKEN_NOUNSMAP_WEB_DEV}}          
