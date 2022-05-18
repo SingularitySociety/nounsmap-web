@@ -28,5 +28,5 @@ jobs:
         run: yarn; yarn local-predeploy; yarn build
       - name: functions deploy to Firebase 
         working-directory: ./functions
-        run: |
+        run: firebase use dev; |
           yarn deploy --token=${{ secrets.FIREBASE_SERVICE_ACCOUNT_NOUNSMAP_WEB_DEV }}
