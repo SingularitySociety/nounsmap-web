@@ -54,16 +54,6 @@ export const process_error = (error: any) => {
   return new functions.https.HttpsError("internal", error.message);
 };
 
-const chunk = (arr: string[], chunkSize: number) => {
-  const ret: string[][] = [];
-  const len = arr.length;
-  for (let i = 0; i < len; i += chunkSize) {
-    const tmp = arr.slice(i, i + chunkSize);
-    ret.push(tmp);
-  }
-  return ret;
-};
-
 export const filterData = (data: { [key: string]: any }) => {
   return Object.keys(data).reduce((tmp: { [key: string]: any }, key) => {
     if (data[key] !== null && data[key] !== undefined) {

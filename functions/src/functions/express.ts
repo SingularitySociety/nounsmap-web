@@ -1,14 +1,10 @@
 import express from "express";
 import * as admin from "firebase-admin";
 import * as xmlbuilder from "xmlbuilder";
-import * as path from "path";
-import * as os from "os";
 import * as fs from "fs";
-import UUID from "uuid-v4";
 import moment from "moment";
-import * as imageUtilBlend from "./image/imageUtilBlend";
 
-import { firebaseConfig, nounsMapConfig } from "../common/project";
+import { nounsMapConfig } from "../common/project";
 
 import * as Sentry from "@sentry/node";
 
@@ -31,50 +27,6 @@ export const logger = async (req, res, next) => {
 };
 export const hello_response = async (req, res) => {
   res.json({ message: "hello" });
-};
-
-const debugPhotoSync = async (req: any, res: any) => {
-  const { photo_id } = req.params;
-  let storage = admin.storage();
-  const objname = `images/photos/${photo_id}/ogp/tmp.jpg`;  
-  const toFilePath = `images/photos/${photo_id}/ogp/600.jpg`;  
-  const bucketObj = storage.bucket(firebaseConfig.storageBucket);
-  const tempFilePath = path.join(os.tmpdir(), UUID());
-
-  await bucketObj.file(objname).download({ destination: tempFilePath });
-  console.log("Image downloaded locally to", tempFilePath);
-  // upload
-  const uuid = UUID();
-  const ret = await bucketObj.upload(tempFilePath, {
-    destination: toFilePath,
-    metadata: {
-      contentType: "image/jpeg",
-      metadata: {
-        firebaseStorageDownloadTokens: uuid,
-      },
-    },
-  });
-  // generate public image url see: https://stackoverflow.com/questions/42956250/get-download-url-from-file-uploaded-with-cloud-functions-for-firebase
-  const file = ret[0];
-  const url = (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) ?
-    `http://localhost:9199/v0/b/${bucketObj.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`:
-    `https://firebasestorage.googleapis.com/v0/b/${bucketObj.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
-  await db.doc(`photos/${photo_id}`).set(
-    {
-      title:"NounsMap Photo & News share!",
-      description:"We are planning to release easy photo and map share service",
-      deletedFlag:false,
-      publicFlag:true,
-      images: {
-        [600]: {
-          original: "no",
-          url,
-        },
-      },
-    },
-    { merge: true }
-  );
-  res.json({ message: photo_id, url });
 };
 
 const lastmod = (restaurant) => {
@@ -216,63 +168,8 @@ const debugError = async (req: any, res: any) => {
   }, 10);
 };
 
-
-import osmsm from "osm-static-maps";
-import {downloadFileFromBucket} from "./image/imageUtil"
-
-const photoPosted = async (req: any, res: any) => {
-  const { photo_id } = req.params;
-  const { lat, lng, zoom } = req.query;
-  try {
-    // 地図画像の Buffer オブジェクトを取得
-    const imageBinaryBuffer = await osmsm({
-      width:  600, // 画像の横幅(ピクセル) twitter recommend 600
-      height: 314, // 画像の縦幅(ピクセル) twitter recommend 314
-      center: lng+','+lat, // 経度,緯度
-      zoom: zoom, // ズームレベル
-      type: 'png' // PNG 画像フォーマット
-    })
-    // 地図画像データをファイルに出力
-    const tmpMap = 'map.png';
-    await fs.promises.writeFile(tmpMap, imageBinaryBuffer)
-
-    const fromObj = {bucket:firebaseConfig.storageBucket , name:'images/photos/' + photo_id + '/original.jpg'}
-    const tmpPhoto = await downloadFileFromBucket(fromObj);
-    const tmpResizedPhoto = await imageUtilBlend.resizeLocal(tmpPhoto, 220);
-    const iconPath = "./images/red160px.png";
-    const tmpBlendImage = "ogp.jpg";
-    await imageUtilBlend.blendLocal(tmpMap,tmpResizedPhoto,iconPath,tmpBlendImage);
-    const toObj = {bucket:firebaseConfig.storageBucket , name:'images/photos/' + photo_id + '/ogp/600.jpg',context:"image/jpeg"}
-    const url = await imageUtilBlend.uploadFileToBucket(tmpBlendImage,toObj);
-    console.log(url);
-    fs.unlinkSync(tmpPhoto);
-    fs.unlinkSync(tmpResizedPhoto);
-    await db.doc(`photos/${photo_id}`).set(
-      {
-        title:"NounsMap Photo & News share!",
-        description:"We are planning to release easy photo and map share service",
-        deletedFlag:false,
-        publicFlag:true,
-        images: {
-          [600]: {
-            url,
-          },
-        },
-      },
-      { merge: true }
-    );
-    res.json({ message: photo_id, url });
-  } catch (err) {
-    console.error(err);
-    res.json({ message: "error" + err });
-  }
-}
-
 app.use(express.json());
 app.get("/p/:photo_id", ogpPage);
 app.get("/sitemap.xml", sitemap_response);
-
-app.put("/p/posted/:photo_id", photoPosted);
-app.get("/debug/photosync/:photo_id", debugPhotoSync);
 app.get("/debug/error", debugError);
 
