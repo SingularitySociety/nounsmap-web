@@ -218,24 +218,50 @@ const debugError = async (req: any, res: any) => {
 
 
 import osmsm from "osm-static-maps";
+import {downloadFileFromBucket} from "./image/imageUtil"
 
-const debugTest = async (req: any, res: any) => {
+const photoPosted = async (req: any, res: any) => {
+  const { photo_id } = req.params;
+  const { lat, lng, zoom } = req.query;
   try {
-
     // 地図画像の Buffer オブジェクトを取得
     const imageBinaryBuffer = await osmsm({
-      width:  600, // 画像の横幅(ピクセル)
-      height: 600, // 画像の縦幅(ピクセル)
-      center: '47,34.5', // 経度,緯度
-      zoom: 6, // ズームレベル
+      width:  600, // 画像の横幅(ピクセル) twitter recommend 600
+      height: 314, // 画像の縦幅(ピクセル) twitter recommend 314
+      center: lng+','+lat, // 経度,緯度
+      zoom: zoom, // ズームレベル
       type: 'png' // PNG 画像フォーマット
     })
-
     // 地図画像データをファイルに出力
     const tmpMap = 'map.png';
     await fs.promises.writeFile(tmpMap, imageBinaryBuffer)
-    await imageUtilBlend.blendLocal(tmpMap,"./images/red160px.png","./images/red160px.png",200,"mapResized.png","");
-    res.json({ message: "success" });
+
+    const fromObj = {bucket:firebaseConfig.storageBucket , name:'images/photos/' + photo_id + '/original.jpg'}
+    const tmpPhoto = await downloadFileFromBucket(fromObj);
+    const tmpResizedPhoto = await imageUtilBlend.resizeLocal(tmpPhoto, 220);
+    const iconPath = "./images/red160px.png";
+    const tmpBlendImage = "ogp.jpg";
+    await imageUtilBlend.blendLocal(tmpMap,tmpResizedPhoto,iconPath,tmpBlendImage);
+    const toObj = {bucket:firebaseConfig.storageBucket , name:'images/photos/' + photo_id + '/ogp/600.jpg',context:"image/jpeg"}
+    const url = await imageUtilBlend.uploadFileToBucket(tmpBlendImage,toObj);
+    console.log(url);
+    fs.unlinkSync(tmpPhoto);
+    fs.unlinkSync(tmpResizedPhoto);
+    await db.doc(`photos/${photo_id}`).set(
+      {
+        title:"NounsMap Photo & News share!",
+        description:"We are planning to release easy photo and map share service",
+        deletedFlag:false,
+        publicFlag:true,
+        images: {
+          [600]: {
+            url,
+          },
+        },
+      },
+      { merge: true }
+    );
+    res.json({ message: photo_id, url });
   } catch (err) {
     console.error(err);
     res.json({ message: "error" + err });
@@ -246,7 +272,7 @@ app.use(express.json());
 app.get("/p/:photo_id", ogpPage);
 app.get("/sitemap.xml", sitemap_response);
 
-app.get("/debug/test", debugTest);
+app.put("/p/posted/:photo_id", photoPosted);
 app.get("/debug/photosync/:photo_id", debugPhotoSync);
 app.get("/debug/error", debugError);
 

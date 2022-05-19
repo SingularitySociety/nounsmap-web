@@ -85,10 +85,10 @@ export const validImagePath = (filePath, matchPaths) => {
 
 export const getFirestorePath = (filePath) => {
   const paths = filePath.split("/");
-  if (validImagePath(filePath, [constant.coverPath, constant.profilePath])) {
-    return paths.slice(1, 3).join("/");
-  } else if (validImagePath(filePath, [constant.menuItemPath])) {
-    return paths.slice(1, 5).join("/");
+  if (validImagePath(filePath, [constant.originalPath])) {
+    return paths.slice(1, 2).join("/");
+  } else if (validImagePath(filePath, [constant.ogpPath])) {
+    return paths.slice(1, 2).join("/");
   }
   return "";
 };
