@@ -6,6 +6,7 @@ import * as os from "os";
 import * as fs from "fs";
 import UUID from "uuid-v4";
 import moment from "moment";
+import * as imageUtilBlend from "./image/imageUtilBlend";
 
 import { firebaseConfig, nounsMapConfig } from "../common/project";
 
@@ -204,7 +205,6 @@ const ogpPage = async (req: any, res: any) => {
   } catch (e) {
     console.log(e);
     Sentry.captureException(e);
-    res.send(template_data);
   }
 };
 
@@ -217,10 +217,36 @@ const debugError = async (req: any, res: any) => {
 };
 
 
+import osmsm from "osm-static-maps";
+
+const debugTest = async (req: any, res: any) => {
+  try {
+
+    // 地図画像の Buffer オブジェクトを取得
+    const imageBinaryBuffer = await osmsm({
+      width:  600, // 画像の横幅(ピクセル)
+      height: 600, // 画像の縦幅(ピクセル)
+      center: '47,34.5', // 経度,緯度
+      zoom: 6, // ズームレベル
+      type: 'png' // PNG 画像フォーマット
+    })
+
+    // 地図画像データをファイルに出力
+    const tmpMap = 'map.png';
+    await fs.promises.writeFile(tmpMap, imageBinaryBuffer)
+    await imageUtilBlend.blendLocal(tmpMap,"./images/red160px.png","./images/red160px.png",200,"mapResized.png","");
+    res.json({ message: "success" });
+  } catch (err) {
+    console.error(err);
+    res.json({ message: "error" + err });
+  }
+}
+
 app.use(express.json());
 app.get("/p/:photo_id", ogpPage);
 app.get("/sitemap.xml", sitemap_response);
 
+app.get("/debug/test", debugTest);
 app.get("/debug/photosync/:photo_id", debugPhotoSync);
 app.get("/debug/error", debugError);
 
