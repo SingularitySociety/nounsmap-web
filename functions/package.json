@@ -7,7 +7,7 @@
     "serve": "npm run build && firebase emulators:start --import=exportedlocal",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "use-dev" : "firebase use dev",
+    "use-dev": "firebase use dev",
     "deploy": "firebase deploy --only functions",
     "local-predeploy": " cp ../dist/index.html templates/index.html && cp ../src/config/project.ts ./src/common/project.ts",
     "logs": "firebase functions:log"
@@ -23,6 +23,9 @@
     "firebase-functions": "^3.19.0",
     "moment": "^2.29.3",
     "moment-timezone": "^0.5.34",
+    "osm-static-maps": "^3.10.3",
+    "puppeteer": "^14.1.0",
+    "sharp": "^0.30.4",
     "uuid-v4": "^0.1.0",
     "xmlbuilder": "^15.1.1"
   },
