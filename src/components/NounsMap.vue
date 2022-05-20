@@ -1,6 +1,9 @@
 <template>
   <div>
-    <photo-upload/>
+    <photo-select @selected="photoSelected"/>
+    <button @click="uploadPhoto">
+      upload
+    </button>    
     <div>
       <img :src="dataURL" />
     </div>
@@ -16,11 +19,12 @@ import { Loader } from "@googlemaps/js-api-loader";
 import html2canvas from "html2canvas";
 
 import heatmaps from "@/data/heatmapPoints";
-import PhotoUpload from "@/components/PhotoUpload.vue";
+import PhotoSelect from "@/components/PhotoSelect.vue";
+import { uploadFile } from "@/lib/firebase/storage";
 
 export default defineComponent({
   components: {
-    PhotoUpload,
+    PhotoSelect,
   },   
   setup() {
     const mapRef = ref();
@@ -32,6 +36,7 @@ export default defineComponent({
       { location: google.maps.LatLng; weight: number }[]
     >([]);
     const captureRef = ref();
+    const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
 
@@ -105,7 +110,14 @@ export default defineComponent({
         heatmap.setMap(mapObj.value);
       }
     });
-
+    const photoSelected = async (files:any) => {
+      console.log(files);
+      photoLocal.value = files[0];
+    };
+    const uploadPhoto = async () => {
+      const path = "images/tmp.jpg";
+      uploadFile(photoLocal.value, path);
+    };
     const capture = async () => {
       const el = captureRef.value as HTMLElement;
       const params: Parameters<typeof html2canvas> = [
@@ -133,6 +145,8 @@ export default defineComponent({
       dataURL,
       pictureURL,
       captureRef,
+      photoSelected,
+      uploadPhoto,
       capture,
     };
   },

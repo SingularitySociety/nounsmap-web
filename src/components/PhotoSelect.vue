@@ -11,36 +11,40 @@
     </div>
     
 </template>
-<script>
-//importing bootstrap 5 and pdf maker Modules
+<script lang="ts">
+import { defineComponent, ref } from "vue";
 import "bootstrap/dist/css/bootstrap.min.css";
-export default {
-  methods: {
-      //image upload and preview methods
-        selectImage () {
-          this.$refs.fileInput.click()
-      },
-      pickFile () {
-        let input = this.$refs.fileInput
-        let file = input.files
-        if (file && file[0]) {
-          let reader = new FileReader
-          reader.onload = e => {
-            this.previewImage = e.target.result
-          }
-          reader.readAsDataURL(file[0])
-          this.$emit('input', file[0])
+
+export default defineComponent({
+  setup(_, context) {
+    const fileInput = ref();
+    const previewImage = ref();
+    const selectImage = () => {
+      fileInput.value.click()
+    };
+    const pickFile = () => {
+      const input = fileInput.value
+      const file = input.files
+      if (file && file[0]) {
+        const reader = new FileReader
+        reader.onload = e => {
+          previewImage.value = e.target.result
         }
+        reader.readAsDataURL(file[0])
+        context.emit('input', file[0])
+        context.emit('selected', file)
       }
-  },
-  data: function() {
+    };
     return {
-      previewImage: null
-    }  
-  }
-}
+      fileInput,
+      previewImage,
+      selectImage,
+      pickFile,
+    };
+  },
+});  
 </script>
-<style >
+<style scoped>
 .imagePreviewWrapper {
   background-repeat: no-repeat;
     width: 250px;
