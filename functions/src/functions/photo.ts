@@ -15,6 +15,7 @@ import { firebaseConfig } from "../common/project";
 // This function is called by users after post user's photo
 export const posted = async (db, data: any, context: functions.https.CallableContext | Context) => {
     //const customerUid = utils.validate_auth(context);
+    console.log(context);
     const { photoId,lat,lng,zoom } = data;
     const _lat = Number(lat) || 0;
     const _lng = Number(lng) || 0;
@@ -54,6 +55,7 @@ export const posted = async (db, data: any, context: functions.https.CallableCon
 };
 
 export const debugPhotoSync = async (db, data: any, context: functions.https.CallableContext | Context) => {
+    console.log(context);
     const { photoId } = data;
     let storage = admin.storage();
     const objname = `images/photos/${photoId}/ogp/tmp.jpg`;  
