@@ -20,6 +20,10 @@ export const posted = async (db, data: any, context: functions.https.CallableCon
     const _lat = Number(lat) || 0;
     const _lng = Number(lng) || 0;
     const _zoom = Number(zoom) || 10;
+    const regex = /^[0-9a-zA-Z]+$/;
+    if (!regex.test(photoId)) {  
+      throw utils.process_error(`wrong photoId:${photoId}`);
+    }  
     utils.validate_params({ photoId }); // tip, sendSMS and lng are optinoal
     const fromObj = {bucket:firebaseConfig.storageBucket , name:'images/photos/' + photoId + '/original.jpg'}
     const toObj = {bucket:firebaseConfig.storageBucket , name:'images/photos/' + photoId + '/ogp/600.jpg',context:"image/jpeg"}
