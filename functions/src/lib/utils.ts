@@ -7,31 +7,54 @@ export const getRegion = () => {
   return (locale && locale.region) || "US";
 };
 
-export const validate_auth = (context: functions.https.CallableContext | Context) => {
+export const validate_auth = (
+  context: functions.https.CallableContext | Context
+) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError("failed-precondition", "The function must be called while authenticated.");
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called while authenticated."
+    );
   }
   return context.auth.uid;
 };
 
-export const validate_admin_auth = (context: functions.https.CallableContext | Context) => {
+export const validate_admin_auth = (
+  context: functions.https.CallableContext | Context
+) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError("failed-precondition", "The function must be called while authenticated.");
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called while authenticated."
+    );
   }
   return context.auth?.token?.parentUid || context.auth.uid;
 };
-export const validate_parent_admin_auth = (context: functions.https.CallableContext | Context) => {
+export const validate_parent_admin_auth = (
+  context: functions.https.CallableContext | Context
+) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError("failed-precondition", "The function must be called while authenticated.");
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called while authenticated."
+    );
   }
   if (context.auth?.token?.parentUid) {
-    throw new functions.https.HttpsError("failed-precondition", "The function must be called parent user.");
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called parent user."
+    );
   }
   return context.auth.uid;
 };
-export const is_admin_auth = (context: functions.https.CallableContext | Context) => {
+export const is_admin_auth = (
+  context: functions.https.CallableContext | Context
+) => {
   if (!context.auth) {
-    throw new functions.https.HttpsError("failed-precondition", "The function must be called while authenticated.");
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called while authenticated."
+    );
   }
   return !!context.auth?.token?.email;
 };
@@ -41,7 +64,11 @@ export const validate_params = (params) => {
     return params[key] === undefined;
   });
   if (errors.length > 0) {
-    throw new functions.https.HttpsError("invalid-argument", "Missing parameters.", { params: errors });
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "Missing parameters.",
+      { params: errors }
+    );
   }
 };
 

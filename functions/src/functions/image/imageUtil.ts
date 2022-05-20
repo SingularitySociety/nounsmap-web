@@ -7,7 +7,13 @@ import UUID from "uuid-v4";
 
 import * as constant from "./constant";
 
-const runSharp = async (bucket, fromFileFullPath, toFileFullPath, size, contentType) => {
+const runSharp = async (
+  bucket,
+  fromFileFullPath,
+  toFileFullPath,
+  size,
+  contentType
+) => {
   const tmpResizeFile = path.join(os.tmpdir(), UUID());
 
   try {
@@ -32,7 +38,9 @@ const runSharp = async (bucket, fromFileFullPath, toFileFullPath, size, contentT
     });
     // generate public image url see: https://stackoverflow.com/questions/42956250/get-download-url-from-file-uploaded-with-cloud-functions-for-firebase
     const file = ret[0];
-    return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    return `https://firebasestorage.googleapis.com/v0/b/${
+      bucket.name
+    }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
   } catch (e) {
     console.log("error", e);
   }
@@ -50,7 +58,13 @@ export const resizedImage = async (object, toFileFullPath, size) => {
   const bucketObj = admin.storage().bucket(object.bucket);
 
   const fromTempFilePath = await downloadFileFromBucket(object);
-  const ret = await runSharp(bucketObj, fromTempFilePath, toFileFullPath, size, object.contentType);
+  const ret = await runSharp(
+    bucketObj,
+    fromTempFilePath,
+    toFileFullPath,
+    size,
+    object.contentType
+  );
 
   // Once the thumbnail has been uploaded delete the local file to free up disk space.
   fs.unlinkSync(fromTempFilePath);
@@ -106,7 +120,6 @@ export const getToFileFullPath = (filePath, size) => {
   return toFileFullPath;
 };
 
-
 export const resizeLocal = async (fromFileFullPath, size) => {
   const tmpResizeFile = path.join(os.tmpdir(), UUID());
   try {
@@ -131,18 +144,17 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
     await sharp(mapFilePath)
       .composite([
         {
-          input: photoPath ,
+          input: photoPath,
           blend: "over",
-          top:30,
-          left:130,
+          top: 30,
+          left: 130,
         },
         {
-          input: iconPath ,
+          input: iconPath,
           blend: "over",
-          top:200,
-          left:270,
+          top: 200,
+          left: 270,
         },
-
       ])
       .toFile(tmpFile);
     return tmpFile;
@@ -152,7 +164,7 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
   return "";
 };
 
-export const uploadFileToBucket = async (tmpFile,object) => {
+export const uploadFileToBucket = async (tmpFile, object) => {
   const bucketObj = admin.storage().bucket(object.bucket);
   //const tmpResizeFile = path.join(os.tmpdir(), UUID());
   try {
@@ -168,7 +180,9 @@ export const uploadFileToBucket = async (tmpFile,object) => {
       },
     });
     const file = ret[0];
-    return `https://firebasestorage.googleapis.com/v0/b/${object.bucket}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    return `https://firebasestorage.googleapis.com/v0/b/${
+      object.bucket
+    }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
   } catch (e) {
     console.log("error", e);
   }

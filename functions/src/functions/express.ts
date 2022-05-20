@@ -47,9 +47,18 @@ export const sitemap_response = async (req, res) => {
   try {
     const hostname = "https://" + nounsMapConfig.hostName;
 
-    const urlset = xmlbuilder.create("urlset").att("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9");
+    const urlset = xmlbuilder
+      .create("urlset")
+      .att("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9");
 
-    const docs = (await db.collection("restaurants").where("publicFlag", "==", true).where("deletedFlag", "==", false).orderBy("updatedAt", "desc").get()).docs;
+    const docs = (
+      await db
+        .collection("restaurants")
+        .where("publicFlag", "==", true)
+        .where("deletedFlag", "==", false)
+        .orderBy("updatedAt", "desc")
+        .get()
+    ).docs;
     await Promise.all(
       docs.map(async (doc) => {
         const url = urlset.ele("url");
@@ -113,7 +122,8 @@ const ogpPage = async (req: any, res: any) => {
       ? [photo_data.title, nounsMapConfig.pageTitle].join(" / ")
       : nounsMapConfig.siteName;
     const image = photo_data.images["600"].url;
-    const description = photo_data.description || nounsMapConfig.siteDescription;
+    const description =
+      photo_data.description || nounsMapConfig.siteDescription;
     const regexTitle = /<title.*title>/;
     const url = `https://${nounsMapConfig.hostName}/p/${escapeHtml(photo_id)}`;
 
@@ -136,7 +146,7 @@ const ogpPage = async (req: any, res: any) => {
     ];
     res.set("Cache-Control", "public, max-age=300, s-maxage=600");
 
-    const regexBody =  /<div id="__replace_body">/;
+    const regexBody = /<div id="__replace_body">/;
 
     const bodyString = [
       '<div id="__nuxt">',
@@ -172,4 +182,3 @@ app.use(express.json());
 app.get("/p/:photo_id", ogpPage);
 app.get("/sitemap.xml", sitemap_response);
 app.get("/debug/error", debugError);
-
