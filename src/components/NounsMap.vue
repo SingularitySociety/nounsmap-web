@@ -1,5 +1,6 @@
 <template>
   <div>
+    <photo-upload/>
     <div>
       <img :src="dataURL" />
     </div>
@@ -15,8 +16,12 @@ import { Loader } from "@googlemaps/js-api-loader";
 import html2canvas from "html2canvas";
 
 import heatmaps from "@/data/heatmapPoints";
+import PhotoUpload from "@/components/PhotoUpload.vue";
 
 export default defineComponent({
+  components: {
+    PhotoUpload,
+  },   
   setup() {
     const mapRef = ref();
 
