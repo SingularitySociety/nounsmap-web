@@ -1,18 +1,14 @@
 <template>
   <div align="center">
-    <twitter-login :user="user.user"/>
+    <twitter-login :user="user.user" />
     <photo-select @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <button class="btn btn-primary my-button" @click="uploadPhoto">
         upload
-      </button>    
-
+      </button>
     </div>
     <div>
-      <a v-bind:href="dataURL"  v-if="dataURL">
-       share(Twitter)!! 
-      </a>
-
+      <a v-bind:href="dataURL" v-if="dataURL"> share(Twitter)!! </a>
     </div>
   </div>
   <div id="captureRef">
@@ -36,7 +32,7 @@ import TwitterLogin from "./TwitterLogin.vue";
 
 import { uploadFile } from "@/lib/firebase/storage";
 import { nounsMapConfig } from "../config/project";
-import {photoPosted} from "@/lib/firebase/functions";
+import { photoPosted } from "@/lib/firebase/functions";
 
 interface UserData {
   user: User | null;
@@ -46,9 +42,9 @@ export default defineComponent({
   components: {
     PhotoSelect,
     TwitterLogin,
-  },   
+  },
   setup() {
-    const store = useStore();    
+    const store = useStore();
     const mapRef = ref();
 
     const mapInstance = ref();
@@ -75,7 +71,7 @@ export default defineComponent({
           store.commit("setUser", null);
           user.user = null;
         }
-      });      
+      });
       const loader = new Loader({
         apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
         libraries: ["places", "visualization"],
@@ -144,8 +140,14 @@ export default defineComponent({
         heatmap.setMap(mapObj.value);
       }
     });
-    const getNewPhotoData = (pid:string, org:string, path:string, lat:number, lng:number, zoom:number) => {
-      
+    const getNewPhotoData = (
+      pid: string,
+      org: string,
+      path: string,
+      lat: number,
+      lng: number,
+      zoom: number
+    ) => {
       const photoData = {
         id: pid,
         description: "",
@@ -153,40 +155,58 @@ export default defineComponent({
         images: {
           original: path,
         },
-        lat:lat,
-        lng:lng,
+        lat: lat,
+        lng: lng,
         zoom: zoom,
         plevel: 0,
-        deletedFlag:false,
-        publicFlag:true,
+        deletedFlag: false,
+        publicFlag: true,
       };
       return photoData;
-    };    
+    };
     const photoSelected = async (files: File[]) => {
       photoLocal.value = files[0];
     };
     const uploadPhoto = async () => {
       const latlng = mapObj.value.getCenter();
-      console.log(latlng.lat(),latlng.lng());
-      const {lat, lng, zoom} = {lat:latlng.lat(), lng:latlng.lng(),zoom:mapObj.value.getZoom()};
+      console.log(latlng.lat(), latlng.lng());
+      const { lat, lng, zoom } = {
+        lat: latlng.lat(),
+        lng: latlng.lng(),
+        zoom: mapObj.value.getZoom(),
+      };
       console.log(user.user ? user.user.uid : "user is empty");
-      if(!photoLocal.value || !user.user) {
+      if (!photoLocal.value || !user.user) {
         console.log("empty photo or user");
-        return
+        return;
       }
       //const _pid = uuid(); a0X + 10 digits;
-      const _pid = "a02" +( "0000000000" +  Math.floor(Math.random() * 10000000000)).slice(-10);
+      const _pid =
+        "a02" +
+        ("0000000000" + Math.floor(Math.random() * 10000000000)).slice(-10);
       const storage_path = `images/photos/${_pid}/original.jpg`;
-      const file : File = photoLocal.value;
+      const file: File = photoLocal.value;
       await uploadFile(file, storage_path);
-      const pdata = getNewPhotoData(_pid,photoLocal.value.name,storage_path,lat,lng,zoom);
+      const pdata = getNewPhotoData(
+        _pid,
+        photoLocal.value.name,
+        storage_path,
+        lat,
+        lng,
+        zoom
+      );
       console.log(pdata);
       photoLocal.value = "";
-      await setDoc(doc(db,`photos/${_pid}`),pdata);
-      const { data } : any  = await photoPosted({photoId:_pid,lat,lng,zoom});
+      await setDoc(doc(db, `photos/${_pid}`), pdata);
+      const { data }: any = await photoPosted({
+        photoId: _pid,
+        lat,
+        lng,
+        zoom,
+      });
       console.log(data);
-      if(data.success) {
-        dataURL.value = `https://twitter.com/intent/tweet?url=https://${nounsMapConfig.hostName}/p/${_pid}`;      
+      if (data.success) {
+        dataURL.value = `https://twitter.com/intent/tweet?url=https://${nounsMapConfig.hostName}/p/${_pid}`;
         console.log(dataURL.value);
       } else {
         console.error("failed");
@@ -214,12 +234,11 @@ export default defineComponent({
 }
 .my-button {
   background-repeat: no-repeat;
-    width: 80px;
-    height: 40px;
-    cursor: pointer;
-    margin: 0 auto 30px;
-    background-size: contain;
-    background-position: center center;
+  width: 80px;
+  height: 40px;
+  cursor: pointer;
+  margin: 0 auto 30px;
+  background-size: contain;
+  background-position: center center;
 }
-
 </style>

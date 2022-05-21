@@ -1,25 +1,25 @@
 <template>
   <section class="card" v-if="user">
-    <button class="btn btn-primary"  @click="signout" >
-    Logout
-    </button>
+    <button class="btn btn-primary" @click="signout">Logout</button>
   </section>
   <section class="card" v-else>
-    <button class="btn btn-primary"  @click="signin" >
-      Login(Twitter)
-    </button>
+    <button class="btn btn-primary" @click="signin">Login(Twitter)</button>
   </section>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 // import firebaseApp from '@/src/main.js'
-import { getAuth, signInWithPopup, signOut, TwitterAuthProvider } from "firebase/auth";
-
+import {
+  getAuth,
+  signInWithPopup,
+  signOut,
+  TwitterAuthProvider,
+} from "firebase/auth";
 
 export default defineComponent({
   props: {
-    user: Object
+    user: Object,
   },
   setup() {
     const signin = () => {
@@ -36,15 +36,15 @@ export default defineComponent({
           console.log(errorCode + "@@@" + errorMessage);
         });
     };
-    const signout = ()=>{
+    const signout = () => {
       const auth = getAuth();
       signOut(auth)
-      .then(() => {
-        console.log("logout correctly");
-      })
-      .catch(() => {
-        alert('Logout fail')
-      })
+        .then(() => {
+          console.log("logout correctly");
+        })
+        .catch(() => {
+          alert("Logout fail");
+        });
     };
     return {
       signin,

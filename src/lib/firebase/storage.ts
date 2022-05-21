@@ -13,7 +13,9 @@ export const uploadFile = (file: File, path: string) => {
 
     uploadTask.on(
       "state_changed",
-      (snapshot) => {console.log(snapshot)},
+      (snapshot) => {
+        console.log(snapshot);
+      },
       (err) => {
         rejected(err);
       },
