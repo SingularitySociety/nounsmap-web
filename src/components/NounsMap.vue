@@ -1,14 +1,18 @@
 <template>
   <div align="center">
-    <twitter-login/>
+    <twitter-login :user="user.user"/>
     <photo-select @selected="photoSelected" v-if="user.user" />
-    <button class="btn btn-primary" @click="uploadPhoto" v-if="photoLocal">
-      upload
-    </button>    
+    <div align="center" v-if="photoLocal">
+      <button class="btn btn-primary my-button" @click="uploadPhoto">
+        upload
+      </button>    
+
+    </div>
     <div>
-      <a href="dataURL"  v-if="dataURL">
+      <a v-bind:href="dataURL"  v-if="dataURL">
        share(Twitter)!! 
       </a>
+
     </div>
   </div>
   <div id="captureRef">
@@ -67,7 +71,9 @@ export default defineComponent({
           user.user = fbuser;
           store.commit("setUser", fbuser);
         } else {
+          console.log("authStateChanged:" + fbuser);
           store.commit("setUser", null);
+          user.user = null;
         }
       });      
       const loader = new Loader({
@@ -171,7 +177,8 @@ export default defineComponent({
       //const _pid = uuid(); a0X + 10 digits;
       const _pid = "a02" +( "0000000000" +  Math.floor(Math.random() * 10000000000)).slice(-10);
       const storage_path = `images/photos/${_pid}/original.jpg`;
-      await uploadFile(photoLocal.value, storage_path);
+      const file : File = photoLocal.value;
+      await uploadFile(file, storage_path);
       const pdata = getNewPhotoData(_pid,photoLocal.value.name,storage_path,lat,lng,zoom);
       console.log(pdata);
       photoLocal.value = "";
@@ -205,4 +212,14 @@ export default defineComponent({
   width: 100vw;
   height: 100vh;
 }
+.my-button {
+  background-repeat: no-repeat;
+    width: 80px;
+    height: 40px;
+    cursor: pointer;
+    margin: 0 auto 30px;
+    background-size: contain;
+    background-position: center center;
+}
+
 </style>
