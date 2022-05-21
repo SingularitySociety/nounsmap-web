@@ -28,7 +28,7 @@ export default defineComponent({
       if (file && file[0]) {
         const reader = new FileReader
         reader.onload = e => {
-          previewImage.value = e.target.result
+          previewImage.value = e?.target?.result
         }
         reader.readAsDataURL(file[0])
         context.emit('input', file[0])

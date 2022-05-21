@@ -1,11 +1,14 @@
 <template>
-  <div>
-    <photo-select @selected="photoSelected"/>
-    <button @click="uploadPhoto">
+  <div align="center">
+    <twitter-login/>
+    <photo-select @selected="photoSelected" v-if="user.user" />
+    <button class="btn btn-primary" @click="uploadPhoto" v-if="photoLocal">
       upload
     </button>    
     <div>
-      <img :src="dataURL" />
+      <a href="dataURL"  v-if="dataURL">
+       share(Twitter)!! 
+      </a>
     </div>
   </div>
   <div id="captureRef">
@@ -14,19 +17,34 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch } from "vue";
+import { defineComponent, reactive, ref, onMounted, watch } from "vue";
+import { useStore } from "vuex";
+import { db } from "@/lib/firebase/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth } from "@/utils/firebase";
+import { User } from "firebase/auth";
+
 import { Loader } from "@googlemaps/js-api-loader";
-import html2canvas from "html2canvas";
 
 import heatmaps from "@/data/heatmapPoints";
 import PhotoSelect from "@/components/PhotoSelect.vue";
+import TwitterLogin from "./TwitterLogin.vue";
+
 import { uploadFile } from "@/lib/firebase/storage";
+import { nounsMapConfig } from "../config/project";
+import {photoPosted} from "@/lib/firebase/functions";
+
+interface UserData {
+  user: User | null;
+}
 
 export default defineComponent({
   components: {
     PhotoSelect,
+    TwitterLogin,
   },   
   setup() {
+    const store = useStore();    
     const mapRef = ref();
 
     const mapInstance = ref();
@@ -40,12 +58,22 @@ export default defineComponent({
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
 
+    const user = reactive<UserData>({ user: null });
+
     onMounted(async () => {
+      auth.onAuthStateChanged((fbuser) => {
+        if (fbuser) {
+          console.log("authStateChanged:" + fbuser);
+          user.user = fbuser;
+          store.commit("setUser", fbuser);
+        } else {
+          store.commit("setUser", null);
+        }
+      });      
       const loader = new Loader({
         apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
         libraries: ["places", "visualization"],
       });
-
       const mapOptions = {
         center: { lat: 49, lng: 34.5 },
         zoom: 6,
@@ -110,44 +138,63 @@ export default defineComponent({
         heatmap.setMap(mapObj.value);
       }
     });
-    const photoSelected = async (files:any) => {
-      console.log(files);
+    const getNewPhotoData = (pid:string, org:string, path:string, lat:number, lng:number, zoom:number) => {
+      
+      const photoData = {
+        id: pid,
+        description: "",
+        original_name: org,
+        images: {
+          original: path,
+        },
+        lat:lat,
+        lng:lng,
+        zoom: zoom,
+        plevel: 0,
+        deletedFlag:false,
+        publicFlag:true,
+      };
+      return photoData;
+    };    
+    const photoSelected = async (files: File[]) => {
       photoLocal.value = files[0];
     };
     const uploadPhoto = async () => {
-      const path = "images/tmp.jpg";
-      uploadFile(photoLocal.value, path);
-    };
-    const capture = async () => {
-      const el = captureRef.value as HTMLElement;
-      const params: Parameters<typeof html2canvas> = [
-        el,
-        {
-          x: 40,
-          y: 40,
-          width: 480,
-          height: 480,
-          useCORS: true,
-        },
-      ];
-      const canvasElement = await html2canvas(...params).catch((e) => {
-        console.error(e);
-        return;
-      });
-      if (!canvasElement) {
-        return;
+      const latlng = mapObj.value.getCenter();
+      console.log(latlng.lat(),latlng.lng());
+      const {lat, lng, zoom} = {lat:latlng.lat(), lng:latlng.lng(),zoom:mapObj.value.getZoom()};
+      console.log(user.user ? user.user.uid : "user is empty");
+      if(!photoLocal.value || !user.user) {
+        console.log("empty photo or user");
+        return
       }
-      dataURL.value = canvasElement.toDataURL();
+      //const _pid = uuid(); a0X + 10 digits;
+      const _pid = "a02" +( "0000000000" +  Math.floor(Math.random() * 10000000000)).slice(-10);
+      const storage_path = `images/photos/${_pid}/original.jpg`;
+      await uploadFile(photoLocal.value, storage_path);
+      const pdata = getNewPhotoData(_pid,photoLocal.value.name,storage_path,lat,lng,zoom);
+      console.log(pdata);
+      photoLocal.value = "";
+      await setDoc(doc(db,`photos/${_pid}`),pdata);
+      const { data } : any  = await photoPosted({photoId:_pid,lat,lng,zoom});
+      console.log(data);
+      if(data.success) {
+        dataURL.value = `https://twitter.com/intent/tweet?url=https://${nounsMapConfig.hostName}/p/${_pid}`;      
+        console.log(dataURL.value);
+      } else {
+        console.error("failed");
+      }
     };
 
     return {
+      user,
       mapRef,
       dataURL,
       pictureURL,
       captureRef,
+      photoLocal,
       photoSelected,
       uploadPhoto,
-      capture,
     };
   },
 });
