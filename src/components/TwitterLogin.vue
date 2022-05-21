@@ -12,33 +12,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 // import firebaseApp from '@/src/main.js'
 import { getAuth, signInWithPopup, signOut, TwitterAuthProvider } from "firebase/auth";
-import { useStore } from "vuex";
-import { db } from "@/lib/firebase/firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { auth } from "@/utils/firebase";
-import { User } from "firebase/auth";
 
 
 export default defineComponent({
   props: {
-    user: User
+    user: Object
   },
   setup() {
-    const user = ref();
-    const token = ref();
-    const secret = ref();
     const signin = () => {
       const provider = new TwitterAuthProvider();
       const auth = getAuth();
       signInWithPopup(auth, provider)
-        .then((result) => {
+        .then(() => {
           // The signed-in user info.
-          const credential = TwitterAuthProvider.credentialFromResult(result);
-          token.value = credential.accessToken;
-          secret.value = credential.secret;
         })
         .catch((error) => {
           // Handle Errors here.
