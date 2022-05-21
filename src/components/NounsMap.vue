@@ -8,7 +8,7 @@
       </button>
     </div>
     <div>
-      <a v-bind:href="dataURL" v-if="dataURL"> share(Twitter)!! </a>
+      <a :href="dataURL" v-if="dataURL"> share(Twitter)!! </a>
     </div>
   </div>
   <div id="captureRef">
