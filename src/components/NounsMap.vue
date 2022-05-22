@@ -23,7 +23,6 @@ import { db } from "@/lib/firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
-
 import { Loader } from "@googlemaps/js-api-loader";
 
 import heatmaps from "@/data/heatmapPoints";
@@ -198,6 +197,7 @@ export default defineComponent({
       console.log(pdata);
       photoLocal.value = "";
       await setDoc(doc(db, `photos/${_pid}`), pdata);
+       // eslint-disable-next-line 
       const { data }: any = await photoPosted({
         photoId: _pid,
         lat,
