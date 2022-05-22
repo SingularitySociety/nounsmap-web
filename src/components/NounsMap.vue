@@ -1,13 +1,25 @@
 <template>
   <div class="p-6" align="center">
     <twitter-login :user="user.user" />
-    <photo-select @selected="photoSelected" v-if="user.user" />
+    <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <button
+        v-if="!processing"
         @click="uploadPhoto"
         class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
       >
         {{ $t("message.uploadImage") }}
+      </button>
+      <button
+        v-else
+        type="button"
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+        disabled
+      >
+        <i class="animate-spin material-icons text-lg text-op-teal mr-2"
+          >schedule</i
+        >
+        Processing...
       </button>
     </div>
     <div>
@@ -48,6 +60,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const mapRef = ref();
+    const photoRef = ref();
 
     const mapInstance = ref();
     const mapObj = ref();
@@ -61,6 +74,7 @@ export default defineComponent({
     const pictureURL = ref<string>();
 
     const user = reactive<UserData>({ user: null });
+    const processing = ref();
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
@@ -131,6 +145,7 @@ export default defineComponent({
           shouldFocus: false,
         });
       });
+      processing.value = false;
     });
 
     watch([heatmapPoints, mapObj], () => {
@@ -167,6 +182,7 @@ export default defineComponent({
       return photoData;
     };
     const photoSelected = async (files: File[]) => {
+      console.log("photoSeleted" + files);
       photoLocal.value = files[0];
     };
     const uploadPhoto = async () => {
@@ -182,6 +198,8 @@ export default defineComponent({
         console.log("empty photo or user");
         return;
       }
+      processing.value = true;
+      photoRef.value.fileInput.disabled = true;
       //const _pid = uuid(); a0X + 10 digits;
       const _pid =
         "a02" +
@@ -198,7 +216,6 @@ export default defineComponent({
         zoom
       );
       console.log(pdata);
-      photoLocal.value = "";
       await setDoc(doc(db, `photos/${_pid}`), pdata);
       // eslint-disable-next-line
       const { data }: any = await photoPosted({
@@ -214,15 +231,21 @@ export default defineComponent({
       } else {
         console.error("failed");
       }
+      photoRef.value.fileInput.value = null;
+      photoRef.value.previewImage = null;
+      processing.value = false;
+      photoLocal.value = null;
     };
 
     return {
       user,
       mapRef,
+      photoRef,
       dataURL,
       pictureURL,
       captureRef,
       photoLocal,
+      processing,
       photoSelected,
       uploadPhoto,
     };
