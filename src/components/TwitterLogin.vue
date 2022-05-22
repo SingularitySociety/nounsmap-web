@@ -1,9 +1,13 @@
 <template>
   <section class="card" v-if="user">
-    <button class="btn btn-primary" @click="signout">Logout</button>
+    <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" @click="signout">
+      Logout
+    </button>
   </section>
   <section class="card" v-else>
-    <button class="btn btn-primary" @click="signin">Login(Twitter)</button>
+    <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" @click="signin">
+      Login(Twitter)
+    </button>
   </section>
 </template>
 

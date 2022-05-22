@@ -1,9 +1,9 @@
 <template>
-  <div align="center">
+  <div class="p-6" align="center">
     <twitter-login :user="user.user" />
     <photo-select @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
-      <button class="btn btn-primary my-button" @click="uploadPhoto">
+      <button  @click="uploadPhoto" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
         upload
       </button>
     </div>
@@ -231,14 +231,5 @@ export default defineComponent({
 .nouns-map {
   width: 100vw;
   height: 100vh;
-}
-.my-button {
-  background-repeat: no-repeat;
-  width: 80px;
-  height: 40px;
-  cursor: pointer;
-  margin: 0 auto 30px;
-  background-size: contain;
-  background-position: center center;
 }
 </style>

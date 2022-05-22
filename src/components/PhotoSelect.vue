@@ -1,25 +1,21 @@
 <template>
-  <div class="App container mt-5">
-    <div class="mb-3">
-      <label for="formFile" class="form-label">Upload Image:</label>
-
-      <input
-        class="form-control"
-        ref="fileInput"
-        type="file"
-        @input="pickFile"
-      />
-    </div>
-    <div
-      class="imagePreviewWrapper"
-      :style="{ 'background-image': `url(${previewImage})` }"
-      @click="selectImage"
-    ></div>
+  <div class="container mx-auto px-2 py-4">
+    <span class="sr-only">Upload Image:</span>
+    <input type="file" ref="fileInput" @input="pickFile"
+      class="text-sm text-slate-500
+      file:mr-4 file:py-2 file:px-4
+      file:rounded-full file:border-1
+      file:text-sm file:font-semibold
+      file:bg-white file:text-gray-800
+      hover:file:bg-gray-100
+    "/>
+    <div class="shrink-0 py-2"  @click="selectImage" v-if="previewImage">
+      <img class="h-40 object-cover rounded-md" :src="previewImage" alt="selected photo" />
+    </div>    
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 export default defineComponent({
   setup(_, context) {
@@ -50,15 +46,4 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.imagePreviewWrapper {
-  background-repeat: no-repeat;
-  width: 250px;
-  height: 250px;
-  display: block;
-  cursor: pointer;
-  margin: 0 auto 30px;
-  background-size: contain;
-  background-position: center center;
-}
-</style>
+
