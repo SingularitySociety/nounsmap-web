@@ -6,7 +6,7 @@ const lang = {
     logout: "ログアウト",
     loginTwitter: "Twitterでログイン",
     uploadImage: "画像をアップロードしましょう!",
-    shareTwitter: "Twitterにリンクを共有！"    
+    shareTwitter: "Twitterにリンクを共有！",
   },
   languages,
 };

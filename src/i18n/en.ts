@@ -7,7 +7,7 @@ const lang = {
     logout: "Logout",
     loginTwitter: "Login(Twitter)",
     uploadImage: "Upload Image!",
-    shareTwitter: "Share(Twitter)!!"
+    shareTwitter: "Share(Twitter)!!",
   },
   languages,
 };

@@ -3,7 +3,10 @@
     <twitter-login :user="user.user" />
     <photo-select @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
-      <button  @click="uploadPhoto" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+      <button
+        @click="uploadPhoto"
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+      >
         {{ $t("message.uploadImage") }}
       </button>
     </div>
@@ -197,7 +200,7 @@ export default defineComponent({
       console.log(pdata);
       photoLocal.value = "";
       await setDoc(doc(db, `photos/${_pid}`), pdata);
-       // eslint-disable-next-line 
+      // eslint-disable-next-line
       const { data }: any = await photoPosted({
         photoId: _pid,
         lat,
