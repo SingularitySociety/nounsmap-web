@@ -1,12 +1,12 @@
 <template>
   <section class="card" v-if="user">
     <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" @click="signout">
-      Logout
+      {{ $t("message.logout") }}
     </button>
   </section>
   <section class="card" v-else>
     <button class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" @click="signin">
-      Login(Twitter)
+      {{ $t("message.loginTwitter") }}
     </button>
   </section>
 </template>

@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-2 py-4">
-    <span class="sr-only">Upload Image:</span>
+    <span class="sr-only">{{ $t("message.selectImage") }}</span>
     <input type="file" ref="fileInput" @input="pickFile"
       class="text-sm text-slate-500
       file:mr-4 file:py-2 file:px-4

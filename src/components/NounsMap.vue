@@ -4,11 +4,11 @@
     <photo-select @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <button  @click="uploadPhoto" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
-        upload
+        {{ $t("message.uploadImage") }}
       </button>
     </div>
     <div>
-      <a :href="dataURL" v-if="dataURL"> share(Twitter)!! </a>
+      <a :href="dataURL" v-if="dataURL"> {{ $t("message.shareTwitter") }} </a>
     </div>
   </div>
   <div id="captureRef">
