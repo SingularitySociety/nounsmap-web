@@ -96,24 +96,39 @@ const escapeHtml = (str: string): string => {
 };
 
 const isId = (id: string) => {
-  return /^[a-zA-Z0-9]+$/.test(id);
+  return /^[a-zA-Z0-9-]+$/.test(id);
 };
 const ogpPage = async (req: any, res: any) => {
   const { photo_id } = req.params;
+  console.log(photo_id);
   const template_data = fs.readFileSync("./templates/index.html", {
     encoding: "utf8",
   });
   try {
     if (!isId(photo_id)) {
+      console.error(`isId ${photo_id} failed`);
       return res.status(404).send(template_data);
     }
-    const photo = await db.doc(`photos/${photo_id}`).get();
+    const photouser = await db.doc(`photos/${photo_id}`).get();
 
+    if (!photouser || !photouser.exists) {
+      console.error(`photouser ${photo_id} not found`);
+      return res.status(404).send(template_data);
+    }
+    const photouser_data: any = photouser.data();
+
+    const photo = await db
+      .doc(`users/${photouser_data.uid}/public_photos/${photo_id}`)
+      .get();
     if (!photo || !photo.exists) {
+      console.error(`user ${photouser_data.uid}/ photo ${photo_id} not found`);
       return res.status(404).send(template_data);
     }
     const photo_data: any = photo.data();
     if (photo_data.deletedFlag || !photo_data.publicFlag) {
+      console.error(
+        `delete or not public user ${photouser_data.uid}/ photo ${photo_id}  ${photo_data.deletedFlag} ${photo_data.publicFlag}`
+      );
       return res.status(404).send(template_data);
     }
 
@@ -157,7 +172,6 @@ const ogpPage = async (req: any, res: any) => {
       escapeHtml(nounsMapConfig.introduction),
       "</span>",
     ].join("\n");
-
     res.send(
       template_data
         .replace(/<meta[^>]*>/g, "")

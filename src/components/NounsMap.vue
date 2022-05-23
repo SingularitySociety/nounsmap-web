@@ -1,7 +1,29 @@
 <template>
-  <div>
+  <div class="p-6" align="center">
+    <twitter-login :user="user.user" />
+    <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
+    <div align="center" v-if="photoLocal">
+      <button
+        v-if="!processing"
+        @click="uploadPhoto"
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+      >
+        {{ $t("message.uploadImage") }}
+      </button>
+      <button
+        v-else
+        type="button"
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+        disabled
+      >
+        <i class="animate-spin material-icons text-lg text-op-teal mr-2"
+          >schedule</i
+        >
+        Processing...
+      </button>
+    </div>
     <div>
-      <img :src="dataURL" />
+      <a :href="dataURL" v-if="dataURL"> {{ $t("message.shareTwitter") }} </a>
     </div>
   </div>
   <div id="captureRef">
@@ -10,15 +32,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch } from "vue";
+import { defineComponent, reactive, ref, onMounted, watch } from "vue";
+import { useStore } from "vuex";
+import { db } from "@/utils/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth } from "@/utils/firebase";
+import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
-import html2canvas from "html2canvas";
 
 import heatmaps from "@/data/heatmapPoints";
+import PhotoSelect from "@/components/PhotoSelect.vue";
+import TwitterLogin from "./TwitterLogin.vue";
+
+import { uploadFile } from "@/utils/storage";
+import { nounsMapConfig } from "../config/project";
+import { photoPosted } from "@/utils/functions";
+import { collection } from "firebase/firestore";
+
+import { getNewPhotoData } from "@/models/photo";
+
+interface UserData {
+  user: User | null;
+}
 
 export default defineComponent({
+  components: {
+    PhotoSelect,
+    TwitterLogin,
+  },
   setup() {
+    const store = useStore();
     const mapRef = ref();
+    const photoRef = ref();
 
     const mapInstance = ref();
     const mapObj = ref();
@@ -27,15 +72,29 @@ export default defineComponent({
       { location: google.maps.LatLng; weight: number }[]
     >([]);
     const captureRef = ref();
+    const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
 
+    const user = reactive<UserData>({ user: null });
+    const processing = ref();
+
     onMounted(async () => {
+      auth.onAuthStateChanged((fbuser) => {
+        if (fbuser) {
+          console.log("authStateChanged:" + fbuser);
+          user.user = fbuser;
+          store.commit("setUser", fbuser);
+        } else {
+          console.log("authStateChanged:" + fbuser);
+          store.commit("setUser", null);
+          user.user = null;
+        }
+      });
       const loader = new Loader({
         apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
         libraries: ["places", "visualization"],
       });
-
       const mapOptions = {
         center: { lat: 49, lng: 34.5 },
         zoom: 6,
@@ -89,6 +148,7 @@ export default defineComponent({
           shouldFocus: false,
         });
       });
+      processing.value = false;
     });
 
     watch([heatmapPoints, mapObj], () => {
@@ -100,35 +160,73 @@ export default defineComponent({
         heatmap.setMap(mapObj.value);
       }
     });
-
-    const capture = async () => {
-      const el = captureRef.value as HTMLElement;
-      const params: Parameters<typeof html2canvas> = [
-        el,
-        {
-          x: 40,
-          y: 40,
-          width: 480,
-          height: 480,
-          useCORS: true,
-        },
-      ];
-      const canvasElement = await html2canvas(...params).catch((e) => {
-        console.error(e);
-        return;
-      });
-      if (!canvasElement) {
+    const photoSelected = async (files: File[]) => {
+      console.log("photoSeleted" + files);
+      photoLocal.value = files[0];
+    };
+    const uploadPhoto = async () => {
+      const latlng = mapObj.value.getCenter();
+      console.log(latlng.lat(), latlng.lng());
+      const { lat, lng, zoom } = {
+        lat: latlng.lat(),
+        lng: latlng.lng(),
+        zoom: mapObj.value.getZoom(),
+      };
+      console.log(user.user ? user.user.uid : "user is empty");
+      if (!photoLocal.value || !user.user) {
+        console.log("empty photo or user");
         return;
       }
-      dataURL.value = canvasElement.toDataURL();
+      processing.value = true;
+      const _uid = user.user.uid;
+      photoRef.value.fileInput.disabled = true;
+      //const _pid = uuid(); a0X + 10 digits;
+      const _pid = doc(collection(db, "hoge")).id;
+      const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
+      const file: File = photoLocal.value;
+      await uploadFile(file, storage_path);
+      const pdata = getNewPhotoData(
+        _pid,
+        photoLocal.value.name,
+        storage_path,
+        lat,
+        lng,
+        zoom
+      );
+      console.log(pdata);
+      await setDoc(doc(db, `users/${_uid}/public_photos/${_pid}`), pdata);
+      // eslint-disable-next-line
+      const { data }: any = await photoPosted({
+        photoId: _pid,
+        lat,
+        lng,
+        zoom,
+      });
+      console.log(data);
+      if (data.success) {
+        dataURL.value = `https://twitter.com/intent/tweet?url=https://${nounsMapConfig.hostName}/p/${_pid}`;
+        console.log(dataURL.value);
+      } else {
+        console.error("failed");
+      }
+      photoRef.value.fileInput.value = null;
+      photoRef.value.previewImage = null;
+      photoRef.value.fileInput.disabled = false;
+      processing.value = false;
+      photoLocal.value = null;
     };
 
     return {
+      user,
       mapRef,
+      photoRef,
       dataURL,
       pictureURL,
       captureRef,
-      capture,
+      photoLocal,
+      processing,
+      photoSelected,
+      uploadPhoto,
     };
   },
 });
