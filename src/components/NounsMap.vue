@@ -34,7 +34,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref, onMounted, watch } from "vue";
 import { useStore } from "vuex";
-import { db } from "@/lib/firebase/firebase";
+import { db } from "@/utils/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
@@ -44,9 +44,12 @@ import heatmaps from "@/data/heatmapPoints";
 import PhotoSelect from "@/components/PhotoSelect.vue";
 import TwitterLogin from "./TwitterLogin.vue";
 
-import { uploadFile } from "@/lib/firebase/storage";
+import { uploadFile } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
-import { photoPosted } from "@/lib/firebase/functions";
+import { photoPosted } from "@/utils/functions";
+import { collection } from "firebase/firestore";
+
+import { getNewPhotoData } from "@/models/photo";
 
 interface UserData {
   user: User | null;
@@ -157,30 +160,6 @@ export default defineComponent({
         heatmap.setMap(mapObj.value);
       }
     });
-    const getNewPhotoData = (
-      pid: string,
-      org: string,
-      path: string,
-      lat: number,
-      lng: number,
-      zoom: number
-    ) => {
-      const photoData = {
-        id: pid,
-        description: "",
-        original_name: org,
-        images: {
-          original: path,
-        },
-        lat: lat,
-        lng: lng,
-        zoom: zoom,
-        plevel: 0,
-        deletedFlag: false,
-        publicFlag: true,
-      };
-      return photoData;
-    };
     const photoSelected = async (files: File[]) => {
       console.log("photoSeleted" + files);
       photoLocal.value = files[0];
@@ -199,12 +178,11 @@ export default defineComponent({
         return;
       }
       processing.value = true;
+      const _uid = user.user.uid;
       photoRef.value.fileInput.disabled = true;
       //const _pid = uuid(); a0X + 10 digits;
-      const _pid =
-        "a02" +
-        ("0000000000" + Math.floor(Math.random() * 10000000000)).slice(-10);
-      const storage_path = `images/photos/${_pid}/original.jpg`;
+      const _pid = doc(collection(db, "hoge")).id;
+      const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
       const file: File = photoLocal.value;
       await uploadFile(file, storage_path);
       const pdata = getNewPhotoData(
@@ -216,7 +194,7 @@ export default defineComponent({
         zoom
       );
       console.log(pdata);
-      await setDoc(doc(db, `photos/${_pid}`), pdata);
+      await setDoc(doc(db, `users/${_uid}/public_photos/${_pid}`), pdata);
       // eslint-disable-next-line
       const { data }: any = await photoPosted({
         photoId: _pid,
@@ -233,6 +211,7 @@ export default defineComponent({
       }
       photoRef.value.fileInput.value = null;
       photoRef.value.previewImage = null;
+      photoRef.value.fileInput.disabled = false;
       processing.value = false;
       photoLocal.value = null;
     };

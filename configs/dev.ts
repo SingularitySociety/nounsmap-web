@@ -15,4 +15,5 @@ export const nounsMapConfig = {
   region: "JP",
   hostName: "dev.nounsmap.com",
   introduction: "Comming soon. NOOOOOOOOOOOOOUNS map!!",
+  useEmulator: false,
 };
