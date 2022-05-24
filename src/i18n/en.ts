@@ -9,7 +9,8 @@ const lang = {
     uploadImage: "Upload Image!",
     shareTwitter: "Share(Twitter)!!",
     processing: "Processing...",
-    selectPhotoLocation: "Please move the map so that the location of the photo is in the center.",
+    selectPhotoLocation:
+      "Please move the map so that the location of the photo is in the center.",
     spotPrivacyLevel: "SpotPrivacyLevel",
   },
   languages,
