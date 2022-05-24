@@ -7,6 +7,9 @@ const lang = {
     loginTwitter: "Twitterでログイン",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
+    processing: "送信中です...",
+    selectPhotoLocation: "写真の場所が中心になるように地図を移動してください",
+    spotPrivacyLevel: "場所のプライバシーレベル",
   },
   languages,
 };

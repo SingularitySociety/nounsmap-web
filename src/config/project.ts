@@ -5,7 +5,7 @@ export const firebaseConfig = {
   storageBucket: "nounsmap-web-dev.appspot.com",
   messagingSenderId: "921564152867",
   appId: "1:921564152867:web:f52be744b25a8648059d96",
-  measurementId: "G-8HBS0HJ881"
+  measurementId: "G-8HBS0HJ881",
 };
 
 export const nounsMapConfig = {
