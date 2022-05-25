@@ -10,6 +10,7 @@ const lang = {
     processing: "送信中です...",
     selectPhotoLocation: "写真の場所が中心になるように地図を移動してください",
     spotPrivacyLevel: "場所のプライバシーレベル",
+    requestAccount: "metamask wallet 接続",
   },
   languages,
 };

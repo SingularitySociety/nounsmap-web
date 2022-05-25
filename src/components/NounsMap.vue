@@ -1,6 +1,7 @@
 <template>
   <div class="p-6" align="center">
     <twitter-login :user="user.user" />
+    <wallet :user="user.user" />
     <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <div>
@@ -52,6 +53,7 @@ import { Loader } from "@googlemaps/js-api-loader";
 import heatmaps from "@/data/heatmapPoints";
 import PhotoSelect from "@/components/PhotoSelect.vue";
 import TwitterLogin from "./TwitterLogin.vue";
+import Wallet from "./Wallet.vue";
 
 import { uploadFile } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
@@ -68,6 +70,7 @@ export default defineComponent({
   components: {
     PhotoSelect,
     TwitterLogin,
+    Wallet,
   },
   setup() {
     const store = useStore();
