@@ -24,10 +24,10 @@
                 {{ token.tokenID }} : {{ token.tokenName }}
               </option>
             </select>
-            <div v-if="nfts[ownedTokenId]" class="sm:flex">
+            <div v-if="nft" class="sm:flex">
               <div
                 class="h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden"
-                style="background-image: {{nfts[ownedTokenId].data?.image}}"
+                style="background-image: {{nft.image}}"
                 title="token"
               >
                 <div class="relative sm:w-1/2 w-full" :class="bgColor">
@@ -35,7 +35,7 @@
                     :href="`https://testnets.opensea.io/assets/${contractAddress}/${ownedTokenId}`"
                     target="_blank"
                   >
-                    <img :src="nfts[ownedTokenId].data?.image" class="w-full" />
+                    <img :src="nft.image" class="w-full" />
                   </a>
                 </div>
               </div>
@@ -63,6 +63,13 @@ import { ethers } from "ethers";
 const nounsTokenJson = require("./NounsToken9331f10808.json");
 // import firebaseApp from '@/src/main.js'
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line
+    ethereum: any;
+  }
+}
+
 export default defineComponent({
   props: {
     user: Object,
@@ -72,22 +79,19 @@ export default defineComponent({
     //const contractAddress = "0xbe41F43c0d2cCbfce561429F18d3473DFa17eBAd"; // desc for actual nouns // for rinkeby
     const contractAddress = "0xA409B4d308D6234b1E47b63ae1AEbE4fb5030D2a"; //  for rinkeby 0524 version
 
-    // eslint-disable-next-line
-    const nfts = ref<{ [key: string]: any }>({});
+    const nft = ref<string>();
     const accounts = ref<string[]>([]);
     const ownedTokenId = ref();
     const network = ref();
     const tokens = ref();
 
-    // eslint-disable-next-line
-    const hasMetaMask = !!(window as any).ethereum;
+    const hasMetaMask = !!(window as Window).ethereum;
     if (!hasMetaMask) {
       return { hasMetaMask: false, fireOn: false };
     }
-    // eslint-disable-next-line
-    const ethereum = (window as any).ethereum;
-    // eslint-disable-next-line
-    ethereum.on("accountsChanged", (accounts: any) => {
+
+    const ethereum = (window as Window).ethereum;
+    ethereum.on("accountsChanged", (accounts: Array<string>) => {
       console.log(accounts);
     });
     ethereum.on("chainChanged", (chainId: string) => {
@@ -95,8 +99,7 @@ export default defineComponent({
     });
 
     const provider = new ethers.providers.Web3Provider(
-      // eslint-disable-next-line
-      (window as any).ethereum
+      (window as Window).ethereum
     );
     const contract = new ethers.Contract(
       contractAddress,
@@ -118,7 +121,7 @@ export default defineComponent({
         action: "tokennfttx",
         contractaddress: contractAddress,
         address: accounts.value[0],
-        apkikey: tmpKey,
+        apikey: tmpKey,
       });
       console.log(tokens.value);
     };
@@ -128,20 +131,16 @@ export default defineComponent({
         const data = JSON.parse(
           Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
         );
-        updateNFT(String(tokenId), "data", data);
+        nft.value = data;
       } catch (e) {
-        updateNFT(String(tokenId), "data", { name: "broken" });
+        //nft.value = "broken";
+        console.error(e);
       }
     };
-    // eslint-disable-next-line
-    const updateNFT = (index: string, key: string, nft: any) => {
-      const newNfts = { ...nfts.value };
-      const newData = { ...nfts.value[index] } || {};
-      newData[key] = nft;
-      newNfts[index] = newData;
-      nfts.value = newNfts;
-      console.log(nfts.value);
+    const getNftData = () => {
+      return nft.value;
     };
+
     watch(ownedTokenId, async () => {
       await updateNftData(ownedTokenId.value);
       context.emit("updated", ownedTokenId.value);
@@ -150,12 +149,13 @@ export default defineComponent({
       hasMetaMask,
       contractAddress,
       accounts,
-      nfts,
+      nft,
       provider,
       network,
       tokens,
       ownedTokenId,
       requestAccount,
+      getNftData,
     };
   },
 });

@@ -12,7 +12,7 @@ const lang = {
     selectPhotoLocation:
       "Please move the map so that the location of the photo is in the center.",
     spotPrivacyLevel: "SpotPrivacyLevel",
-    requestAccount: "metamask wallet connect",
+    requestAccount: "connect MetaMask",
   },
   languages,
 };

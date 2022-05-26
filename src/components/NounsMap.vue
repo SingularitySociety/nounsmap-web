@@ -275,7 +275,7 @@ export default defineComponent({
       if (walletRef.value) {
         console.log(`token updated ${walletRef.value.ownedTokenId}`);
         const icon = {
-          url: walletRef.value.nfts[walletRef.value.ownedTokenId].data?.image,
+          url: walletRef.value.getNftData().image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
         marker.setIcon(icon);
