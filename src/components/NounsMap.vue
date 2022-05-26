@@ -1,7 +1,7 @@
 <template>
   <div class="p-6" align="center">
     <twitter-login :user="user.user" />
-    <wallet :user="user.user" />
+    <wallet ref="walletRef" @updated="tokenUpdated" :user="user.user" />
     <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <div>
@@ -76,6 +76,7 @@ export default defineComponent({
     const store = useStore();
     const mapRef = ref();
     const photoRef = ref();
+    const walletRef = ref();
     const pLevel = ref();
 
     const mapInstance = ref();
@@ -270,11 +271,22 @@ export default defineComponent({
         locationCircle = null;
       }
     };
+    const tokenUpdated = async () => {
+      if (walletRef.value) {
+        console.log(`token updated ${walletRef.value.ownedTokenId}`);
+        const icon = {
+          url: walletRef.value.nfts[walletRef.value.ownedTokenId].data?.image,
+          scaledSize: new mapInstance.value.maps.Size(80, 80),
+        };
+        marker.setIcon(icon);
+      }
+    };
 
     return {
       user,
       mapRef,
       photoRef,
+      walletRef,
       pLevel,
       dataURL,
       pictureURL,
@@ -283,6 +295,7 @@ export default defineComponent({
       photoSelected,
       uploadPhoto,
       locationUpdated,
+      tokenUpdated,
     };
   },
 });
