@@ -78,8 +78,8 @@ export default defineComponent({
         };
         console.debug(imageSize, toSize);
         const [resizedCanvas, blob] = await resizeImage(imageRef.value, toSize);
-        resizedBlob = blob;
-        if (resized.value & resizedCanvas) {
+        resizedBlob = blob as Blob;
+        if (resized.value && resizedCanvas) {
           resized.value.getContext("2d").clearRect(0, 0, 1000, 1000);
           resized.value.getContext("2d").drawImage(resizedCanvas, 0, 0);
         }
