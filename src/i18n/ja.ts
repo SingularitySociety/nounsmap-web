@@ -11,6 +11,7 @@ const lang = {
     selectPhotoLocation: "写真の場所が中心になるように地図を移動してください",
     spotPrivacyLevel: "場所のプライバシーレベル",
     requestAccount: "MetaMaskと連携",
+    youNeedNet: "{networkName}に切り替えてください",
   },
   languages,
 };
