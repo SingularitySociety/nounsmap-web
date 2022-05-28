@@ -63,13 +63,6 @@ import { ethers } from "ethers";
 const nounsTokenJson = require("./NounsToken9331f10808.json");
 // import firebaseApp from '@/src/main.js'
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line
-    ethereum: any;
-  }
-}
-
 export default defineComponent({
   props: {
     user: Object,
