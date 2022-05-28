@@ -7,7 +7,7 @@ import * as map from "./map/map";
 
 import { firebaseConfig } from "../common/project";
 
-const defaultIconURL: string =
+const defaultIconURL =
   "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
 
 const getIconPath = async (uid, pdata) => {
@@ -16,9 +16,8 @@ const getIconPath = async (uid, pdata) => {
       bucket: firebaseConfig.storageBucket,
       name: `images/users/${uid}/public_icons/${pdata.iconId}/icon.svg`,
     };
-    return imageUtil.downloadFileFromBucket(iconObj).then((tmpIcon) => {
-      return imageUtil.resizeLocal(tmpIcon, 96);
-    });
+    const tmpIcon = await imageUtil.downloadFileFromBucket(iconObj);
+    return await imageUtil.resizeLocal(tmpIcon, 96);
   } else {
     return "./images/red160px.png";
   }
@@ -33,7 +32,7 @@ const uploadOGPImage = async (
   _zoom,
   ogpPath
 ) => {
-  let tmpFile, tmpFiles, tmpBlend;
+  let tmpFile;
   const fromObj = {
     bucket: firebaseConfig.storageBucket,
     name: `images/users/${uid}/public_photos/${photoId}/original.jpg`,
@@ -43,34 +42,25 @@ const uploadOGPImage = async (
     name: ogpPath,
     context: "image/jpeg",
   };
-  return Promise.all([
+  const tmpFiles = await Promise.all([
     map.downloadMapImage(_lat, _lng, _zoom),
     imageUtil.downloadFileFromBucket(fromObj).then((tmpPhoto) => {
       tmpFile = tmpPhoto;
       return imageUtil.resizeLocal(tmpPhoto, 220);
     }),
     getIconPath(uid, pdata),
-  ])
-    .then((ret) => {
-      console.log(ret);
-      tmpFiles = ret;
-      return imageUtil.blendLocal(ret[0], ret[1], ret[2]);
-    })
-    .then((tmpBlendImage) => {
-      console.log(tmpBlendImage);
-      tmpBlend = tmpBlendImage;
-      return Promise.all([
-        imageUtil.uploadFileToBucket(tmpBlendImage, toObj),
-        fs.unlinkSync(tmpFile),
-        fs.unlinkSync(tmpFiles[0]),
-        fs.unlinkSync(tmpFiles[1]),
-      ]);
-    })
-    .then((ret) => {
-      console.log(ret, tmpBlend);
-      fs.unlinkSync(tmpBlend as string);
-      return ret[0];
-    });
+  ]);
+  const tmpBlend = await imageUtil.blendLocal(tmpFiles[0], tmpFiles[1], tmpFiles[2]);
+  console.log(tmpBlend);
+  const ret = await Promise.all([
+    imageUtil.uploadFileToBucket(tmpBlend, toObj),
+    fs.unlinkSync(tmpFile),
+    fs.unlinkSync(tmpFiles[0]),
+    fs.unlinkSync(tmpFiles[1]),
+  ]);
+  console.log(ret);
+  fs.unlinkSync(tmpBlend as string);
+  return ret[0];
 };
 
 // This function is called by users after post user's photo
@@ -100,7 +90,7 @@ export const posted = async (
   }
   const pdata = photo.data();
   console.log(pdata);
-
+  const FieldValue = require('firebase-admin').firestore.FieldValue;
   try {
     const ogpPath = `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`;
     const url = await uploadOGPImage(
@@ -112,18 +102,20 @@ export const posted = async (
       _zoom,
       ogpPath
     );
-    const _iconURL =
-      photo.data().iconURL.length > 1 ? photo.data().iconURL : defaultIconURL;
-    const _photoURL = photo.data().images.resizedImages["600"].url;
+    const _iconURL = pdata.iconURL.length > 1 ? pdata.iconURL : defaultIconURL;
+    const _photoURL = pdata.images.resizedImages["600"].url;
     console.log(url, _iconURL, _photoURL);
     await db.doc(`photos/${photoId}`).set(
       {
         uid,
+        photoId,
         iconURL: _iconURL,
         photoURL: _photoURL,
         lat: _lat,
         lng: _lng,
         zoom: _zoom,
+        createdAt: pdata.createdAt,
+        updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
@@ -140,6 +132,7 @@ export const posted = async (
             },
           },
         },
+        updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
     );

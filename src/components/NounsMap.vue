@@ -159,16 +159,15 @@ export default defineComponent({
       }
     };
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
-      let _id = "default";
       const nft = walletRef.value.getNftData();
       if (nft) {
-        _id =
+        const _id =
           nft.token.tokenID + nft.token.tokenSymbol + nft.token.contractAddress;
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
         const downloadURL = await uploadSVG(nft.image, storage_path);
         return [_id, downloadURL];
       }
-      return [_id, ""];
+      return ["default", ""];
     };
     const uploadPhoto = async () => {
       const latlng = mapObj.value.getCenter();

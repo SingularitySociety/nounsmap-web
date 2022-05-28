@@ -132,8 +132,8 @@ export default defineComponent({
           Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
         );
         nft.value = data;
-        // eslint-disable-next-line
         nft.value.token = tokens.value.filter(
+          // eslint-disable-next-line
           (x: any) => x.tokenID == tokenId
         )[0];
       } catch (e) {

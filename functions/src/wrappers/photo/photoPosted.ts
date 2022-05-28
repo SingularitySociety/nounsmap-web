@@ -4,6 +4,9 @@ import * as admin from "firebase-admin";
 import * as Photo from "../../functions/photo";
 
 const db = admin.firestore();
+db.settings({
+  timestampsInSnapshots: true,
+});
 
 export default functions
   .runWith({
