@@ -30,7 +30,7 @@
                 style="background-image: {{nft.image}}"
                 title="token"
               >
-                <div class="relative sm:w-1/2 w-full" :class="bgColor">
+                <div class="relative sm:w-1/2 w-full">
                   <a
                     :href="`https://testnets.opensea.io/assets/${contractAddress}/${ownedTokenId}`"
                     target="_blank"
@@ -79,7 +79,7 @@ export default defineComponent({
     //const contractAddress = "0xbe41F43c0d2cCbfce561429F18d3473DFa17eBAd"; // desc for actual nouns // for rinkeby
     const contractAddress = "0xA409B4d308D6234b1E47b63ae1AEbE4fb5030D2a"; //  for rinkeby 0524 version
 
-    const nft = ref<string>();
+    const nft = ref();
     const accounts = ref<string[]>([]);
     const ownedTokenId = ref();
     const network = ref();
@@ -112,11 +112,11 @@ export default defineComponent({
     const requestAccount = async () => {
       await provider.send("eth_requestAccounts", []);
       accounts.value = await provider.listAccounts();
-      console.log(accounts.value);
+      console.debug(accounts.value);
       const signer = provider.getSigner();
-      console.log(signer);
+      console.debug(signer);
       network.value = await provider.getNetwork();
-      console.log(network.value);
+      console.debug(network.value);
       tokens.value = await ethScan.fetch("account", {
         action: "tokennfttx",
         contractaddress: contractAddress,
@@ -132,6 +132,10 @@ export default defineComponent({
           Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
         );
         nft.value = data;
+        // eslint-disable-next-line
+        nft.value.token = tokens.value.filter(
+          (x: any) => x.tokenID == tokenId
+        )[0];
       } catch (e) {
         //nft.value = "broken";
         console.error(e);
