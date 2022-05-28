@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, watch } from "vue";
+import { defineComponent, reactive, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -50,17 +50,16 @@ import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
-import heatmaps from "@/data/heatmapPoints";
 import PhotoSelect from "@/components/PhotoSelect.vue";
 import TwitterLogin from "./TwitterLogin.vue";
 import Wallet from "./Wallet.vue";
 
-import { uploadFile } from "@/utils/storage";
+import { uploadFile, uploadSVG } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
 import { photoPosted } from "@/utils/functions";
 import { collection } from "firebase/firestore";
 
-import { getNewPhotoData } from "@/models/photo";
+import { generateNewPhotoData } from "@/models/photo";
 
 interface UserData {
   user: User | null;
@@ -82,9 +81,6 @@ export default defineComponent({
     const mapInstance = ref();
     const mapObj = ref();
 
-    const heatmapPoints = ref<
-      { location: google.maps.LatLng; weight: number }[]
-    >([]);
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
@@ -97,12 +93,11 @@ export default defineComponent({
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
+        console.log({ fbuser });
         if (fbuser) {
-          console.log("authStateChanged:" + fbuser);
           user.user = fbuser;
           store.commit("setUser", fbuser);
         } else {
-          console.log("authStateChanged:" + fbuser);
           store.commit("setUser", null);
           user.user = null;
         }
@@ -117,69 +112,17 @@ export default defineComponent({
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
-
-      // TODO: get data from Firestore.
-      heatmapPoints.value = heatmaps.map((point) => {
-        return {
-          location: new mapInstance.value.maps.LatLng(
-            point.location.lat,
-            point.location.lng
-          ),
-          weight: point.weight,
-        };
-      });
-
-      const icon = {
-        url: "/images/glasses/red320px.png",
-        scaledSize: new mapInstance.value.maps.Size(80, 30),
-      };
       marker = new mapInstance.value.maps.Marker({
         position: new mapInstance.value.maps.LatLng(47, 34.5),
         map: mapObj.value,
-        icon,
       });
-      pictureURL.value = require("@/assets/sample/pexels-11518762.jpg");
-
-      const contentString =
-        '<div id="content">' +
-        '<div id="siteNotice">' +
-        '<img width="242" height="120"  src="' +
-        pictureURL.value +
-        '" />';
-      "</div>" + "</div>";
-
-      const infowindow = new google.maps.InfoWindow({
-        content: contentString,
-      });
-      infowindow.open({
-        anchor: marker,
-        map: mapObj.value,
-        shouldFocus: false,
-      });
-
-      marker.addListener("click", () => {
-        infowindow.open({
-          anchor: marker,
-          map: mapObj.value,
-          shouldFocus: false,
-        });
-      });
+      showDemoIcons();
       processing.value = false;
       pLevel.value = 50;
     });
 
-    watch([heatmapPoints, mapObj], () => {
-      if (heatmapPoints.value.length > 0 && mapInstance.value && mapObj.value) {
-        const heatmap = new mapInstance.value.maps.visualization.HeatmapLayer({
-          data: heatmapPoints.value,
-          map: mapObj.value,
-        });
-        heatmap.setMap(mapObj.value);
-      }
-    });
-    const photoSelected = async (files: File[]) => {
-      console.log("photoSeleted" + files);
-      photoLocal.value = files[0];
+    const photoSelected = async (file: File) => {
+      photoLocal.value = file;
       marker.setMap(null);
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
@@ -187,7 +130,7 @@ export default defineComponent({
       locationUpdated();
     };
     const locationUpdated = () => {
-      console.log(pLevel.value);
+      console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
       if (locationCircle) {
         locationCircle.setCenter(mapObj.value.getCenter());
@@ -215,37 +158,54 @@ export default defineComponent({
         );
       }
     };
+    const uploadIcon = async (_uid: string): Promise<[string, string]> => {
+      let _id = "default";
+      const nft = walletRef.value.getNftData();
+      if (nft) {
+        _id =
+          nft.token.tokenID + nft.token.tokenSymbol + nft.token.contractAddress;
+        const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
+        const downloadURL = await uploadSVG(nft.image, storage_path);
+        return [_id, downloadURL];
+      }
+      return [_id, ""];
+    };
     const uploadPhoto = async () => {
       const latlng = mapObj.value.getCenter();
-      console.log(latlng.lat(), latlng.lng());
+      console.debug(latlng.lat(), latlng.lng());
       const { lat, lng, zoom } = {
         lat: privacyShift(latlng.lat()),
         lng: privacyShift(latlng.lng()),
         zoom: mapObj.value.getZoom(),
       };
-      console.log(lat, lng);
-      console.log(user.user ? user.user.uid : "user is empty");
+      console.debug(lat, lng);
       if (!photoLocal.value || !user.user) {
-        console.log("empty photo or user");
+        console.error("empty photo or user");
         return;
       }
       processing.value = true;
       const _uid = user.user.uid;
       photoRef.value.fileInput.disabled = true;
-      //const _pid = uuid(); a0X + 10 digits;
+      const [iconId, iconURL] = await uploadIcon(_uid);
+
+      //generate random id  "hoge" is not created actually
       const _pid = doc(collection(db, "hoge")).id;
       const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
-      const file: File = photoLocal.value;
-      await uploadFile(file, storage_path);
-      const pdata = getNewPhotoData(
+      const photoURL = (await uploadFile(
+        photoRef.value.getResizedBlob(),
+        storage_path
+      )) as string;
+      const pdata = generateNewPhotoData(
         _pid,
+        photoURL,
         photoLocal.value.name,
         storage_path,
         lat,
         lng,
-        zoom
+        zoom,
+        iconId,
+        iconURL
       );
-      console.log(pdata);
       await setDoc(doc(db, `users/${_uid}/public_photos/${_pid}`), pdata);
       // eslint-disable-next-line
       const { data }: any = await photoPosted({
@@ -254,10 +214,10 @@ export default defineComponent({
         lng,
         zoom,
       });
-      console.log(data);
+      console.log({ _pid }, { data });
       if (data.success) {
         dataURL.value = `https://twitter.com/intent/tweet?url=https://${nounsMapConfig.hostName}/p/${_pid}`;
-        console.log(dataURL.value);
+        console.debug(dataURL.value);
       } else {
         console.error("failed");
       }
@@ -273,13 +233,45 @@ export default defineComponent({
     };
     const tokenUpdated = async () => {
       if (walletRef.value) {
-        console.log(`token updated ${walletRef.value.ownedTokenId}`);
         const icon = {
           url: walletRef.value.getNftData().image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
         marker.setIcon(icon);
+        marker.setAnimation(google.maps.Animation.BOUNCE);
       }
+    };
+    const showDemoIcons = () => {
+      //update for demofor Demo
+      const icon = {
+        url: "/images/glasses/red320px.png",
+        scaledSize: new mapInstance.value.maps.Size(80, 30),
+      };
+      pictureURL.value = require("@/assets/sample/pexels-11518762.jpg");
+      marker.setIcon(icon);
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      const contentString =
+        '<div id="content">' +
+        '<div id="siteNotice">' +
+        '<img width="242" height="120"  src="' +
+        pictureURL.value +
+        '" />';
+      "</div>" + "</div>";
+      const infowindow = new google.maps.InfoWindow({
+        content: contentString,
+      });
+      infowindow.open({
+        anchor: marker,
+        map: mapObj.value,
+        shouldFocus: false,
+      });
+      marker.addListener("click", () => {
+        infowindow.open({
+          anchor: marker,
+          map: mapObj.value,
+          shouldFocus: false,
+        });
+      });
     };
 
     return {

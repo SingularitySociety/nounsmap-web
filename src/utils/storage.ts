@@ -2,6 +2,7 @@ import {
   getStorage,
   ref,
   uploadBytesResumable,
+  uploadString,
   getDownloadURL,
 } from "firebase/storage";
 
@@ -28,5 +29,22 @@ export const uploadFile = (file: File, path: string) => {
         });
       }
     );
+  });
+};
+
+export const uploadSVG = (data: string, path: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const storage = getStorage();
+    const storageRef = ref(storage, path);
+    const metadata = {
+      contentType: " image/svg+xml",
+    };
+    uploadString(storageRef, data, "data_url", metadata).then((snapshot) => {
+      console.log(snapshot);
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        // console.log('File available at', downloadURL);
+        resolve(downloadURL);
+      });
+    });
   });
 };
