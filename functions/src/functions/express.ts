@@ -136,7 +136,7 @@ const ogpPage = async (req: any, res: any) => {
     const title = photo_data.title
       ? [photo_data.title, nounsMapConfig.pageTitle].join(" / ")
       : nounsMapConfig.siteName;
-    const image = photo_data.images["600"].url;
+    const image = photo_data.images.ogp["600"].url;
     const description =
       photo_data.description || nounsMapConfig.siteDescription;
     const regexTitle = /<title.*title>/;

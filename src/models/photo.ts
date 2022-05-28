@@ -1,3 +1,4 @@
+import { serverTimestamp } from "firebase/firestore";
 export const generateNewPhotoData = (
   pid: string,
   photoURL: string,
@@ -29,6 +30,8 @@ export const generateNewPhotoData = (
     iconURL,
     deletedFlag: false,
     publicFlag: true,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   };
   return photoData;
 };

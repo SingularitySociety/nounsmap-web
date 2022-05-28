@@ -152,7 +152,7 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
         {
           input: iconPath,
           blend: "over",
-          top: 200,
+          top: 180,
           left: 270,
         },
       ])

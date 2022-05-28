@@ -23,6 +23,7 @@ import { defineComponent, ref, watch } from "vue";
 import { resizeImage } from "@/utils/image";
 
 export default defineComponent({
+  emits: ["selected"],
   setup(_, context) {
     const fileInput = ref();
     const previewImage = ref();
@@ -54,7 +55,7 @@ export default defineComponent({
       if (!imageRef.value) {
         return;
       }
-      imageRef.value.onload = async function () {
+      imageRef.value.onload = async () => {
         imageSize = {
           w: imageRef.value.naturalWidth,
           h: imageRef.value.naturalHeight,
@@ -68,7 +69,7 @@ export default defineComponent({
         //TBD : can not resized correctly
         const [resizedCanvas, blob] = await resizeImage(imageRef.value, toSize);
         resizedBlob = blob;
-        if (resized.value) {
+        if (resized.value & resizedCanvas) {
           resized.value.getContext("2d").clearRect(0, 0, 1000, 1000);
           resized.value.getContext("2d").drawImage(resizedCanvas, 0, 0);
         }
