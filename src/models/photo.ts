@@ -1,41 +1,32 @@
-export interface photoData {
-  deletedFlag: boolean;
-  publicFlag: boolean;
-  description: string;
-  id: string;
-  type: string;
-  images: {
-    item: {
-      resizedImages: {
-        [key: string]: string;
-      };
-    };
-  };
-  lat: number;
-  lng: number;
-  zoom: number;
-  plevel: number;
-}
-
-export const getNewPhotoData = (
+export const generateNewPhotoData = (
   pid: string,
+  photoURL: string,
   org: string,
   path: string,
   lat: number,
   lng: number,
-  zoom: number
+  zoom: number,
+  iconId: string,
+  iconURL: string
 ) => {
   const photoData = {
     id: pid,
     description: "",
     original_name: org,
     images: {
-      original: path,
+      resizedImages: {
+        600: {
+          path: path,
+          url: photoURL,
+        },
+      },
     },
     lat: lat,
     lng: lng,
     zoom: zoom,
     plevel: 0,
+    iconId,
+    iconURL,
     deletedFlag: false,
     publicFlag: true,
   };
