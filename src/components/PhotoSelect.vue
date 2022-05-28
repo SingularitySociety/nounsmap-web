@@ -21,6 +21,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { resizeImage } from "@/utils/image";
+import exifr from "exifr";
 
 export default defineComponent({
   emits: ["selected"],
@@ -31,6 +32,7 @@ export default defineComponent({
     const resized = ref();
     let resizedBlob: Blob;
     let imageSize: { w: number; h: number };
+    let location: { lat: number; lng: number };
 
     const selectImage = () => {
       fileInput.value.click();
@@ -43,7 +45,16 @@ export default defineComponent({
           previewImage.value = e?.target?.result;
         };
         reader.readAsDataURL(file[0]);
+        exifr.gps(file[0]).then((output) => {
+          console.log({ output });
+          if (output) {
+            location = { lat: output.latitude, lng: output.longitude };
+          }
+        });
       }
+    };
+    const getLocation = () => {
+      return location;
     };
     const getResizedBlob = () => {
       return resizedBlob;
@@ -66,7 +77,6 @@ export default defineComponent({
           height: (toWidth * imageSize.h) / imageSize.w,
         };
         console.debug(imageSize, toSize);
-        //TBD : can not resized correctly
         const [resizedCanvas, blob] = await resizeImage(imageRef.value, toSize);
         resizedBlob = blob;
         if (resized.value & resizedCanvas) {
@@ -83,6 +93,7 @@ export default defineComponent({
       resized,
       selectImage,
       pickFile,
+      getLocation,
       getResizedBlob,
       getImageSize,
     };

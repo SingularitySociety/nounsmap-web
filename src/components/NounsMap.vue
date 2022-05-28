@@ -1,7 +1,7 @@
 <template>
   <div class="p-6" align="center">
     <twitter-login :user="user.user" />
-    <wallet ref="walletRef" @updated="tokenUpdated" :user="user.user" />
+    <wallet ref="walletRef" @updated="iconUpdate" :user="user.user" />
     <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <div>
@@ -118,7 +118,7 @@ export default defineComponent({
       });
       showDemoIcons();
       processing.value = false;
-      pLevel.value = 50;
+      pLevel.value = 5;
     });
 
     const photoSelected = async (file: File) => {
@@ -127,11 +127,21 @@ export default defineComponent({
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
-      locationUpdated();
+      const location = photoRef.value.getLocation()
+        ? photoRef.value.getLocation()
+        : mapObj.value.getCenter();
+      mapObj.value.setCenter(location);
+      mapObj.value.setZoom(12);
+      marker = new mapInstance.value.maps.Marker({
+        position: location,
+        map: mapObj.value,
+      });
+      iconUpdate();
     };
     const locationUpdated = () => {
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
+      marker.setPosition(mapObj.value.getCenter());
       if (locationCircle) {
         locationCircle.setCenter(mapObj.value.getCenter());
         locationCircle.setRadius(privacyLevel);
@@ -230,14 +240,21 @@ export default defineComponent({
         locationCircle = null;
       }
     };
-    const tokenUpdated = async () => {
-      if (walletRef.value) {
+    const iconUpdate = async () => {
+      if (walletRef.value && walletRef.value.getNftData()) {
         const icon = {
           url: walletRef.value.getNftData().image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
         marker.setIcon(icon);
         marker.setAnimation(google.maps.Animation.BOUNCE);
+      } else {
+        //Nouns Default red grass
+        const icon = {
+          url: "/images/glasses/red320px.png",
+          scaledSize: new mapInstance.value.maps.Size(80, 30),
+        };
+        marker.setIcon(icon);
       }
     };
     const showDemoIcons = () => {
@@ -286,7 +303,7 @@ export default defineComponent({
       photoSelected,
       uploadPhoto,
       locationUpdated,
-      tokenUpdated,
+      iconUpdate,
     };
   },
 });
