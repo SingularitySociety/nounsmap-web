@@ -1,6 +1,4 @@
-import "pica";
-
-import Pica from 'pica';
+import Pica from "pica";
 const pica = Pica();
 
 export const resizeImage = async (
