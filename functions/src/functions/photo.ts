@@ -10,6 +10,69 @@ import { firebaseConfig } from "../common/project";
 const defaultIconURL: string =
   "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
 
+const getIconPath = async (uid, pdata) => {
+  if (pdata.iconURL.length > 1) {
+    const iconObj = {
+      bucket: firebaseConfig.storageBucket,
+      name: `images/users/${uid}/public_icons/${pdata.iconId}/icon.svg`,
+    };
+    return imageUtil.downloadFileFromBucket(iconObj).then((tmpIcon) => {
+      return imageUtil.resizeLocal(tmpIcon, 96);
+    });
+  } else {
+    return "./images/red160px.png";
+  }
+};
+
+const uploadOGPImage = async (
+  uid,
+  photoId,
+  pdata,
+  _lat,
+  _lng,
+  _zoom,
+  ogpPath
+) => {
+  let tmpFile, tmpFiles, tmpBlend;
+  const fromObj = {
+    bucket: firebaseConfig.storageBucket,
+    name: `images/users/${uid}/public_photos/${photoId}/original.jpg`,
+  };
+  const toObj = {
+    bucket: firebaseConfig.storageBucket,
+    name: ogpPath,
+    context: "image/jpeg",
+  };
+  return Promise.all([
+    map.downloadMapImage(_lat, _lng, _zoom),
+    imageUtil.downloadFileFromBucket(fromObj).then((tmpPhoto) => {
+      tmpFile = tmpPhoto;
+      return imageUtil.resizeLocal(tmpPhoto, 220);
+    }),
+    getIconPath(uid, pdata),
+  ])
+    .then((ret) => {
+      console.log(ret);
+      tmpFiles = ret;
+      return imageUtil.blendLocal(ret[0], ret[1], ret[2]);
+    })
+    .then((tmpBlendImage) => {
+      console.log(tmpBlendImage);
+      tmpBlend = tmpBlendImage;
+      return Promise.all([
+        imageUtil.uploadFileToBucket(tmpBlendImage, toObj),
+        fs.unlinkSync(tmpFile),
+        fs.unlinkSync(tmpFiles[0]),
+        fs.unlinkSync(tmpFiles[1]),
+      ]);
+    })
+    .then((ret) => {
+      console.log(ret, tmpBlend);
+      fs.unlinkSync(tmpBlend as string);
+      return ret[0];
+    });
+};
+
 // This function is called by users after post user's photo
 export const posted = async (
   db,
@@ -29,39 +92,30 @@ export const posted = async (
   console.log(
     `user:${uid} photo:${photoId} lat:${_lat} lng:${_lng} zoom:${_zoom}`
   );
-  const fromObj = {
-    bucket: firebaseConfig.storageBucket,
-    name: `images/users/${uid}/public_photos/${photoId}/original.jpg`,
-  };
-  const toObj = {
-    bucket: firebaseConfig.storageBucket,
-    name: `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`,
-    context: "image/jpeg",
-  };
-  try {
-    const tmpMap = await map.downloadMapImage(_lat, _lng, _zoom);
-    const tmpPhoto = await imageUtil.downloadFileFromBucket(fromObj);
-    const tmpResizedPhoto = await imageUtil.resizeLocal(tmpPhoto, 220);
-    const iconPath = "./images/red160px.png";
-    const tmpBlendImage = await imageUtil.blendLocal(
-      tmpMap,
-      tmpResizedPhoto,
-      iconPath
+  const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
+  if (!photo || !photo.exists || !photo.data()) {
+    throw utils.process_error(
+      `fire store data ,notfound user:${uid} photoId:${photoId}`
     );
-    const url = await imageUtil.uploadFileToBucket(tmpBlendImage, toObj);
-    fs.unlinkSync(tmpBlendImage);
-    fs.unlinkSync(tmpResizedPhoto);
-    fs.unlinkSync(tmpPhoto);
-    fs.unlinkSync(tmpMap);
+  }
+  const pdata = photo.data();
+  console.log(pdata);
 
-    const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
-    if (!photo || !photo.exists) {
-      return;
-    }
-    console.log(photo.data());
+  try {
+    const ogpPath = `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`;
+    const url = await uploadOGPImage(
+      uid,
+      photoId,
+      pdata,
+      _lat,
+      _lng,
+      _zoom,
+      ogpPath
+    );
     const _iconURL =
       photo.data().iconURL.length > 1 ? photo.data().iconURL : defaultIconURL;
     const _photoURL = photo.data().images.resizedImages["600"].url;
+    console.log(url, _iconURL, _photoURL);
     await db.doc(`photos/${photoId}`).set(
       {
         uid,
@@ -81,7 +135,7 @@ export const posted = async (
         images: {
           ogp: {
             [600]: {
-              path: toObj.name,
+              path: ogpPath,
               url,
             },
           },
@@ -89,7 +143,7 @@ export const posted = async (
       },
       { merge: true }
     );
-    return { success: true };
+    return { success: true, url };
   } catch (error) {
     throw utils.process_error(error);
   }
