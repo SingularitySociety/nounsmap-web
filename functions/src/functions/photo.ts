@@ -7,6 +7,9 @@ import * as map from "./map/map";
 
 import { firebaseConfig } from "../common/project";
 
+const defaultIconURL: string =
+  "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
+
 // This function is called by users after post user's photo
 export const posted = async (
   db,
@@ -23,7 +26,9 @@ export const posted = async (
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   utils.validate_params({ photoId }); // tip, sendSMS and lng are optinoal
-  console.log(`user:${uid} photo:${photoId} lat:${_lat} lng:${_lng} zoom:${_zoom}`)
+  console.log(
+    `user:${uid} photo:${photoId} lat:${_lat} lng:${_lng} zoom:${_zoom}`
+  );
   const fromObj = {
     bucket: firebaseConfig.storageBucket,
     name: `images/users/${uid}/public_photos/${photoId}/original.jpg`,
@@ -48,9 +53,23 @@ export const posted = async (
     fs.unlinkSync(tmpResizedPhoto);
     fs.unlinkSync(tmpPhoto);
     fs.unlinkSync(tmpMap);
+
+    const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
+    if (!photo || !photo.exists) {
+      return;
+    }
+    console.log(photo.data());
+    const _iconURL =
+      photo.data().iconURL.length > 1 ? photo.data().iconURL : defaultIconURL;
+    const _photoURL = photo.data().images.resizedImages["600"].url;
     await db.doc(`photos/${photoId}`).set(
       {
-        uid: uid,
+        uid,
+        iconURL: _iconURL,
+        photoURL: _photoURL,
+        lat: _lat,
+        lng: _lng,
+        zoom: _zoom,
       },
       { merge: true }
     );
@@ -60,8 +79,11 @@ export const posted = async (
         description:
           "We are planning to release easy photo and map share service",
         images: {
-          [600]: {
-            url,
+          ogp: {
+            [600]: {
+              path: toObj.name,
+              url,
+            },
           },
         },
       },
