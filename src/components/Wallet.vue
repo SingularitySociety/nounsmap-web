@@ -13,7 +13,7 @@
               Network: {{ network.name }} chainID({{ network.chainId }}) <br />
             </p>
           </div>
-          <div v-if="tokens">
+          <div v-if="tokens && tokens.length > 0">
             Please select your Token:
             <select v-model="ownedTokenId">
               <option
@@ -39,6 +39,18 @@
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+          <div v-else>
+            <div v-if="contractInfo">
+              {{
+                $t("message.youDonthaveToken", {
+                  contract:
+                    contractInfo[0].tokenSymbol +
+                    ":" +
+                    contractInfo[0].tokenName,
+                })
+              }}<br />
             </div>
           </div>
         </div>
@@ -84,6 +96,7 @@ export default defineComponent({
     const accounts = ref<string[]>([]);
     const ownedTokenId = ref();
     const network = ref();
+    const contractInfo = ref();
     const tokens = ref();
 
     const hasMetaMask = !!(window as Window).ethereum;
@@ -118,6 +131,13 @@ export default defineComponent({
       console.debug(signer);
       network.value = await provider.getNetwork();
       console.debug(network.value);
+      contractInfo.value = await ethScan.fetch("account", {
+        contractaddress: contractAddress,
+        action: "tokennfttx",
+        address: contractAddress,
+        apikey: tmpKey,
+      });
+      console.log(contractInfo.value);
       tokens.value = await ethScan.fetch("account", {
         action: "tokennfttx",
         contractaddress: contractAddress,
@@ -125,6 +145,9 @@ export default defineComponent({
         apikey: tmpKey,
       });
       console.log(tokens.value);
+      if (tokens.value[0]) {
+        ownedTokenId.value = tokens.value[0].tokenID;
+      }
     };
     const updateNftData = async (tokenId: string) => {
       try {
@@ -155,6 +178,7 @@ export default defineComponent({
     return {
       hasMetaMask,
       contractAddress,
+      contractInfo,
       openseaUrl,
       networkName,
       accounts,

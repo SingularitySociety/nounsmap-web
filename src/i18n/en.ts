@@ -14,6 +14,7 @@ const lang = {
     spotPrivacyLevel: "SpotPrivacyLevel",
     requestAccount: "Connect MetaMask",
     youNeedNet: "You need to connect to {networkName}",
+    youDonthaveToken: "If you have tokens of {contract}, you can select it!",
   },
   languages,
 };

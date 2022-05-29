@@ -12,6 +12,7 @@ const lang = {
     spotPrivacyLevel: "場所のプライバシーレベル",
     requestAccount: "MetaMaskと連携",
     youNeedNet: "{networkName}に切り替えてください",
+    youDonthaveToken: "{contract} のNFTトークンを持っていると選択できます！",
   },
   languages,
 };
