@@ -1,6 +1,7 @@
 <template>
   <div v-if="!hasMetaMask">Please install MetaMask.</div>
   <div v-else class="ml-0">
+    <Connect />
     <div v-if="accounts && accounts[0] && network">
       <div class="max-w-sm w-full lg:max-w-full lg:flex">
         <div
@@ -71,6 +72,7 @@ import { defineComponent, ref, watch } from "vue";
 import { ethers } from "ethers";
 import nounsTokenJson from "@/abi/NounsToken";
 import { ethereumConfig } from "@/config/project";
+import Connect from "@/components/Connect.vue";
 
 interface Token {
   tokenID: string;
@@ -87,6 +89,9 @@ export interface NFT {
   token: Token;
 }
 export default defineComponent({
+  components: {
+    Connect
+  },  
   props: {
     user: Object,
   },
