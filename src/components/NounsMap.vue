@@ -1,7 +1,7 @@
 <template>
   <div class="p-6" align="center">
     <twitter-login :user="user.user" />
-    <wallet ref="walletRef" @updated="iconUpdate" :user="user.user" />
+    <wallet ref="walletRef" @updated="nftUpdate" :user="user.user" />
     <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <div>
@@ -52,7 +52,7 @@ import { Loader } from "@googlemaps/js-api-loader";
 
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import TwitterLogin from "./TwitterLogin.vue";
-import Wallet from "./Wallet.vue";
+import Wallet, { NFT } from "./Wallet.vue";
 
 import { uploadFile, uploadSVG } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
@@ -90,6 +90,7 @@ export default defineComponent({
 
     let marker: google.maps.Marker;
     let locationCircle: google.maps.Circle | null;
+    let nft: NFT;
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
@@ -167,7 +168,6 @@ export default defineComponent({
       }
     };
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
-      const nft = walletRef.value.getNftData();
       if (nft) {
         const _id =
           nft.token.tokenID + nft.token.tokenSymbol + nft.token.contractAddress;
@@ -238,10 +238,15 @@ export default defineComponent({
         locationCircle = null;
       }
     };
-    const iconUpdate = async () => {
-      if (walletRef.value && walletRef.value.getNftData()) {
+    const nftUpdate = (anft: NFT) => {
+      nft = anft;
+      console.log({ nft });
+      iconUpdate();
+    };
+    const iconUpdate = () => {
+      if (nft && nft.image) {
         const icon = {
-          url: walletRef.value.getNftData().image,
+          url: nft.image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
         marker.setIcon(icon);
@@ -301,7 +306,7 @@ export default defineComponent({
       photoSelected,
       uploadPhoto,
       locationUpdated,
-      iconUpdate,
+      nftUpdate,
     };
   },
 });

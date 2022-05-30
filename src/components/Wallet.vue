@@ -1,7 +1,7 @@
 <template>
   <div v-if="!hasMetaMask">Please install MetaMask.</div>
   <div v-else class="ml-0">
-    <div v-if="accounts[0] && network">
+    <div v-if="accounts && accounts[0] && network">
       <div class="max-w-sm w-full lg:max-w-full lg:flex">
         <div
           class="border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4 justify-between leading-normal"
@@ -45,10 +45,8 @@
             <div v-if="contractInfo">
               {{
                 $t("message.youDonthaveToken", {
-                  contract:
-                    contractInfo[0].tokenSymbol +
-                    ":" +
-                    contractInfo[0].tokenName,
+                  tokenSymbol: contractInfo[0].tokenSymbol,
+                  tokenName: contractInfo[0].tokenName,
                 })
               }}<br />
             </div>
@@ -74,30 +72,41 @@ import { ethers } from "ethers";
 import nounsTokenJson from "@/abi/NounsToken";
 import { ethereumConfig } from "@/config/project";
 
-interface NFT {
+interface Token {
+  tokenID: string;
+  tokenName: string;
+  tokenSymbol: string;
+  contractAddress: string;
+  hash: string;
+}
+
+export interface NFT {
   name: string;
   description: string;
   image: string;
-}
-interface NFTData {
-  data: NFT;
-  price: number;
-  owner: string;
-  bgColor: string;
-  token?: object;
+  token: Token;
 }
 export default defineComponent({
   props: {
     user: Object,
   },
+  emits: {
+    updated: (param: NFT) => {
+      if (param.image && param.token) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
   setup(_, context) {
     const { contractAddress, openseaUrl, networkName } = ethereumConfig;
-    const nft = ref<NFTData>();
+    const nft = ref<NFT>();
     const accounts = ref<Array<string>>([]);
     const ownedTokenId = ref();
     const network = ref();
     const contractInfo = ref();
-    const tokens = ref();
+    const tokens = ref<Array<Token>>([]);
 
     const hasMetaMask = !!(window as Window).ethereum;
     if (!hasMetaMask) {
@@ -138,15 +147,17 @@ export default defineComponent({
         apikey: tmpKey,
       });
       console.log(contractInfo.value);
-      tokens.value = await ethScan.fetch("account", {
-        action: "tokennfttx",
-        contractaddress: contractAddress,
-        address: accounts.value[0],
-        apikey: tmpKey,
-      });
-      console.log(tokens.value);
-      if (tokens.value[0]) {
-        ownedTokenId.value = tokens.value[0].tokenID;
+      if (accounts.value) {
+        tokens.value = await ethScan.fetch("account", {
+          action: "tokennfttx",
+          contractaddress: contractAddress,
+          address: accounts.value[0],
+          apikey: tmpKey,
+        });
+        console.log(tokens.value);
+        if (tokens.value[0]) {
+          ownedTokenId.value = tokens.value[0].tokenID;
+        }
       }
     };
     const updateNftData = async (tokenId: string) => {
@@ -158,8 +169,7 @@ export default defineComponent({
         nft.value = data;
         if (nft.value) {
           nft.value.token = tokens.value.filter(
-            // eslint-disable-next-line
-            (x: any) => x.tokenID == tokenId
+            (x: Token) => x.tokenID == tokenId
           )[0];
         }
       } catch (e) {
@@ -167,13 +177,12 @@ export default defineComponent({
         console.error(e);
       }
     };
-    const getNftData = () => {
-      return nft.value;
-    };
-
     watch(ownedTokenId, async () => {
+      console.log("ownedTokenId:", ownedTokenId.value);
       await updateNftData(ownedTokenId.value);
-      context.emit("updated", ownedTokenId.value);
+      if (nft.value && nft.value.image) {
+        context.emit("updated", nft.value as NFT);
+      }
     });
     return {
       hasMetaMask,
@@ -188,7 +197,6 @@ export default defineComponent({
       tokens,
       ownedTokenId,
       requestAccount,
-      getNftData,
     };
   },
 });

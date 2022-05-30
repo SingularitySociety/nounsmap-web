@@ -48,7 +48,7 @@ export default defineComponent({
     const previewImage = ref();
     const imageRef = ref();
     const resized = ref();
-      let photoInfo = {} as PhotoInfo;
+    let photoInfo = {} as PhotoInfo;
 
     const selectImage = () => {
       fileInput.value.click();
