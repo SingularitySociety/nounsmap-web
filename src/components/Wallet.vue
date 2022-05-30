@@ -93,7 +93,7 @@ export default defineComponent({
   setup(_, context) {
     const { contractAddress, openseaUrl, networkName } = ethereumConfig;
     const nft = ref<NFTData>();
-    const accounts = ref<string[]>([]);
+    const accounts = ref<Array<string>>([]);
     const ownedTokenId = ref();
     const network = ref();
     const contractInfo = ref();
@@ -132,8 +132,8 @@ export default defineComponent({
       network.value = await provider.getNetwork();
       console.debug(network.value);
       contractInfo.value = await ethScan.fetch("account", {
-        contractaddress: contractAddress,
         action: "tokennfttx",
+        contractaddress: contractAddress,
         address: contractAddress,
         apikey: tmpKey,
       });
