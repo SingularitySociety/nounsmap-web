@@ -50,7 +50,7 @@ import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
-import PhotoSelect from "@/components/PhotoSelect.vue";
+import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import TwitterLogin from "./TwitterLogin.vue";
 import Wallet from "./Wallet.vue";
 
@@ -121,15 +121,13 @@ export default defineComponent({
       pLevel.value = 5;
     });
 
-    const photoSelected = async (file: File) => {
-      photoLocal.value = file;
+    const photoSelected = async (info: PhotoInfo) => {
+      photoLocal.value = info;
       marker.setMap(null);
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
-      const location = photoRef.value.getLocation()
-        ? photoRef.value.getLocation()
-        : mapObj.value.getCenter();
+      const location = info.location ? info.location : mapObj.value.getCenter();
       mapObj.value.setCenter(location);
       mapObj.value.setZoom(12);
       marker = new mapInstance.value.maps.Marker({
@@ -201,13 +199,13 @@ export default defineComponent({
       const _pid = doc(collection(db, "hoge")).id;
       const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
       const photoURL = (await uploadFile(
-        photoRef.value.getResizedBlob(),
+        photoLocal.value.resizedBlob,
         storage_path
       )) as string;
       const pdata = generateNewPhotoData(
         _pid,
         photoURL,
-        photoLocal.value.name,
+        photoLocal.value.file.name,
         storage_path,
         lat,
         lng,
