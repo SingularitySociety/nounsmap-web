@@ -48,6 +48,9 @@
     },
     "functions": {
       "port": 5002
-    }
+    },
+    "hosting": {
+      "port": 5001
+    }    
   }
 }
