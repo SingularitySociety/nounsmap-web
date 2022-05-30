@@ -1,10 +1,8 @@
-import "pica";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pica = require("pica")();
+import Pica from "pica";
+const pica = Pica();
 
 export const resizeImage = async (
-  img: object,
+  img: HTMLImageElement,
   toSize: { width: number; height: number }
 ) => {
   try {

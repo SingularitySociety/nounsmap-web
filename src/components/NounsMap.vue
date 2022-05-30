@@ -1,7 +1,7 @@
 <template>
   <div class="p-6" align="center">
     <twitter-login :user="user.user" />
-    <wallet ref="walletRef" @updated="tokenUpdated" :user="user.user" />
+    <wallet ref="walletRef" @updated="nftUpdate" :user="user.user" />
     <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
     <div align="center" v-if="photoLocal">
       <div>
@@ -50,9 +50,9 @@ import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
-import PhotoSelect from "@/components/PhotoSelect.vue";
+import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import TwitterLogin from "./TwitterLogin.vue";
-import Wallet from "./Wallet.vue";
+import Wallet, { NFT } from "./Wallet.vue";
 
 import { uploadFile, uploadSVG } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
@@ -90,6 +90,7 @@ export default defineComponent({
 
     let marker: google.maps.Marker;
     let locationCircle: google.maps.Circle | null;
+    let nft: NFT;
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
@@ -118,20 +119,28 @@ export default defineComponent({
       });
       showDemoIcons();
       processing.value = false;
-      pLevel.value = 50;
+      pLevel.value = 5;
     });
 
-    const photoSelected = async (file: File) => {
-      photoLocal.value = file;
+    const photoSelected = async (info: PhotoInfo) => {
+      photoLocal.value = info;
       marker.setMap(null);
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
-      locationUpdated();
+      const location = info.location ? info.location : mapObj.value.getCenter();
+      mapObj.value.setCenter(location);
+      mapObj.value.setZoom(12);
+      marker = new mapInstance.value.maps.Marker({
+        position: location,
+        map: mapObj.value,
+      });
+      iconUpdate();
     };
     const locationUpdated = () => {
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
+      marker.setPosition(mapObj.value.getCenter());
       if (locationCircle) {
         locationCircle.setCenter(mapObj.value.getCenter());
         locationCircle.setRadius(privacyLevel);
@@ -159,7 +168,6 @@ export default defineComponent({
       }
     };
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
-      const nft = walletRef.value.getNftData();
       if (nft) {
         const _id =
           nft.token.tokenID + nft.token.tokenSymbol + nft.token.contractAddress;
@@ -191,13 +199,13 @@ export default defineComponent({
       const _pid = doc(collection(db, "hoge")).id;
       const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
       const photoURL = (await uploadFile(
-        photoRef.value.getResizedBlob(),
+        photoLocal.value.resizedBlob,
         storage_path
       )) as string;
       const pdata = generateNewPhotoData(
         _pid,
         photoURL,
-        photoLocal.value.name,
+        photoLocal.value.file.name,
         storage_path,
         lat,
         lng,
@@ -230,14 +238,26 @@ export default defineComponent({
         locationCircle = null;
       }
     };
-    const tokenUpdated = async () => {
-      if (walletRef.value) {
+    const nftUpdate = (anft: NFT) => {
+      nft = anft;
+      console.log({ nft });
+      iconUpdate();
+    };
+    const iconUpdate = () => {
+      if (nft && nft.image) {
         const icon = {
-          url: walletRef.value.getNftData().image,
+          url: nft.image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
         marker.setIcon(icon);
         marker.setAnimation(google.maps.Animation.BOUNCE);
+      } else {
+        //Nouns Default red grass
+        const icon = {
+          url: "/images/glasses/red320px.png",
+          scaledSize: new mapInstance.value.maps.Size(80, 30),
+        };
+        marker.setIcon(icon);
       }
     };
     const showDemoIcons = () => {
@@ -286,7 +306,7 @@ export default defineComponent({
       photoSelected,
       uploadPhoto,
       locationUpdated,
-      tokenUpdated,
+      nftUpdate,
     };
   },
 });

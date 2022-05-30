@@ -1,19 +1,19 @@
 <template>
   <div v-if="!hasMetaMask">Please install MetaMask.</div>
   <div v-else class="ml-0">
-    <div v-if="accounts[0] && network">
+    <div v-if="accounts && accounts[0] && network">
       <div class="max-w-sm w-full lg:max-w-full lg:flex">
         <div
           class="border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4 justify-between leading-normal"
         >
           <div class="mb-8">
             <p class="text-gray-700 text-base">
-              please select metamask network as Rinkeby for this test site.<br />
+              {{ $t("message.youNeedNet", { networkName }) }}<br />
               Account: {{ accounts[0] }} <br />
               Network: {{ network.name }} chainID({{ network.chainId }}) <br />
             </p>
           </div>
-          <div v-if="tokens">
+          <div v-if="tokens && tokens.length > 0">
             Please select your Token:
             <select v-model="ownedTokenId">
               <option
@@ -32,13 +32,23 @@
               >
                 <div class="relative sm:w-1/2 w-full">
                   <a
-                    :href="`https://testnets.opensea.io/assets/${contractAddress}/${ownedTokenId}`"
+                    :href="`${openseaUrl}/assets/${contractAddress}/${ownedTokenId}`"
                     target="_blank"
                   >
                     <img :src="nft.image" class="w-full" />
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+          <div v-else>
+            <div v-if="contractInfo">
+              {{
+                $t("message.youDonthaveToken", {
+                  tokenSymbol: contractInfo[0].tokenSymbol,
+                  tokenName: contractInfo[0].tokenName,
+                })
+              }}<br />
             </div>
           </div>
         </div>
@@ -59,31 +69,44 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { ethers } from "ethers";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const nounsTokenJson = require("./NounsToken9331f10808.json");
-// import firebaseApp from '@/src/main.js'
+import nounsTokenJson from "@/abi/NounsToken";
+import { ethereumConfig } from "@/config/project";
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line
-    ethereum: any;
-  }
+interface Token {
+  tokenID: string;
+  tokenName: string;
+  tokenSymbol: string;
+  contractAddress: string;
+  hash: string;
 }
 
+export interface NFT {
+  name: string;
+  description: string;
+  image: string;
+  token: Token;
+}
 export default defineComponent({
   props: {
     user: Object,
   },
+  emits: {
+    updated: (param: NFT) => {
+      if (param.image && param.token) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
   setup(_, context) {
-    //const contractAddress = "0x1c9fD50dF7a4f066884b58A05D91e4b55005876A"; // desc for actual nouns for local
-    //const contractAddress = "0xbe41F43c0d2cCbfce561429F18d3473DFa17eBAd"; // desc for actual nouns // for rinkeby
-    const contractAddress = "0xA409B4d308D6234b1E47b63ae1AEbE4fb5030D2a"; //  for rinkeby 0524 version
-
-    const nft = ref();
-    const accounts = ref<string[]>([]);
+    const { contractAddress, openseaUrl, networkName } = ethereumConfig;
+    const nft = ref<NFT>();
+    const accounts = ref<Array<string>>([]);
     const ownedTokenId = ref();
     const network = ref();
-    const tokens = ref();
+    const contractInfo = ref();
+    const tokens = ref<Array<Token>>([]);
 
     const hasMetaMask = !!(window as Window).ethereum;
     if (!hasMetaMask) {
@@ -117,13 +140,25 @@ export default defineComponent({
       console.debug(signer);
       network.value = await provider.getNetwork();
       console.debug(network.value);
-      tokens.value = await ethScan.fetch("account", {
+      contractInfo.value = await ethScan.fetch("account", {
         action: "tokennfttx",
         contractaddress: contractAddress,
-        address: accounts.value[0],
+        address: contractAddress,
         apikey: tmpKey,
       });
-      console.log(tokens.value);
+      console.log(contractInfo.value);
+      if (accounts.value) {
+        tokens.value = await ethScan.fetch("account", {
+          action: "tokennfttx",
+          contractaddress: contractAddress,
+          address: accounts.value[0],
+          apikey: tmpKey,
+        });
+        console.log(tokens.value);
+        if (tokens.value[0]) {
+          ownedTokenId.value = tokens.value[0].tokenID;
+        }
+      }
     };
     const updateNftData = async (tokenId: string) => {
       try {
@@ -132,26 +167,29 @@ export default defineComponent({
           Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
         );
         nft.value = data;
-        nft.value.token = tokens.value.filter(
-          // eslint-disable-next-line
-          (x: any) => x.tokenID == tokenId
-        )[0];
+        if (nft.value) {
+          nft.value.token = tokens.value.filter(
+            (x: Token) => x.tokenID == tokenId
+          )[0];
+        }
       } catch (e) {
         //nft.value = "broken";
         console.error(e);
       }
     };
-    const getNftData = () => {
-      return nft.value;
-    };
-
     watch(ownedTokenId, async () => {
+      console.log("ownedTokenId:", ownedTokenId.value);
       await updateNftData(ownedTokenId.value);
-      context.emit("updated", ownedTokenId.value);
+      if (nft.value && nft.value.image) {
+        context.emit("updated", nft.value as NFT);
+      }
     });
     return {
       hasMetaMask,
       contractAddress,
+      contractInfo,
+      openseaUrl,
+      networkName,
       accounts,
       nft,
       provider,
@@ -159,7 +197,6 @@ export default defineComponent({
       tokens,
       ownedTokenId,
       requestAccount,
-      getNftData,
     };
   },
 });
