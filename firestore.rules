@@ -10,6 +10,10 @@ service cloud.firestore {
         allow read: if request.auth != null;
       }
     }
+    match /photos/{photoId} {
+    	allow create, update, delete: if false;
+      allow read: if true;
+    }
     match /{document=**} {
       allow read, write: if false;
     }

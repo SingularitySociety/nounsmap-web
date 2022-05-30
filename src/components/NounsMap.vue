@@ -42,10 +42,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from "vue";
+import { defineComponent, reactive, ref, watch, onMounted, Ref } from "vue";
 import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 import { db } from "@/utils/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
@@ -65,6 +66,73 @@ interface UserData {
   user: User | null;
 }
 
+const contentString = (pictureURL: string) => {
+  return '<div id="content">' +
+        '<div id="siteNotice">' +
+        '<img width="242" height="120"  src="' +
+        pictureURL +
+        '" />' +
+        "</div>" + "</div>";
+}
+
+interface SiteData {
+  icon?: google.maps.Icon,
+  photoURL: string,
+  lat: number,
+  lng: number,
+  visibility: boolean
+}
+
+class Site {
+  private _mapInstance: Ref<typeof google>;
+  private _mapObj: Ref<google.maps.Map>;
+  private _marker: google.maps.Marker;
+  private _infoWindow: google.maps.InfoWindow;
+  private _data: SiteData;
+
+  constructor(mapInstance: Ref<typeof google>, mapObj: Ref<google.maps.Map>, data: SiteData) {
+    this._mapInstance = mapInstance;
+    this._mapObj = mapObj;
+    this._marker = new mapInstance.value.maps.Marker({
+      icon: data.icon,
+      animation: google.maps.Animation.BOUNCE,
+      position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
+      map: mapObj.value,
+      visible: data.visibility
+    });
+    this._infoWindow = new mapInstance.value.maps.InfoWindow({content: contentString(data.photoURL)});
+    this._marker.addListener("click", () => {
+      this._infoWindow.open({
+        anchor: this._marker,
+        map: mapObj.value,
+        shouldFocus: false,
+      });
+    });
+    this._data = data;
+  }
+
+  update(data: Partial<SiteData>) {
+    this._data = { ...this._data, ...data };
+
+    if (data.icon != null) {
+      this._marker.setIcon(data.icon);
+    }
+
+    if (data.photoURL != null) {
+      this._infoWindow.setContent(contentString(data.photoURL));
+    }
+    if (data.lat != null || data.lng != null) {
+      const latlng = new this._mapInstance.value.maps.LatLng(data.lat ?? this._data.lat, data.lng ?? this._data.lng);
+      this._marker.setPosition(latlng);
+      this._mapObj.value.setCenter(latlng);
+    }
+
+    if (data.visibility != null) {
+      this._marker.setVisible(data.visibility);
+    }
+  }
+}
+
 export default defineComponent({
   components: {
     PhotoSelect,
@@ -73,6 +141,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const route = useRoute();
     const mapRef = ref();
     const photoRef = ref();
     const walletRef = ref();
@@ -90,6 +159,8 @@ export default defineComponent({
 
     let marker: google.maps.Marker;
     let locationCircle: google.maps.Circle | null;
+
+    let site: Site;
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
@@ -112,18 +183,41 @@ export default defineComponent({
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
-      marker = new mapInstance.value.maps.Marker({
-        position: new mapInstance.value.maps.LatLng(47, 34.5),
-        map: mapObj.value,
-      });
-      showDemoIcons();
+      // marker = new mapInstance.value.maps.Marker({
+      //   position: new mapInstance.value.maps.LatLng(47, 34.5),
+      //   map: mapObj.value,
+      // });
+      // showDemoIcons();
       processing.value = false;
       pLevel.value = 50;
+      
+      site = new Site(mapInstance, mapObj, {
+        icon: {
+        url: "/images/glasses/red320px.png",
+        scaledSize: new mapInstance.value.maps.Size(80, 30),
+        },
+        lat: 48,
+        lng: 34.5,
+        photoURL: require("@/assets/sample/pexels-11518762.jpg") ?? '',
+        visibility: true
+      });
+      if (route.params.photoId != null) {
+        const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
+        photoDoc.then(doc => {
+          if (doc.exists()) {
+            const { photoURL, lat, lng } = doc.data();
+
+            site.update({photoURL, lat, lng});
+          }
+        }).catch(reason => {
+          console.error(reason);
+        });
+      }
     });
 
     const photoSelected = async (file: File) => {
       photoLocal.value = file;
-      marker.setMap(null);
+      site.update({visibility: false});
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
@@ -236,41 +330,8 @@ export default defineComponent({
           url: walletRef.value.getNftData().image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
-        marker.setIcon(icon);
-        marker.setAnimation(google.maps.Animation.BOUNCE);
+        site.update({icon});
       }
-    };
-    const showDemoIcons = () => {
-      //update for demofor Demo
-      const icon = {
-        url: "/images/glasses/red320px.png",
-        scaledSize: new mapInstance.value.maps.Size(80, 30),
-      };
-      pictureURL.value = require("@/assets/sample/pexels-11518762.jpg");
-      marker.setIcon(icon);
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      const contentString =
-        '<div id="content">' +
-        '<div id="siteNotice">' +
-        '<img width="242" height="120"  src="' +
-        pictureURL.value +
-        '" />';
-      "</div>" + "</div>";
-      const infowindow = new google.maps.InfoWindow({
-        content: contentString,
-      });
-      infowindow.open({
-        anchor: marker,
-        map: mapObj.value,
-        shouldFocus: false,
-      });
-      marker.addListener("click", () => {
-        infowindow.open({
-          anchor: marker,
-          map: mapObj.value,
-          shouldFocus: false,
-        });
-      });
     };
 
     return {

@@ -7,6 +7,8 @@ import Home from "../views/Home.vue";
 import Account from "../views/Account.vue";
 import About from "../views/About.vue";
 
+import NounsMap from "../components/NounsMap.vue";
+
 const routeChildren: Array<RouteRecordRaw> = [
   {
     path: "",
@@ -25,8 +27,13 @@ const routeChildren: Array<RouteRecordRaw> = [
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    component: Layout,
+    component: NounsMap,
     children: [
+      {
+        path: "/p/:photoId",
+        component: NounsMap,
+        props: true
+      },
       {
         path: "/:lang",
         component: Blank,

@@ -1,15 +1,11 @@
 <template>
-  <nouns-map />
+  <router-view />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import NounsMap from "./components/NounsMap.vue";
 
 export default defineComponent({
-  name: "App",
-  components: {
-    NounsMap,
-  },
+  name: "App"
 });
 </script>
