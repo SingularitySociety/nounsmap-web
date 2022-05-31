@@ -10,7 +10,10 @@ const lang = {
     processing: "送信中です...",
     selectPhotoLocation: "写真の場所が中心になるように地図を移動してください",
     spotPrivacyLevel: "場所のプライバシーレベル",
-    requestAccount: "connect MetaMask",
+    requestAccount: "MetaMaskと連携",
+    youNeedNet: "{networkName}に切り替えてください",
+    youDonthaveToken:
+      '"{tokenSymbol}":"{tokenName}"のNFTトークンを持っていると選択できます！',
   },
   languages,
 };

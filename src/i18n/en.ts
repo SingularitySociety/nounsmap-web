@@ -12,7 +12,10 @@ const lang = {
     selectPhotoLocation:
       "Please move the map so that the location of the photo is in the center.",
     spotPrivacyLevel: "SpotPrivacyLevel",
-    requestAccount: "connect MetaMask",
+    requestAccount: "Connect MetaMask",
+    youNeedNet: "You need to connect to {networkName}",
+    youDonthaveToken:
+      'If you have tokens of "{tokenSymbol}":"{tokenName}", you can select it!',
   },
   languages,
 };
