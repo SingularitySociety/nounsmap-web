@@ -12,7 +12,11 @@ import NounsMap from "../components/NounsMap.vue";
 const routeChildren: Array<RouteRecordRaw> = [
   {
     path: "",
-    component: Home,
+    component: NounsMap,
+  },
+  {
+    path: "p/:photoId",
+    component: NounsMap,
   },
   {
     path: "about",
@@ -27,13 +31,8 @@ const routeChildren: Array<RouteRecordRaw> = [
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    component: NounsMap,
+    component: Layout,
     children: [
-      {
-        path: "/p/:photoId",
-        component: NounsMap,
-        props: true
-      },
       {
         path: "/:lang",
         component: Blank,

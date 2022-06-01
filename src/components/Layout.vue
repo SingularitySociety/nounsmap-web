@@ -1,6 +1,7 @@
 <template>
   <div class="layout">
-    <template v-if="user.user"> {{ user.user.displayName }}!! </template>
+    <!-- Saved for future changes. Currently causes error. -->
+    <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
     <router-view />
     <Languages class="mt-4" />
   </div>
@@ -26,26 +27,28 @@ export default defineComponent({
   components: {
     Languages,
   },
-  async setup() {
-    const store = useStore();
-    const user = reactive<UserData>({ user: null });
+  setup() {
+    // Saved for future changes. Currently causes error.
+    // const store = useStore();
+    // const user = reactive<UserData>({ user: null });
     useI18nParam();
 
-    onMounted(() => {
-      auth.onAuthStateChanged((fbuser) => {
-        if (fbuser) {
-          console.log("authStateChanged:");
-          user.user = fbuser;
-          store.commit("setUser", fbuser);
-        } else {
-          store.commit("setUser", null);
-        }
-      });
-    });
+    // Saved for future changes. Currently causes error.
+    // onMounted(() => {
+    //   auth.onAuthStateChanged((fbuser) => {
+    //     if (fbuser) {
+    //       console.log("authStateChanged:");
+    //       user.user = fbuser;
+    //       store.commit("setUser", fbuser);
+    //     } else {
+    //       store.commit("setUser", null);
+    //     }
+    //   });
+    // });
 
-    return {
-      user,
-    };
+    // return {
+    //   user,
+    // };
   },
 });
 </script>

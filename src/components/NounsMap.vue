@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from "vue";
+import { defineComponent, reactive, ref, onMounted, Ref } from "vue";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -63,6 +63,73 @@ import { generateNewPhotoData } from "@/models/photo";
 
 interface UserData {
   user: User | null;
+}
+
+interface MarkerData {
+  icon?: google.maps.Icon,
+  photoURL: string,
+  lat: number,
+  lng: number,
+  visibility: boolean
+}
+
+class Marker {
+  protected _mapInstance: Ref<typeof google>;
+  protected _mapObj: Ref<google.maps.Map>;
+  protected _marker: google.maps.Marker;
+  protected _infoWindow: google.maps.InfoWindow;
+  protected _data: MarkerData;
+
+  protected contentString(photoURL: string) {
+    return '<div id="content">' +
+        '<div id="siteNotice">' +
+        '<img width="242" height="120"  src="' +
+        photoURL +
+        '" />' +
+        "</div>" + "</div>";
+  }
+
+  constructor(mapInstance: Ref<typeof google>, mapObj: Ref<google.maps.Map>, data: MarkerData) {
+    this._mapInstance = mapInstance;
+    this._mapObj = mapObj;
+    this._marker = new mapInstance.value.maps.Marker({
+      icon: data.icon,
+      animation: google.maps.Animation.BOUNCE,
+      position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
+      map: mapObj.value,
+      visible: data.visibility
+    });
+    this._infoWindow = new mapInstance.value.maps.InfoWindow({content: this.contentString(data.photoURL)});
+    this._marker.addListener("click", () => {
+      this._infoWindow.open({
+        anchor: this._marker,
+        map: mapObj.value,
+        shouldFocus: false,
+      });
+    });
+    this._data = data;
+  }
+
+  update(data: Partial<MarkerData>) {
+    this._data = { ...this._data, ...data };
+
+    if (data.icon != null) {
+      this._marker.setIcon(data.icon);
+    }
+
+    if (data.photoURL != null) {
+      this._infoWindow.setContent(this.contentString(data.photoURL));
+    }
+    if (data.lat != null || data.lng != null) {
+      const latlng = new this._mapInstance.value.maps.LatLng(data.lat ?? this._data.lat, data.lng ?? this._data.lng);
+      this._marker.setPosition(latlng);
+      this._mapObj.value.setCenter(latlng);
+    }
+
+    if (data.visibility != null) {
+      this._marker.setVisible(data.visibility);
+    }
+  }
 }
 
 export default defineComponent({
@@ -92,6 +159,8 @@ export default defineComponent({
     let locationCircle: google.maps.Circle | null;
     let nft: NFT;
 
+    const markers: {[id: string]: Marker} = {};
+
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
         console.log({ fbuser });
@@ -113,10 +182,6 @@ export default defineComponent({
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
-      marker = new mapInstance.value.maps.Marker({
-        position: new mapInstance.value.maps.LatLng(47, 34.5),
-        map: mapObj.value,
-      });
       showDemoIcons();
       processing.value = false;
       pLevel.value = 5;
@@ -124,18 +189,20 @@ export default defineComponent({
 
     const photoSelected = async (info: PhotoInfo) => {
       photoLocal.value = info;
-      marker.setMap(null);
+      Object.values(markers).forEach(marker => marker.update({visibility: false}));
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
       const location = info.location ? info.location : mapObj.value.getCenter();
       mapObj.value.setCenter(location);
       mapObj.value.setZoom(12);
-      marker = new mapInstance.value.maps.Marker({
-        position: location,
-        map: mapObj.value,
+      markers['upload'] = new Marker(mapInstance, mapObj, {
+        icon: icon(),
+        photoURL: '',
+        lat: location.lat,
+        lng: location.lng,
+        visibility: true
       });
-      iconUpdate();
     };
     const locationUpdated = () => {
       console.debug(pLevel.value);
@@ -241,23 +308,21 @@ export default defineComponent({
     const nftUpdate = (anft: NFT) => {
       nft = anft;
       console.log({ nft });
-      iconUpdate();
+      markers?.['demo'].update({icon: icon()});
     };
-    const iconUpdate = () => {
+
+    const icon = () => {
       if (nft && nft.image) {
-        const icon = {
+        return {
           url: nft.image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
-        marker.setIcon(icon);
-        marker.setAnimation(google.maps.Animation.BOUNCE);
       } else {
         //Nouns Default red grass
-        const icon = {
+        return {
           url: "/images/glasses/red320px.png",
           scaledSize: new mapInstance.value.maps.Size(80, 30),
         };
-        marker.setIcon(icon);
       }
     };
     const showDemoIcons = () => {
@@ -266,30 +331,13 @@ export default defineComponent({
         url: "/images/glasses/red320px.png",
         scaledSize: new mapInstance.value.maps.Size(80, 30),
       };
-      pictureURL.value = require("@/assets/sample/pexels-11518762.jpg");
-      marker.setIcon(icon);
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      const contentString =
-        '<div id="content">' +
-        '<div id="siteNotice">' +
-        '<img width="242" height="120"  src="' +
-        pictureURL.value +
-        '" />';
-      "</div>" + "</div>";
-      const infowindow = new google.maps.InfoWindow({
-        content: contentString,
-      });
-      infowindow.open({
-        anchor: marker,
-        map: mapObj.value,
-        shouldFocus: false,
-      });
-      marker.addListener("click", () => {
-        infowindow.open({
-          anchor: marker,
-          map: mapObj.value,
-          shouldFocus: false,
-        });
+
+      markers['demo'] = new Marker(mapInstance, mapObj, {
+        icon,
+        photoURL: require("@/assets/sample/pexels-11518762.jpg"),
+        lat: 47,
+        lng: 34.5,
+        visibility: true
       });
     };
 
