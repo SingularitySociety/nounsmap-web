@@ -206,10 +206,10 @@ export default defineComponent({
               lng,
               visibility: true
             });
-            if (!isNaN(lat) && !isNaN(lng)) {
+            if (lat != null && lng != null) {
               mapObj.value.setCenter(new mapInstance.value.maps.LatLng(lat, lng));
             }
-            if (!isNaN(zoom)) {
+            if (zoom != null) {
               mapObj.value.setZoom(zoom);
             }
           }
