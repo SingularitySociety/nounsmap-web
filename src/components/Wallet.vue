@@ -1,61 +1,62 @@
 <template>
   <div v-if="!hasMetaMask">Please install MetaMask.</div>
   <div v-else class="ml-0">
-    <Connect />
     <div v-if="accounts && accounts[0] && network">
-      <div class="max-w-sm w-full lg:max-w-full lg:flex">
-        <div
-          class="border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4 justify-between leading-normal"
-        >
-          <div class="mb-8">
-            <p class="text-gray-700 text-base">
-              {{ $t("message.youNeedNet", { networkName }) }}<br />
-              Account: {{ accounts[0] }} <br />
-              Network: {{ network.name }} chainID({{ network.chainId }}) <br />
-            </p>
-          </div>
-          <div v-if="tokens && tokens.length > 0">
-            Please select your Token:
-            <select v-model="ownedTokenId">
-              <option
-                v-for="token in tokens"
-                :value="token.tokenID"
-                :key="token.hash"
-              >
-                {{ token.tokenID }} : {{ token.tokenName }}
-              </option>
-            </select>
-            <div v-if="nft" class="sm:flex">
-              <div
-                class="h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden"
-                style="background-image: {{nft.image}}"
-                title="token"
-              >
-                <div class="relative sm:w-1/2 w-full">
-                  <a
-                    :href="`${openseaUrl}/assets/${contractAddress}/${ownedTokenId}`"
-                    target="_blank"
-                  >
-                    <img :src="nft.image" class="w-full" />
-                  </a>
+      <div class="max-w-sm bg-white rounded overflow-hidden shadow-lg">
+        <div class="max-w-sm w-full lg:max-w-full lg:flex">
+          <div
+            class="border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4 justify-between leading-normal"
+          >
+            <div class="mb-8">
+              <p class="text-gray-700 text-base">
+                {{ $t("message.youNeedNet", { networkName }) }}<br />
+                Account: {{ accounts[0] }} <br />
+                Network: {{ network.name }} chainID({{ network.chainId }})
+                <br />
+              </p>
+            </div>
+            <div v-if="tokens && tokens.length > 0">
+              Please select your Token:
+              <select v-model="ownedTokenId">
+                <option
+                  v-for="token in tokens"
+                  :value="token.tokenID"
+                  :key="token.hash"
+                >
+                  {{ token.tokenID }} : {{ token.tokenName }}
+                </option>
+              </select>
+              <div v-if="nft" class="sm:flex">
+                <div
+                  class="h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden"
+                  style="background-image: {{nft.image}}"
+                  title="token"
+                >
+                  <div class="relative sm:w-1/2 w-full">
+                    <a
+                      :href="`${openseaUrl}/assets/${contractAddress}/${ownedTokenId}`"
+                      target="_blank"
+                    >
+                      <img :src="nft.image" class="w-full" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div v-else>
-            <div v-if="contractInfo">
-              {{
-                $t("message.youDonthaveToken", {
-                  tokenSymbol: contractInfo[0].tokenSymbol,
-                  tokenName: contractInfo[0].tokenName,
-                })
-              }}<br />
+            <div v-else>
+              <div v-if="contractInfo">
+                {{
+                  $t("message.youDonthaveToken", {
+                    tokenSymbol: contractInfo[0].tokenSymbol,
+                    tokenName: contractInfo[0].tokenName,
+                  })
+                }}<br />
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
     <div v-else class="ml-0">
       <button
         class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
@@ -72,7 +73,6 @@ import { defineComponent, ref, watch } from "vue";
 import { ethers } from "ethers";
 import nounsTokenJson from "@/abi/NounsToken";
 import { ethereumConfig } from "@/config/project";
-import Connect from "@/components/Connect.vue";
 
 interface Token {
   tokenID: string;
@@ -90,8 +90,7 @@ export interface NFT {
 }
 export default defineComponent({
   components: {
-    Connect
-  },  
+  },
   props: {
     user: Object,
   },
@@ -112,6 +111,8 @@ export default defineComponent({
     const network = ref();
     const contractInfo = ref();
     const tokens = ref<Array<Token>>([]);
+    const isContentShown = ref(false);
+    const open = () => (isContentShown.value = true);
 
     const hasMetaMask = !!(window as Window).ethereum;
     if (!hasMetaMask) {
@@ -201,6 +202,8 @@ export default defineComponent({
       network,
       tokens,
       ownedTokenId,
+      isContentShown,
+      open,
       requestAccount,
     };
   },

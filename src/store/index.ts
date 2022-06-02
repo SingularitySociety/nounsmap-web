@@ -3,6 +3,7 @@ import { User } from "firebase/auth";
 
 interface State {
   user: User | null | undefined;
+  userType: string | undefined;
   chainId: string | null;
   account: undefined | null | string;
 }
@@ -10,12 +11,16 @@ interface State {
 export default createStore<State>({
   state: {
     user: undefined,
+    userType: undefined,
     chainId: null,
-    account: undefined,    
+    account: undefined,
   },
   mutations: {
     setUser(state: State, user: User | null) {
       state.user = user;
+    },
+    setUserType(state: State, userType: string | undefined) {
+      state.userType = userType;
     },
     setChainId(state: State, chainId: string | null) {
       state.chainId = chainId;

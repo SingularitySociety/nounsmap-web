@@ -1,13 +1,27 @@
 <template>
-  <section class="card" v-if="user">
-    <button
-      class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-      @click="signout"
-    >
-      {{ $t("message.logout") }}
-    </button>
+  <section v-if="user && user.userType == 'twitter.com'">
+    <div class="max-w-sm bg-white rounded overflow-hidden shadow-lg">
+      <img
+        ref="imageRef"
+        class="h-40 object-cover rounded-md"
+        src="user.user.providerData?[0].photoURL"
+        alt="twitter photo"
+      />
+      <div class="mb-8">
+        <p class="text-gray-700 text-base">
+          twitterName: {{ user?.user?.displayName }} <br />
+          email: {{ user?.user?.email }}
+        </p>
+      </div>
+      <button
+        class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+        @click="signout"
+      >
+        {{ $t("message.logout") }}
+      </button>
+    </div>
   </section>
-  <section class="card" v-else>
+  <section v-else>
     <button
       class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
       @click="signin"
@@ -18,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 // import firebaseApp from '@/src/main.js'
 import {
   getAuth,
@@ -26,10 +40,11 @@ import {
   signOut,
   TwitterAuthProvider,
 } from "firebase/auth";
+import { UserData } from "@/components/NounsUser.vue";
 
 export default defineComponent({
   props: {
-    user: Object,
+    user: Object as PropType<UserData>,
   },
   setup() {
     const signin = () => {
