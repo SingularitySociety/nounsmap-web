@@ -18,7 +18,7 @@ if (nounsMapConfig.useEmulator) {
   // Note: for Auth Emulator need "http://localhost",
   // if only "localhost" it cause following error
   // Firebase: Error (auth/invalid-emulator-scheme).
-  connectAuthEmulator(auth,"http://localhost:9099",{ disableWarnings: true });
+  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
   connectFirestoreEmulator(db, "localhost", 8095);
   connectStorageEmulator(storage, "localhost", 9199);
   connectFunctionsEmulator(functions, "localhost", 5002);

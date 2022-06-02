@@ -1,27 +1,65 @@
 <template>
   <span class="ml-16 font-londrina font-yusei">
     <span v-if="isSignedIn">
-      <button @click="signOut" class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out">{{ $t("menu.signedIn") }}</button>
+      <button
+        @click="signOut"
+        class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
+      >
+        {{ $t("menu.signedIn") }}
+      </button>
     </span>
     <span v-else>
       <span v-if="hasMetaMask">
         <span v-if="account">
-            <button type="button" v-if="isBusy" class="inline-block px-6 py-2.5 text-gray-500 leading-tight rounded shadow-md" disabled>
-              <img class="animate-spin h-3 w-8 absolute" src="@/assets/red160px.png" />
-              <span class="ml-10">{{ $t("message.processing") }}</span>
-            </button>
-            <button v-else @click="signIn" class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out">{{ $t("menu.connected") }}</button>
+          <button
+            type="button"
+            v-if="isBusy"
+            class="inline-block px-6 py-2.5 text-gray-500 leading-tight rounded shadow-md"
+            disabled
+          >
+            <img
+              class="animate-spin h-3 w-8 absolute"
+              src="@/assets/red160px.png"
+            />
+            <span class="ml-10">{{ $t("message.processing") }}</span>
+          </button>
+          <button
+            v-else
+            @click="signIn"
+            class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
+          >
+            {{ $t("menu.connected") }}
+          </button>
         </span>
         <span v-else>
-            <button type="button" v-if="isBusy" class="inline-block px-6 py-2.5 text-gray-500 leading-tight rounded shadow-md" disabled>
-              <img class="animate-spin h-3 w-8 absolute" src="@/assets/red160px.png" />
-              <span class="ml-10">{{ $t("message.processing") }}</span>
-            </button>
-            <button v-else @click="connect" class="inline-block px-6 py-2.5 bg-green-500 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out">{{ $t("menu.connect") }}</button>
+          <button
+            type="button"
+            v-if="isBusy"
+            class="inline-block px-6 py-2.5 text-gray-500 leading-tight rounded shadow-md"
+            disabled
+          >
+            <img
+              class="animate-spin h-3 w-8 absolute"
+              src="@/assets/red160px.png"
+            />
+            <span class="ml-10">{{ $t("message.processing") }}</span>
+          </button>
+          <button
+            v-else
+            @click="connect"
+            class="inline-block px-6 py-2.5 bg-green-500 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
+          >
+            {{ $t("menu.connect") }}
+          </button>
         </span>
       </span>
       <span v-else>
-        <button disabled class="inline-block px-6 py-2.5 bg-gray-400 text-white leading-tight rounded shadow-md">{{ $t("menu.nometamask") }}</button>
+        <button
+          disabled
+          class="inline-block px-6 py-2.5 bg-gray-400 text-white leading-tight rounded shadow-md"
+        >
+          {{ $t("menu.nometamask") }}
+        </button>
       </span>
     </span>
   </span>
@@ -30,7 +68,12 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
-import { hasMetaMask, requestAccount, ethereum, startMonitoringMetamask } from "../utils/MetaMask";
+import {
+  hasMetaMask,
+  requestAccount,
+  ethereum,
+  startMonitoringMetamask,
+} from "../utils/MetaMask";
 import { auth } from "../utils/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
@@ -47,7 +90,7 @@ export default defineComponent({
       isBusy.value = "Connecting Metamask...";
       try {
         await requestAccount(); // ethereum.on('accountsChanged') in App.vue will handle the result
-      } catch(e) {
+      } catch (e) {
         console.log(e);
       }
       isBusy.value = "";
@@ -58,7 +101,7 @@ export default defineComponent({
       // Step 1: We get a nonce from the server
       isBusy.value = "Fetching a verification message from server...";
       const account = store.state.account;
-      const result = await generateNonce({ account }) as any;
+      const result = (await generateNonce({ account })) as any;
       const nonce = result.data.nonce;
       const uuid = result.data.uuid;
 
@@ -73,7 +116,7 @@ export default defineComponent({
         });
 
         // Step 3: We ask the server to verify the signature and get custom token
-        const result2 = await verifyNonce({ signature, uuid }) as any;
+        const result2 = (await verifyNonce({ signature, uuid })) as any;
         console.log(result2.data);
         const token = result2.data.token;
         console.log("signIn: token", token);
@@ -87,7 +130,7 @@ export default defineComponent({
         isBusy.value = "Canceling the verification...";
         try {
           await deleteNonce({ account, uuid });
-        } catch(e) {
+        } catch (e) {
           console.error(e);
         }
       }
@@ -104,7 +147,7 @@ export default defineComponent({
       isBusy,
       connect,
       signIn,
-      signOut
+      signOut,
     };
   },
 });
