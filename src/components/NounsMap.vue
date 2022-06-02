@@ -23,9 +23,7 @@
   </ul>
   <div class="p-6" align="center">
     <NounsUser ref="nounsUserRef" />
-    <twitter-login :user="user.user" />
-    <wallet ref="walletRef" @updated="nftUpdate" :user="user.user" />
-    <photo-select ref="photoRef" @selected="photoSelected" v-if="user.user" />
+    <photo-select ref="photoRef" @selected="photoSelected" />
     <div align="center" v-if="photoLocal">
       <div>
         {{ $t("message.selectPhotoLocation") }}<br />
@@ -70,12 +68,10 @@ import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
-import TwitterLogin from "./TwitterLogin.vue";
 import Wallet, { NFT } from "./Wallet.vue";
 import NounsUser from "@/components/NounsUser.vue";
 
@@ -91,11 +87,11 @@ interface UserData {
 }
 
 interface PinData {
-  icon?: google.maps.Icon,
-  photoURL: string,
-  lat: number,
-  lng: number,
-  visibility: boolean
+  icon?: google.maps.Icon;
+  photoURL: string;
+  lat: number;
+  lng: number;
+  visibility: boolean;
 }
 
 class Pin {
@@ -106,15 +102,22 @@ class Pin {
   protected _data: PinData;
 
   protected contentString(photoURL: string) {
-    return '<div id="content">' +
-        '<div id="siteNotice">' +
-        '<img width="242" height="120"  src="' +
-        photoURL +
-        '" />' +
-        "</div>" + "</div>";
+    return (
+      '<div id="content">' +
+      '<div id="siteNotice">' +
+      '<img width="242" height="120"  src="' +
+      photoURL +
+      '" />' +
+      "</div>" +
+      "</div>"
+    );
   }
 
-  constructor(mapInstance: Ref<typeof google>, mapObj: Ref<google.maps.Map>, data: PinData) {
+  constructor(
+    mapInstance: Ref<typeof google>,
+    mapObj: Ref<google.maps.Map>,
+    data: PinData
+  ) {
     this._mapInstance = mapInstance;
     this._mapObj = mapObj;
     this._marker = new mapInstance.value.maps.Marker({
@@ -122,9 +125,11 @@ class Pin {
       animation: google.maps.Animation.BOUNCE,
       position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
       map: mapObj.value,
-      visible: data.visibility
+      visible: data.visibility,
     });
-    this._infoWindow = new mapInstance.value.maps.InfoWindow({content: this.contentString(data.photoURL)});
+    this._infoWindow = new mapInstance.value.maps.InfoWindow({
+      content: this.contentString(data.photoURL),
+    });
     this._marker.addListener("click", () => {
       this._infoWindow.open({
         anchor: this._marker,
@@ -146,7 +151,10 @@ class Pin {
       this._infoWindow.setContent(this.contentString(data.photoURL));
     }
     if (data.lat != null || data.lng != null) {
-      const latlng = new this._mapInstance.value.maps.LatLng(data.lat ?? this._data.lat, data.lng ?? this._data.lng);
+      const latlng = new this._mapInstance.value.maps.LatLng(
+        data.lat ?? this._data.lat,
+        data.lng ?? this._data.lng
+      );
       this._marker.setPosition(latlng);
       this._mapObj.value.setCenter(latlng);
     }
@@ -160,8 +168,6 @@ class Pin {
 export default defineComponent({
   components: {
     PhotoSelect,
-    TwitterLogin,
-    Wallet,
     NounsUser,
   },
   setup() {
@@ -183,23 +189,12 @@ export default defineComponent({
     const user = reactive<UserData>({ user: null });
     const processing = ref();
 
-    let marker: google.maps.Marker;
     let locationCircle: google.maps.Circle | null;
     let nft: NFT;
 
-    const pins: {[id: string]: Pin} = {};
+    const pins: { [id: string]: Pin } = {};
 
     onMounted(async () => {
-      auth.onAuthStateChanged((fbuser) => {
-        console.log({ fbuser });
-        if (fbuser) {
-          user.user = fbuser;
-          store.commit("setUser", fbuser);
-        } else {
-          store.commit("setUser", null);
-          user.user = null;
-        }
-      });
       const loader = new Loader({
         apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
         libraries: ["places", "visualization"],
@@ -218,55 +213,59 @@ export default defineComponent({
 
       if (route.params.photoId != null) {
         const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
-        photoDoc.then(doc => {
-          if (doc.exists()) {
-            const { iconURL, photoURL, lat, lng, zoom } = doc.data();
+        photoDoc
+          .then((doc) => {
+            if (doc.exists()) {
+              const { iconURL, photoURL, lat, lng, zoom } = doc.data();
 
-            pins[doc.id] = new Pin(mapInstance, mapObj, {
-              icon: {
-                url: iconURL,
-                scaledSize: new mapInstance.value.maps.Size(80, 80),
-              },
-              photoURL,
-              lat,
-              lng,
-              visibility: true
-            });
-            if (lat != null && lng != null) {
-              mapObj.value.setCenter(new mapInstance.value.maps.LatLng(lat, lng));
+              pins[doc.id] = new Pin(mapInstance, mapObj, {
+                icon: {
+                  url: iconURL,
+                  scaledSize: new mapInstance.value.maps.Size(80, 80),
+                },
+                photoURL,
+                lat,
+                lng,
+                visibility: true,
+              });
+              if (lat != null && lng != null) {
+                mapObj.value.setCenter(
+                  new mapInstance.value.maps.LatLng(lat, lng)
+                );
+              }
+              if (zoom != null) {
+                mapObj.value.setZoom(zoom);
+              }
             }
-            if (zoom != null) {
-              mapObj.value.setZoom(zoom);
-            }
-          }
-        }).catch(reason => {
-          console.error(reason);
-        });
+          })
+          .catch((reason) => {
+            console.error(reason);
+          });
       }
     });
 
     const photoSelected = async (info: PhotoInfo) => {
       photoLocal.value = info;
-      Object.values(pins).forEach(site => site.update({visibility: false}));
+      Object.values(pins).forEach((site) => site.update({ visibility: false }));
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
       const location = info.location ? info.location : mapObj.value.getCenter();
       mapObj.value.setCenter(location);
       mapObj.value.setZoom(12);
-      pins['upload'] = new Pin(mapInstance, mapObj, {
+      pins["upload"] = new Pin(mapInstance, mapObj, {
         icon: defaultIcon(),
-        photoURL: '',
+        photoURL: "",
         lat: location.lat,
         lng: location.lng,
-        visibility: true
+        visibility: true,
       });
     };
     const locationUpdated = () => {
       const center = mapObj.value.getCenter();
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
-      pins['upload']?.update({lat: center.lat, lng: center.lng});
+      pins["upload"]?.update({ lat: center.lat, lng: center.lng });
       if (locationCircle) {
         locationCircle.setCenter(mapObj.value.getCenter());
         locationCircle.setRadius(privacyLevel);
@@ -367,7 +366,7 @@ export default defineComponent({
     const nftUpdate = (anft: NFT) => {
       nft = anft;
       console.log({ nft });
-      pins['demo']?.update({icon: defaultIcon()});
+      pins["demo"]?.update({ icon: defaultIcon() });
     };
 
     const defaultIcon = () => {
@@ -387,17 +386,16 @@ export default defineComponent({
     const showDemoIcons = () => {
       //update for demofor Demo
 
-      pins['demo'] = new Pin(mapInstance, mapObj, {
+      pins["demo"] = new Pin(mapInstance, mapObj, {
         icon: defaultIcon(),
         photoURL: require("@/assets/sample/pexels-11518762.jpg"),
         lat: 47,
         lng: 34.5,
-        visibility: true
+        visibility: true,
       });
     };
 
     return {
-      user,
       mapRef,
       photoRef,
       walletRef,

@@ -17,7 +17,7 @@
         class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
         @click="signout"
       >
-        {{ $t("message.logout") }}
+        {{ $t("function.signout") }}
       </button>
     </div>
   </section>
@@ -26,7 +26,7 @@
       class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
       @click="signin"
     >
-      {{ $t("message.loginTwitter") }}
+      {{ $t("function.signinTwitter") }}
     </button>
   </section>
 </template>
