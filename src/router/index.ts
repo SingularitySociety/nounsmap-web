@@ -7,10 +7,16 @@ import Home from "../views/Home.vue";
 import Account from "../views/Account.vue";
 import About from "../views/About.vue";
 
+import NounsMap from "../components/NounsMap.vue";
+
 const routeChildren: Array<RouteRecordRaw> = [
   {
     path: "",
-    component: Home,
+    component: NounsMap,
+  },
+  {
+    path: "p/:photoId",
+    component: NounsMap,
   },
   {
     path: "about",

@@ -42,10 +42,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from "vue";
+import { defineComponent, reactive, ref, onMounted, Ref } from "vue";
+import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
@@ -65,6 +66,73 @@ interface UserData {
   user: User | null;
 }
 
+interface PinData {
+  icon?: google.maps.Icon,
+  photoURL: string,
+  lat: number,
+  lng: number,
+  visibility: boolean
+}
+
+class Pin {
+  protected _mapInstance: Ref<typeof google>;
+  protected _mapObj: Ref<google.maps.Map>;
+  protected _marker: google.maps.Marker;
+  protected _infoWindow: google.maps.InfoWindow;
+  protected _data: PinData;
+
+  protected contentString(photoURL: string) {
+    return '<div id="content">' +
+        '<div id="siteNotice">' +
+        '<img width="242" height="120"  src="' +
+        photoURL +
+        '" />' +
+        "</div>" + "</div>";
+  }
+
+  constructor(mapInstance: Ref<typeof google>, mapObj: Ref<google.maps.Map>, data: PinData) {
+    this._mapInstance = mapInstance;
+    this._mapObj = mapObj;
+    this._marker = new mapInstance.value.maps.Marker({
+      icon: data.icon,
+      animation: google.maps.Animation.BOUNCE,
+      position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
+      map: mapObj.value,
+      visible: data.visibility
+    });
+    this._infoWindow = new mapInstance.value.maps.InfoWindow({content: this.contentString(data.photoURL)});
+    this._marker.addListener("click", () => {
+      this._infoWindow.open({
+        anchor: this._marker,
+        map: mapObj.value,
+        shouldFocus: false,
+      });
+    });
+    this._data = data;
+  }
+
+  update(data: Partial<PinData>) {
+    this._data = { ...this._data, ...data };
+
+    if (data.icon != null) {
+      this._marker.setIcon(data.icon);
+    }
+
+    if (data.photoURL != null) {
+      this._infoWindow.setContent(this.contentString(data.photoURL));
+    }
+    if (data.lat != null || data.lng != null) {
+      const latlng = new this._mapInstance.value.maps.LatLng(data.lat ?? this._data.lat, data.lng ?? this._data.lng);
+      this._marker.setPosition(latlng);
+      this._mapObj.value.setCenter(latlng);
+    }
+
+    if (data.visibility != null) {
+      this._marker.setVisible(data.visibility);
+    }
+  }
+}
+
 export default defineComponent({
   components: {
     PhotoSelect,
@@ -72,6 +140,7 @@ export default defineComponent({
     Wallet,
   },
   setup() {
+    const route = useRoute();
     const store = useStore();
     const mapRef = ref();
     const photoRef = ref();
@@ -91,6 +160,8 @@ export default defineComponent({
     let marker: google.maps.Marker;
     let locationCircle: google.maps.Circle | null;
     let nft: NFT;
+
+    const pins: {[id: string]: Pin} = {};
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
@@ -113,34 +184,63 @@ export default defineComponent({
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
-      marker = new mapInstance.value.maps.Marker({
-        position: new mapInstance.value.maps.LatLng(47, 34.5),
-        map: mapObj.value,
-      });
-      showDemoIcons();
+      if (route.params.photoId == null) {
+        showDemoIcons();
+      }
       processing.value = false;
       pLevel.value = 5;
+
+      if (route.params.photoId != null) {
+        const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
+        photoDoc.then(doc => {
+          if (doc.exists()) {
+            const { iconURL, photoURL, lat, lng, zoom } = doc.data();
+
+            pins[doc.id] = new Pin(mapInstance, mapObj, {
+              icon: {
+                url: iconURL,
+                scaledSize: new mapInstance.value.maps.Size(80, 80),
+              },
+              photoURL,
+              lat,
+              lng,
+              visibility: true
+            });
+            if (lat != null && lng != null) {
+              mapObj.value.setCenter(new mapInstance.value.maps.LatLng(lat, lng));
+            }
+            if (zoom != null) {
+              mapObj.value.setZoom(zoom);
+            }
+          }
+        }).catch(reason => {
+          console.error(reason);
+        });
+      }
     });
 
     const photoSelected = async (info: PhotoInfo) => {
       photoLocal.value = info;
-      marker.setMap(null);
+      Object.values(pins).forEach(site => site.update({visibility: false}));
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
       const location = info.location ? info.location : mapObj.value.getCenter();
       mapObj.value.setCenter(location);
       mapObj.value.setZoom(12);
-      marker = new mapInstance.value.maps.Marker({
-        position: location,
-        map: mapObj.value,
+      pins['upload'] = new Pin(mapInstance, mapObj, {
+        icon: defaultIcon(),
+        photoURL: '',
+        lat: location.lat,
+        lng: location.lng,
+        visibility: true
       });
-      iconUpdate();
     };
     const locationUpdated = () => {
+      const center = mapObj.value.getCenter();
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
-      marker.setPosition(mapObj.value.getCenter());
+      pins['upload']?.update({lat: center.lat, lng: center.lng});
       if (locationCircle) {
         locationCircle.setCenter(mapObj.value.getCenter());
         locationCircle.setRadius(privacyLevel);
@@ -241,55 +341,32 @@ export default defineComponent({
     const nftUpdate = (anft: NFT) => {
       nft = anft;
       console.log({ nft });
-      iconUpdate();
+      pins['demo']?.update({icon: defaultIcon()});
     };
-    const iconUpdate = () => {
+
+    const defaultIcon = () => {
       if (nft && nft.image) {
-        const icon = {
+        return {
           url: nft.image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
-        marker.setIcon(icon);
-        marker.setAnimation(google.maps.Animation.BOUNCE);
       } else {
         //Nouns Default red grass
-        const icon = {
+        return {
           url: "/images/glasses/red320px.png",
           scaledSize: new mapInstance.value.maps.Size(80, 30),
         };
-        marker.setIcon(icon);
       }
     };
     const showDemoIcons = () => {
       //update for demofor Demo
-      const icon = {
-        url: "/images/glasses/red320px.png",
-        scaledSize: new mapInstance.value.maps.Size(80, 30),
-      };
-      pictureURL.value = require("@/assets/sample/pexels-11518762.jpg");
-      marker.setIcon(icon);
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      const contentString =
-        '<div id="content">' +
-        '<div id="siteNotice">' +
-        '<img width="242" height="120"  src="' +
-        pictureURL.value +
-        '" />';
-      "</div>" + "</div>";
-      const infowindow = new google.maps.InfoWindow({
-        content: contentString,
-      });
-      infowindow.open({
-        anchor: marker,
-        map: mapObj.value,
-        shouldFocus: false,
-      });
-      marker.addListener("click", () => {
-        infowindow.open({
-          anchor: marker,
-          map: mapObj.value,
-          shouldFocus: false,
-        });
+
+      pins['demo'] = new Pin(mapInstance, mapObj, {
+        icon: defaultIcon(),
+        photoURL: require("@/assets/sample/pexels-11518762.jpg"),
+        lat: 47,
+        lng: 34.5,
+        visibility: true
       });
     };
 
