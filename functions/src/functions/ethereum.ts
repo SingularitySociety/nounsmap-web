@@ -16,6 +16,7 @@ export const generateNonce = async (
   data: { account: string },
   context: functions.https.CallableContext
 ) => {
+  console.log(context.auth);
   const refNonces = db.collection("nonces");
   const { account } = data;
   const newData = {
@@ -31,6 +32,7 @@ export const verifyNonce = async (
   data: { signature: string; uuid: string },
   context: functions.https.CallableContext
 ) => {
+  console.log(context.auth);
   const { signature, uuid } = data;
   const message = readableMessage + uuid;
   const nonce = "\x19Ethereum Signed Message:\n" + message.length + message;
@@ -57,6 +59,7 @@ export const deleteNonce = async (
   data: { account: string; uuid: string },
   context: functions.https.CallableContext
 ) => {
+  console.log(context.auth);
   const { account, uuid } = data;
 
   const refNonce = db.collection("nonces").doc(uuid);
