@@ -1,6 +1,11 @@
 import languages from "./languages";
 
 const lang = {
+  menu: {
+    map: "Map",
+    upload: "Upload",
+    user: "User",
+  },
   message: {
     hello: "hello world",
     selectImage: "Select image",

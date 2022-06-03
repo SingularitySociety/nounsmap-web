@@ -1,28 +1,5 @@
 <template>
-  <ul class="flex justify-between">
-    <li class="mr-3">
-      <a
-        class="inline-block border border-blue-500 rounded py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white"
-        href="#"
-        >Map</a
-      >
-    </li>
-    <li class="mr-3">
-      <a
-        class="inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
-        href="#"
-        >Upload</a
-      >
-    </li>
-    <li class="mr-3" @click="nounsUserRef?.open()">
-      <a class="inline-block py-2 px-4 text-gray-400" href="#">
-        <i class="material-icons mr-2">person</i>
-        Account
-      </a>
-    </li>
-  </ul>
   <div class="p-6" align="center">
-    <NounsUser ref="nounsUserRef" />
     <photo-select ref="photoRef" @selected="photoSelected" />
     <div align="center" v-if="photoLocal">
       <div>
@@ -73,7 +50,6 @@ import { Loader } from "@googlemaps/js-api-loader";
 
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import Wallet, { NFT } from "./Wallet.vue";
-import NounsUser from "@/components/NounsUser.vue";
 
 import { uploadFile, uploadSVG } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
@@ -163,7 +139,6 @@ class Pin {
 export default defineComponent({
   components: {
     PhotoSelect,
-    NounsUser,
   },
   setup() {
     const route = useRoute();
@@ -171,7 +146,6 @@ export default defineComponent({
     const mapRef = ref();
     const photoRef = ref();
     const walletRef = ref<InstanceType<typeof Wallet>>();
-    const nounsUserRef = ref<InstanceType<typeof NounsUser>>();
     const pLevel = ref();
 
     const mapInstance = ref();
@@ -400,7 +374,6 @@ export default defineComponent({
       mapRef,
       photoRef,
       walletRef,
-      nounsUserRef,
       pLevel,
       dataURL,
       pictureURL,

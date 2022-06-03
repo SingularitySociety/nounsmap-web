@@ -28,8 +28,7 @@
               </select>
               <div v-if="nftstore" class="sm:flex">
                 <div
-                  class="h-auto lg:w-48 flex-none rounded-t-none justify-center overflow-hidden"
-                  style="background-image: {{nftstore.image}}"
+                  class="h-auto w-48 flex-none rounded-t-none justify-center overflow-hidden"
                   title="token"
                 >
                   <div class="relative sm:w-1/2 w-full">

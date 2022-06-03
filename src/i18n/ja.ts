@@ -1,6 +1,11 @@
 import languages from "./languages";
 
 const lang = {
+  menu: {
+    map: "Map",
+    upload: "写真Up",
+    user: "User",
+  },
   message: {
     hello: "こんにちは、世界",
     uploadImage: "画像をアップロードしましょう!",
