@@ -44,6 +44,9 @@ export default createStore<State>({
     isSignedIn: (state: State) => {
       return state.user !== null && state.user !== undefined;
     },
+    NFT: (state) => {
+      return state.nft;
+    },
   },
   actions: {},
   modules: {},

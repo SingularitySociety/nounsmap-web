@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, Ref } from "vue";
+import { defineComponent, ref, onMounted, computed, Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
@@ -81,10 +81,6 @@ import { photoPosted } from "@/utils/functions";
 import { collection } from "firebase/firestore";
 
 import { generateNewPhotoData } from "@/models/photo";
-
-interface UserData {
-  user: User | null;
-}
 
 interface PinData {
   icon?: google.maps.Icon;
@@ -156,7 +152,6 @@ class Pin {
         data.lng ?? this._data.lng
       );
       this._marker.setPosition(latlng);
-      this._mapObj.value.setCenter(latlng);
     }
 
     if (data.visibility != null) {
@@ -186,11 +181,16 @@ export default defineComponent({
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
 
-    const user = reactive<UserData>({ user: null });
     const processing = ref();
 
     let locationCircle: google.maps.Circle | null;
-    let nft: NFT;
+
+    const user = computed<User>(() => store.state.user);
+    const nft = computed<NFT>(() => store.state.nft);
+    watch(nft, (cur, prev) => {
+      console.log({ cur }, { prev });
+      nftUpdate();
+    });
 
     const pins: { [id: string]: Pin } = {};
 
@@ -265,7 +265,7 @@ export default defineComponent({
       const center = mapObj.value.getCenter();
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
-      pins["upload"]?.update({ lat: center.lat, lng: center.lng });
+      pins["upload"]?.update({ lat: center.lat(), lng: center.lng() });
       if (locationCircle) {
         locationCircle.setCenter(mapObj.value.getCenter());
         locationCircle.setRadius(privacyLevel);
@@ -293,11 +293,13 @@ export default defineComponent({
       }
     };
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
-      if (nft) {
+      if (nft.value) {
         const _id =
-          nft.token.tokenID + nft.token.tokenSymbol + nft.token.contractAddress;
+          nft.value.token.tokenID +
+          nft.value.token.tokenSymbol +
+          nft.value.token.contractAddress;
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
-        const downloadURL = await uploadSVG(nft.image, storage_path);
+        const downloadURL = await uploadSVG(nft.value.image, storage_path);
         return [_id, downloadURL];
       }
       return ["default", ""];
@@ -311,12 +313,12 @@ export default defineComponent({
         zoom: mapObj.value.getZoom(),
       };
       console.debug(lat, lng);
-      if (!photoLocal.value || !user.user) {
+      if (!photoLocal.value || !user.value) {
         console.error("empty photo or user");
         return;
       }
       processing.value = true;
-      const _uid = user.user.uid;
+      const _uid = user.value.uid;
       photoRef.value.fileInput.disabled = true;
       const [iconId, iconURL] = await uploadIcon(_uid);
 
@@ -363,16 +365,15 @@ export default defineComponent({
         locationCircle = null;
       }
     };
-    const nftUpdate = (anft: NFT) => {
-      nft = anft;
-      console.log({ nft });
+    const nftUpdate = () => {
       pins["demo"]?.update({ icon: defaultIcon() });
+      pins["upload"]?.update({ icon: defaultIcon() });
     };
 
     const defaultIcon = () => {
-      if (nft && nft.image) {
+      if (nft.value && nft.value.image) {
         return {
-          url: nft.image,
+          url: nft.value.image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
       } else {

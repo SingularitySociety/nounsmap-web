@@ -20,7 +20,7 @@ const lang = {
     signinTwitter: "ログイン(Twitter)",
     signinWallet: "ログイン(Wallet)",
     signout: "ログアウト",
-  },  
+  },
   languages,
 };
 

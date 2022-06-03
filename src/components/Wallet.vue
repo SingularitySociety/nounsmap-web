@@ -286,6 +286,7 @@ export default defineComponent({
     };
     const signOut = async () => {
       await auth.signOut();
+      store.commit("setNft", null);
     };
     const updateNftData = async (tokenId: string) => {
       try {
