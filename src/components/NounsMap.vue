@@ -145,6 +145,9 @@ class Pin {
       this._marker.setVisible(data.visibility);
     }
   }
+  delete(){
+    this._marker.setMap(null);
+  }
 }
 
 export default defineComponent({
@@ -176,15 +179,21 @@ export default defineComponent({
       console.log({ cur }, { prev });
       nftUpdate();
     });
-    watch(
-      () => route.path,
-      (cur) => {
+    watch(() => route.path,(cur) => {
         console.log(cur);
         if (route.path == "/user/photos") {
           loadUserPhotos();
         }
       }
     );
+    watch(user,(cur) => {
+        console.log(cur);
+        if (route.path == "/user/photos") {
+          loadUserPhotos();
+        }
+      }
+    );
+
 
     const pins: { [id: string]: Pin } = {};
 
@@ -204,18 +213,20 @@ export default defineComponent({
       }
       processing.value = false;
       pLevel.value = 5;
-      console.log(route.path);
       if (route.params.photoId != null) {
         const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
         photoDoc
           .then((doc) => {
             if (doc.exists()) {
               const { iconURL, photoURL, lat, lng, zoom } = doc.data();
-
+              //default icon size is 80, 30
+              const size = iconURL.match(/red160px/)
+                ? new mapInstance.value.maps.Size(80, 30)
+                : new mapInstance.value.maps.Size(80, 80);
               pins[doc.id] = new Pin(mapInstance, mapObj, {
                 icon: {
                   url: iconURL,
-                  scaledSize: new mapInstance.value.maps.Size(80, 80),
+                  scaledSize: size,
                 },
                 photoURL,
                 lat,
@@ -254,8 +265,13 @@ export default defineComponent({
         lng: location.lng,
         visibility: true,
       });
+      pins["upload"].hidePhoto();
     };
     const locationUpdated = () => {
+      if(!photoLocal.value){
+        //not photo selected yet
+        return;
+      }
       const center = mapObj.value.getCenter();
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
@@ -332,6 +348,8 @@ export default defineComponent({
         photoLocal.value.resizedBlob,
         storage_path
       )) as string;
+      pins["upload"]?.update({ photoURL });
+      pins["upload"]?.showPhoto();
       const pdata = generateNewPhotoData(
         _pid,
         photoURL,
@@ -382,7 +400,7 @@ export default defineComponent({
       } else {
         //Nouns Default red grass
         return {
-          url: "/images/glasses/red320px.png",
+          url: require("@/assets/red160px.png"),
           scaledSize: new mapInstance.value.maps.Size(80, 30),
         };
       }
@@ -410,19 +428,25 @@ export default defineComponent({
       let maxLng = -180;
       let minLat = 90;
       let minLng = 180;
+      let _zoom = 10;
+      console.log(pins);
+      Object.keys(pins).forEach((key:string)=>pins[key].delete());
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
-        const { iconURL, images, lat, lng } = doc.data();
+        const { iconURL, images, lat, lng, zoom } = doc.data();
         const imageUrl = images?.resizedImages?.["600"]?.url;
         if (!imageUrl) {
           console.log("photoid skipped", doc.id);
           return;
         }
+        //for default icon care
+        const _iconurl = iconURL ? iconURL :  require("@/assets/red160px.png");
+        const _hsize = iconURL ? 80 : 30;
         pins[doc.id] = new Pin(mapInstance, mapObj, {
           icon: {
-            url: iconURL,
-            scaledSize: new mapInstance.value.maps.Size(80, 80),
+            url: _iconurl,
+            scaledSize: new mapInstance.value.maps.Size(80, _hsize),
           },
           photoURL: imageUrl,
           lat,
@@ -434,12 +458,18 @@ export default defineComponent({
           maxLng = Math.max(lng, maxLng);
           minLat = Math.min(lat, minLat);
           minLng = Math.min(lng, minLng);
+          _zoom = zoom;
         }
       });
       console.log(minLat, maxLat, minLng, maxLng);
-      if (minLat < maxLat && minLng < maxLng) {
-        const min = new google.maps.LatLng(minLat - 1, minLng - 1);
-        const max = new google.maps.LatLng(maxLat + 1, maxLng + 1);
+      if (photos.size == 1 ) {
+        mapObj.value.setCenter(
+          new mapInstance.value.maps.LatLng(minLat, minLng)
+        );
+        mapObj.value.setZoom(_zoom);
+      }else if (minLat < maxLat && minLng < maxLng) {
+        const min = new google.maps.LatLng(minLat - 0.1, minLng - 0.1);
+        const max = new google.maps.LatLng(maxLat + 0.1, maxLng + 0.1);
         const latLngBounds = new google.maps.LatLngBounds(min, max);
         mapObj.value.fitBounds(latLngBounds);
       }
