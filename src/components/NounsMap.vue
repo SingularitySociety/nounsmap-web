@@ -406,10 +406,14 @@ export default defineComponent({
       const photos = await getDocs(
         collection(db, `users/${user.value.uid}/public_photos/`)
       );
-      photos.forEach((doc:DocumentData) => {
+      let maxLat = -90;
+      let maxLng = -180;
+      let minLat = 90;
+      let minLng = 180;
+      await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
-        const { iconURL, images, lat, lng, zoom } = doc.data();
+        const { iconURL, images, lat, lng } = doc.data();
         const imageUrl = images?.resizedImages?.["600"]?.url;
         if (!imageUrl) {
           console.log("photoid skipped", doc.id);
@@ -426,12 +430,19 @@ export default defineComponent({
           visibility: true,
         });
         if (lat != null && lng != null) {
-          mapObj.value.setCenter(new mapInstance.value.maps.LatLng(lat, lng));
-        }
-        if (zoom != null) {
-          mapObj.value.setZoom(zoom);
+          maxLat = Math.max(lat, maxLat);
+          maxLng = Math.max(lng, maxLng);
+          minLat = Math.min(lat, minLat);
+          minLng = Math.min(lng, minLng);
         }
       });
+      console.log(minLat, maxLat, minLng, maxLng);
+      if (minLat < maxLat && minLng < maxLng) {
+        const min = new google.maps.LatLng(minLat - 1, minLng - 1);
+        const max = new google.maps.LatLng(maxLat + 1, maxLng + 1);
+        const latLngBounds = new google.maps.LatLngBounds(min, max);
+        mapObj.value.fitBounds(latLngBounds);
+      }
     };
 
     return {
