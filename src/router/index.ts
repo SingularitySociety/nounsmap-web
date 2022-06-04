@@ -14,6 +14,14 @@ const routeChildren: Array<RouteRecordRaw> = [
     component: NounsMap,
   },
   {
+    path: "user",
+    component: NounsMap,
+  },
+  {
+    path: "user/photos",
+    component: NounsMap,
+  },
+  {
     path: "p/:photoId",
     component: NounsMap,
   },

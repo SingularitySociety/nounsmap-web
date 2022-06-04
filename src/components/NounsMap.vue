@@ -44,14 +44,14 @@ import { defineComponent, ref, onMounted, computed, Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, DocumentData } from "firebase/firestore";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import Wallet, { NFT } from "./Wallet.vue";
 
-import { uploadFile, uploadSVG } from "@/utils/storage";
+import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
 import { photoPosted } from "@/utils/functions";
 import { collection } from "firebase/firestore";
@@ -77,7 +77,7 @@ class Pin {
     return (
       '<div id="content">' +
       '<div id="siteNotice">' +
-      '<img width="242" height="120"  src="' +
+      '<img width="128"  src="' +
       photoURL +
       '" />' +
       "</div>" +
@@ -102,6 +102,7 @@ class Pin {
     this._infoWindow = new mapInstance.value.maps.InfoWindow({
       content: this.contentString(data.photoURL),
     });
+    this.showPhoto();
     this._marker.addListener("click", () => {
       this._infoWindow.open({
         anchor: this._marker,
@@ -110,6 +111,16 @@ class Pin {
       });
     });
     this._data = data;
+  }
+  showPhoto() {
+    this._infoWindow.open({
+      anchor: this._marker,
+      map: this._mapObj.value,
+      shouldFocus: false,
+    });
+  }
+  hidePhoto() {
+    this._infoWindow.close();
   }
 
   update(data: Partial<PinData>) {
@@ -165,6 +176,15 @@ export default defineComponent({
       console.log({ cur }, { prev });
       nftUpdate();
     });
+    watch(
+      () => route.path,
+      (cur) => {
+        console.log(cur);
+        if (route.path == "/user/photos") {
+          loadUserPhotos();
+        }
+      }
+    );
 
     const pins: { [id: string]: Pin } = {};
 
@@ -174,17 +194,17 @@ export default defineComponent({
         libraries: ["places", "visualization"],
       });
       const mapOptions = {
-        center: { lat: 49, lng: 34.5 },
         zoom: 6,
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       if (route.params.photoId == null) {
+        mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
         showDemoIcons();
       }
       processing.value = false;
       pLevel.value = 5;
-
+      console.log(route.path);
       if (route.params.photoId != null) {
         const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
         photoDoc
@@ -273,8 +293,17 @@ export default defineComponent({
           nft.value.token.tokenSymbol +
           nft.value.token.contractAddress;
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
-        const downloadURL = await uploadSVG(nft.value.image, storage_path);
-        return [_id, downloadURL];
+        const downloadURL = await getFileDownloadURL(storage_path);
+        if (downloadURL) {
+          //already icon exists
+          console.log("exist", { downloadURL });
+          return [_id, downloadURL];
+        } else {
+          //new icon
+          const newURL = await uploadSVG(nft.value.image, storage_path);
+          console.log("new icon", { newURL });
+          return [_id, newURL];
+        }
       }
       return ["default", ""];
     };
@@ -339,7 +368,7 @@ export default defineComponent({
         locationCircle = null;
       }
     };
-    const nftUpdate = () => {
+    const nftUpdate = async () => {
       pins["demo"]?.update({ icon: defaultIcon() });
       pins["upload"]?.update({ icon: defaultIcon() });
     };
@@ -369,6 +398,41 @@ export default defineComponent({
         visibility: true,
       });
     };
+    const loadUserPhotos = async () => {
+      if (!user.value) {
+        console.error("no user info");
+        return;
+      }
+      const photos = await getDocs(
+        collection(db, `users/${user.value.uid}/public_photos/`)
+      );
+      photos.forEach((doc:DocumentData) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        const { iconURL, images, lat, lng, zoom } = doc.data();
+        const imageUrl = images?.resizedImages?.["600"]?.url;
+        if (!imageUrl) {
+          console.log("photoid skipped", doc.id);
+          return;
+        }
+        pins[doc.id] = new Pin(mapInstance, mapObj, {
+          icon: {
+            url: iconURL,
+            scaledSize: new mapInstance.value.maps.Size(80, 80),
+          },
+          photoURL: imageUrl,
+          lat,
+          lng,
+          visibility: true,
+        });
+        if (lat != null && lng != null) {
+          mapObj.value.setCenter(new mapInstance.value.maps.LatLng(lat, lng));
+        }
+        if (zoom != null) {
+          mapObj.value.setZoom(zoom);
+        }
+      });
+    };
 
     return {
       mapRef,
@@ -382,6 +446,7 @@ export default defineComponent({
       photoSelected,
       uploadPhoto,
       locationUpdated,
+      loadUserPhotos,
       nftUpdate,
     };
   },
