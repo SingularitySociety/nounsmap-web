@@ -1,6 +1,6 @@
 <template>
   <div class="p-6" align="center">
-    <photo-select ref="photoRef" @selected="photoSelected" />
+    <photo-select v-if="user" ref="photoRef" @selected="photoSelected" />
     <div align="center" v-if="photoLocal">
       <div>
         {{ $t("message.selectPhotoLocation") }}<br />
@@ -480,6 +480,7 @@ export default defineComponent({
       mapRef,
       photoRef,
       walletRef,
+      user,
       pLevel,
       dataURL,
       pictureURL,
