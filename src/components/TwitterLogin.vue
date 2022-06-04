@@ -1,20 +1,21 @@
 <template>
   <section v-if="user && user.userType == 'twitter.com'">
-    <div class="max-w-sm bg-white rounded overflow-hidden shadow-lg">
+    <div
+      class="max-w-xs max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4"
+    >
       <img
         ref="imageRef"
         class="h-40 object-cover rounded-md"
-        src="user.user.providerData?[0].photoURL"
+        :src="(user?.user?.photoURL as string)"
         alt="twitter photo"
       />
       <div class="mb-8">
         <p class="text-gray-700 text-base">
           twitterName: {{ user?.user?.displayName }} <br />
-          email: {{ user?.user?.email }}
         </p>
       </div>
       <button
-        class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         @click="signout"
       >
         {{ $t("function.signout") }}

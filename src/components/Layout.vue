@@ -4,12 +4,13 @@
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
     <ul class="grid grid-cols-3 gap-4 justify-items-stretch">
       <li class="mr-3">
-        <a
-          class="cursor-not-allowed flex justify-center items-center border border-white rounded hover:border-gray-200 text-gray-500 hover:bg-gray-200 py-2 px-4"
-          href="#"
-        >
-          {{ $t("menu.map") }}</a
-        >
+        <router-link to="/user/photos">
+          <div
+            class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+          >
+            {{ $t("menu.map") }}
+          </div>
+        </router-link>
       </li>
       <li class="mr-3">
         <a
@@ -20,13 +21,14 @@
         >
       </li>
       <li class="mr-3" @click="nounsUserRef?.open()">
-        <a
-          class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
-          href="#"
-        >
-          <i class="material-icons mr-2">person</i>
-          {{ $t("menu.user") }}
-        </a>
+        <router-link to="/user">
+          <div
+            class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+          >
+            <i class="material-icons mr-2">person</i>
+            {{ $t("menu.user") }}
+          </div>
+        </router-link>
       </li>
     </ul>
     <NounsUser ref="nounsUserRef" />

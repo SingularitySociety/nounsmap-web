@@ -48,3 +48,14 @@ export const uploadSVG = (data: string, path: string): Promise<string> => {
     });
   });
 };
+
+export const getFileDownloadURL = async (path: string) => {
+  const storage = getStorage();
+  const storageRef = ref(storage, path);
+  try {
+    return await getDownloadURL(storageRef);
+  } catch (reason) {
+    console.error(reason);
+    return "";
+  }
+};

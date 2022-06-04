@@ -3,10 +3,10 @@
   <div v-else class="ml-0">
     <div v-if="user?.userType == 'wallet' && account">
       <div
-        class="border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4"
+        class="max-w-xs max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4"
       >
-        <div class="max-w-sm bg-white">
-          <div class="w-full lg:max-w-full">
+        <div class="bg-white">
+          <div class="">
             <div class="mb-8">
               <p class="text-gray-700 overflow-hidden text-base">
                 {{ $t("message.youNeedNet", { networkName }) }}<br />
@@ -28,10 +28,10 @@
               </select>
               <div v-if="nftstore" class="sm:flex">
                 <div
-                  class="h-auto w-48 flex-none rounded-t-none justify-center overflow-hidden"
+                  class="h-auto w-32 flex-none rounded-t-none justify-center overflow-hidden"
                   title="token"
                 >
-                  <div class="relative sm:w-1/2 w-full">
+                  <div class="relative w-full">
                     <a
                       :href="`${openseaUrl}/assets/${contractAddress}/${ownedTokenId}`"
                       target="_blank"

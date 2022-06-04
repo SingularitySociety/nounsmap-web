@@ -1,6 +1,6 @@
 <template>
   <div class="p-6" align="center">
-    <photo-select ref="photoRef" @selected="photoSelected" />
+    <photo-select v-if="user" ref="photoRef" @selected="photoSelected" />
     <div align="center" v-if="photoLocal">
       <div>
         {{ $t("message.selectPhotoLocation") }}<br />
@@ -44,14 +44,14 @@ import { defineComponent, ref, onMounted, computed, Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, DocumentData } from "firebase/firestore";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import Wallet, { NFT } from "./Wallet.vue";
 
-import { uploadFile, uploadSVG } from "@/utils/storage";
+import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
 import { photoPosted } from "@/utils/functions";
 import { collection } from "firebase/firestore";
@@ -76,8 +76,8 @@ class Pin {
   protected contentString(photoURL: string) {
     return (
       '<div id="content">' +
-      '<div id="siteNotice">' +
-      '<img width="242" height="120"  src="' +
+      '<div  id="siteNotice">' +
+      '<img  class="w-32" src="' +
       photoURL +
       '" />' +
       "</div>" +
@@ -102,6 +102,7 @@ class Pin {
     this._infoWindow = new mapInstance.value.maps.InfoWindow({
       content: this.contentString(data.photoURL),
     });
+    this.showPhoto();
     this._marker.addListener("click", () => {
       this._infoWindow.open({
         anchor: this._marker,
@@ -110,6 +111,16 @@ class Pin {
       });
     });
     this._data = data;
+  }
+  showPhoto() {
+    this._infoWindow.open({
+      anchor: this._marker,
+      map: this._mapObj.value,
+      shouldFocus: false,
+    });
+  }
+  hidePhoto() {
+    this._infoWindow.close();
   }
 
   update(data: Partial<PinData>) {
@@ -133,6 +144,9 @@ class Pin {
     if (data.visibility != null) {
       this._marker.setVisible(data.visibility);
     }
+  }
+  delete() {
+    this._marker.setMap(null);
   }
 }
 
@@ -165,6 +179,21 @@ export default defineComponent({
       console.log({ cur }, { prev });
       nftUpdate();
     });
+    watch(
+      () => route.path,
+      (cur) => {
+        console.log(cur);
+        if (route.path == "/user/photos") {
+          loadUserPhotos();
+        }
+      }
+    );
+    watch(user, (cur) => {
+      console.log(cur);
+      if (route.path == "/user/photos") {
+        loadUserPhotos();
+      }
+    });
 
     const pins: { [id: string]: Pin } = {};
 
@@ -174,7 +203,6 @@ export default defineComponent({
         libraries: ["places", "visualization"],
       });
       const mapOptions = {
-        center: { lat: 49, lng: 34.5 },
         zoom: 6,
       };
       mapInstance.value = await loader.load();
@@ -184,18 +212,20 @@ export default defineComponent({
       }
       processing.value = false;
       pLevel.value = 5;
-
       if (route.params.photoId != null) {
         const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
         photoDoc
           .then((doc) => {
             if (doc.exists()) {
               const { iconURL, photoURL, lat, lng, zoom } = doc.data();
-
+              //default icon size is 80, 30
+              const size = iconURL.match(/red160px/)
+                ? new mapInstance.value.maps.Size(80, 30)
+                : new mapInstance.value.maps.Size(80, 80);
               pins[doc.id] = new Pin(mapInstance, mapObj, {
                 icon: {
                   url: iconURL,
-                  scaledSize: new mapInstance.value.maps.Size(80, 80),
+                  scaledSize: size,
                 },
                 photoURL,
                 lat,
@@ -234,8 +264,13 @@ export default defineComponent({
         lng: location.lng,
         visibility: true,
       });
+      pins["upload"].hidePhoto();
     };
     const locationUpdated = () => {
+      if (!photoLocal.value) {
+        //not photo selected yet
+        return;
+      }
       const center = mapObj.value.getCenter();
       console.debug(pLevel.value);
       const privacyLevel = pLevel.value * 1000;
@@ -273,8 +308,17 @@ export default defineComponent({
           nft.value.token.tokenSymbol +
           nft.value.token.contractAddress;
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
-        const downloadURL = await uploadSVG(nft.value.image, storage_path);
-        return [_id, downloadURL];
+        const downloadURL = await getFileDownloadURL(storage_path);
+        if (downloadURL) {
+          //already icon exists
+          console.log("exist", { downloadURL });
+          return [_id, downloadURL];
+        } else {
+          //new icon
+          const newURL = await uploadSVG(nft.value.image, storage_path);
+          console.log("new icon", { newURL });
+          return [_id, newURL];
+        }
       }
       return ["default", ""];
     };
@@ -303,6 +347,8 @@ export default defineComponent({
         photoLocal.value.resizedBlob,
         storage_path
       )) as string;
+      pins["upload"]?.update({ photoURL });
+      pins["upload"]?.showPhoto();
       const pdata = generateNewPhotoData(
         _pid,
         photoURL,
@@ -353,14 +399,15 @@ export default defineComponent({
       } else {
         //Nouns Default red grass
         return {
-          url: "/images/glasses/red320px.png",
+          url: require("@/assets/red160px.png"),
           scaledSize: new mapInstance.value.maps.Size(80, 30),
         };
       }
     };
     const showDemoIcons = () => {
       //update for demofor Demo
-
+      // 49, 34.5 is around Ukraine, demo photo about Ukraine crisis
+      mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
       pins["demo"] = new Pin(mapInstance, mapObj, {
         icon: defaultIcon(),
         photoURL: require("@/assets/sample/pexels-11518762.jpg"),
@@ -369,11 +416,71 @@ export default defineComponent({
         visibility: true,
       });
     };
+    const loadUserPhotos = async () => {
+      if (!user.value) {
+        console.error("no user info");
+        return;
+      }
+      const photos = await getDocs(
+        collection(db, `users/${user.value.uid}/public_photos/`)
+      );
+      console.log(pins);
+      Object.keys(pins).forEach((key: string) => pins[key].delete());
+      await photos.forEach((doc: DocumentData) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        const { iconURL, images, lat, lng } = doc.data();
+        const imageUrl = images?.resizedImages?.["600"]?.url;
+        if (!imageUrl) {
+          console.log("photoid skipped", doc.id);
+          return;
+        }
+        //for default icon care
+        const _iconurl = iconURL ? iconURL : require("@/assets/red160px.png");
+        const _hsize = iconURL ? 80 : 30;
+        pins[doc.id] = new Pin(mapInstance, mapObj, {
+          icon: {
+            url: _iconurl,
+            scaledSize: new mapInstance.value.maps.Size(80, _hsize),
+          },
+          photoURL: imageUrl,
+          lat,
+          lng,
+          visibility: true,
+        });
+      });
+      const latarray = photos.docs.map((doc) => {
+        return doc.data().lat;
+      });
+      const maxLat = Math.max.apply(null, latarray);
+      const minLat = Math.min.apply(null, latarray);
+      const lngarray = photos.docs.map((doc) => {
+        return doc.data().lng;
+      });
+      const maxLng = Math.max.apply(null, lngarray);
+      const minLng = Math.min.apply(null, lngarray);
+      console.log(minLat, maxLat, minLng, maxLng);
+      if (photos.size == 1) {
+        mapObj.value.setCenter(
+          new mapInstance.value.maps.LatLng(minLat, minLng)
+        );
+        const zoom = photos.docs[0].data().zoom;
+        if (zoom) {
+          mapObj.value.setZoom(zoom);
+        }
+      } else if (minLat < maxLat && minLng < maxLng) {
+        const min = new google.maps.LatLng(minLat - 0.1, minLng - 0.1);
+        const max = new google.maps.LatLng(maxLat + 0.1, maxLng + 0.1);
+        const latLngBounds = new google.maps.LatLngBounds(min, max);
+        mapObj.value.fitBounds(latLngBounds);
+      }
+    };
 
     return {
       mapRef,
       photoRef,
       walletRef,
+      user,
       pLevel,
       dataURL,
       pictureURL,
@@ -382,6 +489,7 @@ export default defineComponent({
       photoSelected,
       uploadPhoto,
       locationUpdated,
+      loadUserPhotos,
       nftUpdate,
     };
   },
