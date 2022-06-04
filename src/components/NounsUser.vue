@@ -17,22 +17,21 @@
               Plsease SignIn by
             </label>
           </div>
-          <div class="table">
-            <div class="table-row">
-              <div class="table-cell text-gray-700 px-4 py-2 text-sm">
-                twicon
-              </div>
-              <div class="table-cell text-gray-700 px-4 py-2 text-sm">
-                <TwitterLogin :user="user" />
-              </div>
+          <div class="grid grid-cols-4">
+            <div class="col-span-1 text-gray-700 px-4 py-2 text-sm">
+              <img class="h-8 text-center" src="@/assets/icon/Twitter.svg" />
             </div>
-            <div class="table-row">
-              <div class="table-cell text-gray-700 px-4 py-2 text-sm">
-                MMicon
-              </div>
-              <div class="table-cell text-gray-700 px-4 py-2 text-sm">
-                <Wallet :user="user" />
-              </div>
+            <div class="col-span-3 text-gray-700 px-4 py-2 text-sm">
+              <TwitterLogin :user="user" />
+            </div>
+            <div class="col-span-1 text-gray-700 px-4 py-2 text-sm">
+              <img
+                class="h-8 text-center"
+                src="@/assets/icon/metamask-fox.svg"
+              />
+            </div>
+            <div class="col-span-3 text-gray-700 px-4 py-2 text-sm">
+              <Wallet :user="user" />
             </div>
           </div>
         </div>
