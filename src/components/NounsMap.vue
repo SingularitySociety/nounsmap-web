@@ -76,8 +76,8 @@ class Pin {
   protected contentString(photoURL: string) {
     return (
       '<div id="content">' +
-      '<div id="siteNotice">' +
-      '<img width="128"  src="' +
+      '<div  id="siteNotice">' +
+      '<img  class="w-32" src="' +
       photoURL +
       '" />' +
       "</div>" +
@@ -208,7 +208,6 @@ export default defineComponent({
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       if (route.params.photoId == null) {
-        mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
         showDemoIcons();
       }
       processing.value = false;
@@ -386,7 +385,7 @@ export default defineComponent({
         locationCircle = null;
       }
     };
-    const nftUpdate = async () => {
+    const nftUpdate = () => {
       pins["demo"]?.update({ icon: defaultIcon() });
       pins["upload"]?.update({ icon: defaultIcon() });
     };
@@ -407,7 +406,8 @@ export default defineComponent({
     };
     const showDemoIcons = () => {
       //update for demofor Demo
-
+      // 49, 34.5 is around Ukraine, demo photo about Ukraine crisis
+      mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
       pins["demo"] = new Pin(mapInstance, mapObj, {
         icon: defaultIcon(),
         photoURL: require("@/assets/sample/pexels-11518762.jpg"),
@@ -424,17 +424,12 @@ export default defineComponent({
       const photos = await getDocs(
         collection(db, `users/${user.value.uid}/public_photos/`)
       );
-      let maxLat = -90;
-      let maxLng = -180;
-      let minLat = 90;
-      let minLng = 180;
-      let _zoom = 10;
       console.log(pins);
       Object.keys(pins).forEach((key: string) => pins[key].delete());
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
-        const { iconURL, images, lat, lng, zoom } = doc.data();
+        const { iconURL, images, lat, lng } = doc.data();
         const imageUrl = images?.resizedImages?.["600"]?.url;
         if (!imageUrl) {
           console.log("photoid skipped", doc.id);
@@ -453,20 +448,26 @@ export default defineComponent({
           lng,
           visibility: true,
         });
-        if (lat != null && lng != null) {
-          maxLat = Math.max(lat, maxLat);
-          maxLng = Math.max(lng, maxLng);
-          minLat = Math.min(lat, minLat);
-          minLng = Math.min(lng, minLng);
-          _zoom = zoom;
-        }
       });
+      const latarray = photos.docs.map((doc) => {
+        return doc.data().lat;
+      });
+      const maxLat = Math.max.apply(null, latarray);
+      const minLat = Math.min.apply(null, latarray);
+      const lngarray = photos.docs.map((doc) => {
+        return doc.data().lng;
+      });
+      const maxLng = Math.max.apply(null, lngarray);
+      const minLng = Math.min.apply(null, lngarray);
       console.log(minLat, maxLat, minLng, maxLng);
       if (photos.size == 1) {
         mapObj.value.setCenter(
           new mapInstance.value.maps.LatLng(minLat, minLng)
         );
-        mapObj.value.setZoom(_zoom);
+        const zoom = photos.docs[0].data().zoom;
+        if (zoom) {
+          mapObj.value.setZoom(zoom);
+        }
       } else if (minLat < maxLat && minLng < maxLng) {
         const min = new google.maps.LatLng(minLat - 0.1, minLng - 0.1);
         const max = new google.maps.LatLng(maxLat + 0.1, maxLng + 0.1);
