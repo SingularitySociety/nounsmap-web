@@ -145,7 +145,7 @@ class Pin {
       this._marker.setVisible(data.visibility);
     }
   }
-  delete(){
+  delete() {
     this._marker.setMap(null);
   }
 }
@@ -179,21 +179,21 @@ export default defineComponent({
       console.log({ cur }, { prev });
       nftUpdate();
     });
-    watch(() => route.path,(cur) => {
+    watch(
+      () => route.path,
+      (cur) => {
         console.log(cur);
         if (route.path == "/user/photos") {
           loadUserPhotos();
         }
       }
     );
-    watch(user,(cur) => {
-        console.log(cur);
-        if (route.path == "/user/photos") {
-          loadUserPhotos();
-        }
+    watch(user, (cur) => {
+      console.log(cur);
+      if (route.path == "/user/photos") {
+        loadUserPhotos();
       }
-    );
-
+    });
 
     const pins: { [id: string]: Pin } = {};
 
@@ -268,7 +268,7 @@ export default defineComponent({
       pins["upload"].hidePhoto();
     };
     const locationUpdated = () => {
-      if(!photoLocal.value){
+      if (!photoLocal.value) {
         //not photo selected yet
         return;
       }
@@ -430,7 +430,7 @@ export default defineComponent({
       let minLng = 180;
       let _zoom = 10;
       console.log(pins);
-      Object.keys(pins).forEach((key:string)=>pins[key].delete());
+      Object.keys(pins).forEach((key: string) => pins[key].delete());
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
@@ -441,7 +441,7 @@ export default defineComponent({
           return;
         }
         //for default icon care
-        const _iconurl = iconURL ? iconURL :  require("@/assets/red160px.png");
+        const _iconurl = iconURL ? iconURL : require("@/assets/red160px.png");
         const _hsize = iconURL ? 80 : 30;
         pins[doc.id] = new Pin(mapInstance, mapObj, {
           icon: {
@@ -462,12 +462,12 @@ export default defineComponent({
         }
       });
       console.log(minLat, maxLat, minLng, maxLng);
-      if (photos.size == 1 ) {
+      if (photos.size == 1) {
         mapObj.value.setCenter(
           new mapInstance.value.maps.LatLng(minLat, minLng)
         );
         mapObj.value.setZoom(_zoom);
-      }else if (minLat < maxLat && minLng < maxLng) {
+      } else if (minLat < maxLat && minLng < maxLng) {
         const min = new google.maps.LatLng(minLat - 0.1, minLng - 0.1);
         const max = new google.maps.LatLng(maxLat + 0.1, maxLng + 0.1);
         const latLngBounds = new google.maps.LatLngBounds(min, max);
