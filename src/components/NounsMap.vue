@@ -249,6 +249,10 @@ export default defineComponent({
     });
 
     const photoSelected = async (info: PhotoInfo) => {
+      if (!info) {
+        photoLocal.value = null;
+        return;
+      }
       photoLocal.value = info;
       Object.values(pins).forEach((site) => site.update({ visibility: false }));
       mapObj.value.addListener("center_changed", () => {

@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-2 py-4">
-    <canvas ref="resized" v-if="false" />
+    <canvas ref="resized" width="600" height="600" v-if="false" />
     <span class="sr-only">{{ $t("message.selectImage") }}</span>
     <input
       type="file"
@@ -23,6 +23,7 @@
 import { defineComponent, ref } from "vue";
 import { resizeImage } from "@/utils/image";
 import exifr from "exifr";
+import heic2any from "heic2any";
 
 export interface PhotoInfo {
   file: File | null;
@@ -33,14 +34,17 @@ export interface PhotoInfo {
 
 export default defineComponent({
   emits: {
-    selected: (param: PhotoInfo) => {
+    selected: (param: PhotoInfo | null) => {
+      if (param === null) {
+        return true;
+      }
       if (param.file && param.size && param.resizedBlob) {
         //payload.location is optional
-        if (!param.location || (param.location.lat && param.location.lng))
+        if (!param.location || (param.location.lat && param.location.lng)) {
           return true;
-      } else {
-        return false;
+        }
       }
+      return false;
     },
   },
   setup(_, context) {
@@ -53,14 +57,28 @@ export default defineComponent({
     const selectImage = () => {
       fileInput.value.click();
     };
-    const pickFile = () => {
-      const file = fileInput.value.files;
-      if (file && file[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          previewImage.value = e?.target?.result;
-        };
-        reader.readAsDataURL(file[0]);
+    const pickFile = async () => {
+      const files = fileInput.value.files;
+
+      if (files && files[0]) {
+        if (/\.(jpe?g|png|gif)$/i.test(files[0].name)) {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            previewImage.value = e?.target?.result;
+          };
+          reader.readAsDataURL(files[0]);
+        } else if (/\.(heic)$/i.test(files[0].name)) {
+          const blob = await heic2any({
+            blob: files[0],
+            toType: "image/jpeg",
+            quality: 0.94,
+          });
+          previewImage.value = URL.createObjectURL(blob as Blob);
+        } else {
+          fileInput.value.value = "";
+          previewImage.value = "";
+          context.emit("selected", null);
+        }
       }
     };
     const onImageLoad = async () => {
@@ -77,7 +95,7 @@ export default defineComponent({
         width: toWidth,
         height: (toWidth * photoInfo.size.h) / photoInfo.size.w,
       };
-      console.debug(photoInfo.size, toSize);
+      console.info(photoInfo.size, toSize);
       const results = await Promise.all([
         resizeImage(imageRef.value, toSize),
         exifr.gps(fileInput.value.files[0]),
