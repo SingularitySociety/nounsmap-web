@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-2 py-4">
-    <canvas ref="resized" v-if="false" />
+    <canvas ref="resized" width="600" height="600" v-if="false" />
     <span class="sr-only">{{ $t("message.selectImage") }}</span>
     <input
       type="file"
@@ -95,7 +95,7 @@ export default defineComponent({
         width: toWidth,
         height: (toWidth * photoInfo.size.h) / photoInfo.size.w,
       };
-      console.debug(photoInfo.size, toSize);
+      console.info(photoInfo.size, toSize);
       const results = await Promise.all([
         resizeImage(imageRef.value, toSize),
         exifr.gps(fileInput.value.files[0]),
