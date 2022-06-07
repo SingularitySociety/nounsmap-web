@@ -208,7 +208,8 @@ export default defineComponent({
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       if (route.params.photoId == null) {
-        //disable demo icon make temporary default to NULL position
+        //TBD: need to re-think UX
+        //Disabled Ukraine demo icon,  make default to NULL position
         mapObj.value.setCenter(new mapInstance.value.maps.LatLng(0, 0));
 
       }
@@ -409,18 +410,6 @@ export default defineComponent({
           scaledSize: new mapInstance.value.maps.Size(80, 30),
         };
       }
-    };
-    const showDemoIcons = () => {
-      //update for demofor Demo
-      // 49, 34.5 is around Ukraine, demo photo about Ukraine crisis
-      mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
-      pins["demo"] = new Pin(mapInstance, mapObj, {
-        icon: defaultIcon(),
-        photoURL: require("@/assets/sample/pexels-11518762.jpg"),
-        lat: 47,
-        lng: 34.5,
-        visibility: true,
-      });
     };
     const loadUserPhotos = async () => {
       if (!user.value) {
