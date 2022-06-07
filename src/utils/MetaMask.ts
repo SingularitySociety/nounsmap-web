@@ -1,10 +1,7 @@
-import { useStore } from "vuex";
-
-export const ethereum = window.ethereum;
-export const hasMetaMask =
-  typeof ethereum !== "undefined" && ethereum.isMetaMask;
+import store from "../store";
 
 export const requestAccount = async () => {
+  const ethereum = store.state.ethereum;
   if (!ethereum) {
     return null;
   }
@@ -14,6 +11,7 @@ export const requestAccount = async () => {
 };
 
 export const getAccount = async (): Promise<string | null> => {
+  const ethereum = store.state.ethereum;
   if (!ethereum) {
     return null;
   }
@@ -39,28 +37,50 @@ export const ChainIds = {
   Polygon: "0x89",
 };
 
+export const initializeEthereum = () => {
+  const setEthereum = () => {
+    const ethereum = (window as any).ethereum;
+    if (store.state.ethereum != ethereum) {
+      store.commit("setEthereum", ethereum);
+    }
+  };
+  const ethereum = (window as any).ethereum;
+  if (ethereum) {
+    setEthereum();
+  } else {
+    window.addEventListener(
+      "ethereum#initialized",
+      () => {
+        setEthereum();
+      },
+      { once: true }
+    );
+    setTimeout(setEthereum, 30000); // 30 seconds in which nothing happens on android
+  }
+};
+
 export const startMonitoringMetamask = () => {
-  const store = useStore();
   getAccount().then((value) => {
-    console.log("Eth gotAccount", value);
     store.commit("setAccount", value);
+    console.log("Eth gotAccount", store.getters.displayAccount);
   });
-  if (hasMetaMask) {
+  if (store.getters.hasMetaMask) {
+    const ethereum = store.state.ethereum;
     ethereum.on("accountsChanged", (accounts: string[]) => {
       console.log("accountsChanged", accounts.length);
       if (accounts.length == 0) {
         store.commit("setAccount", null);
       } else {
         store.commit("setAccount", accounts[0]);
-        console.log("Eth accountsChanged", accounts[0]);
+        console.log("Eth acountsChanged", store.getters.displayAccount);
       }
     });
     ethereum.on("connect", (info: ProviderConnectInfo): void => {
-      console.log("*** connect", info);
+      console.log("Eth connect", info, store.getters.displayAccount);
       store.commit("setChainId", info.chainId);
     });
     ethereum.on("disconnect", (info: ProviderRpcError): void => {
-      console.log("*** disconnect", info);
+      console.log("Eth disconnect", info);
     });
     ethereum.on("chainChanged", (chainId: string) => {
       store.commit("setChainId", chainId);
@@ -69,6 +89,7 @@ export const startMonitoringMetamask = () => {
 };
 
 export const switchNetwork = async (chainId: string) => {
+  const ethereum = store.state.ethereum;
   try {
     await ethereum.request({
       method: "wallet_switchEthereumChain",

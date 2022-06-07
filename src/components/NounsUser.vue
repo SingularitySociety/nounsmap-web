@@ -53,6 +53,9 @@
       </div>
     </div>
   </transition>
+  <div v-if="true">
+    {{ debugmessage }}
+  </div>
 </template>
 
 <script lang="ts">
@@ -60,6 +63,8 @@ import { defineComponent, reactive, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
+import { initializeEthereum } from "@/utils/MetaMask";
+
 import TwitterLogin from "./TwitterLogin.vue";
 import Wallet from "./Wallet.vue";
 export interface UserData {
@@ -79,11 +84,17 @@ export default defineComponent({
     const selectView = ref(true);
     const twitterView = ref(false);
     const metaMaskView = ref(false);
-
+    const debugmessage = ref<string>();
+    initializeEthereum();
     onMounted(async () => {
+      if (localStorage.user) {
+        console.log(localStorage.user);
+        debugmessage.value = localStorage.user;
+      }
       auth.onAuthStateChanged((fbuser) => {
         console.log({ fbuser });
         if (fbuser) {
+          localStorage.user = JSON.stringify({ uid: fbuser.uid });
           user.user = fbuser;
           if (fbuser.providerData?.[0]?.providerId) {
             user.userType = fbuser.providerData?.[0].providerId;
@@ -108,6 +119,7 @@ export default defineComponent({
       twitterView,
       metaMaskView,
       user,
+      debugmessage,
       open,
     };
   },

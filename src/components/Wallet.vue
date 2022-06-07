@@ -136,12 +136,7 @@ import { auth } from "@/utils/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
 import { UserData } from "@/components/NounsUser.vue";
-import {
-  hasMetaMask,
-  requestAccount,
-  ethereum,
-  startMonitoringMetamask,
-} from "@/utils/MetaMask";
+import { requestAccount } from "@/utils/MetaMask";
 
 interface Token {
   tokenID: string;
@@ -179,6 +174,7 @@ export default defineComponent({
     const nName = computed(() => store.state.networkName);
     const nChainId = computed(() => store.state.chainId);
     const isSignedIn = computed(() => store.getters.isSignedIn);
+    const hasMetaMask = computed(() => store.getters.hasMetaMask);
     const nft = ref<NFT>();
     const nftstore = computed(() => store.state.nft);
     const ownedTokenId = ref();
@@ -188,8 +184,7 @@ export default defineComponent({
     const isContentShown = ref(false);
     const open = () => (isContentShown.value = true);
     onMounted(async () => {
-      startMonitoringMetamask();
-      if (hasMetaMask) {
+      if (store.getters.hasMetaMask) {
         //for already connected user , re-conect,
         if (props.user?.userType == "wallet" && !account.value) {
           await connect();
@@ -198,7 +193,7 @@ export default defineComponent({
       }
     });
     const fetchNFT = async () => {
-      const provider = new ethers.providers.Web3Provider(ethereum);
+      const provider = new ethers.providers.Web3Provider(store.state.ethereum);
       const ethScan = new ethers.providers.EtherscanProvider("rinkeby");
       const tmpKey = "WPHTZ9QQ5WXJRNCWNXC2B3AMPD6AWCWTXB";
 
@@ -254,7 +249,7 @@ export default defineComponent({
       try {
         // Step 2: We ask the user to sign this nonce
         isBusy.value = "Waiting for you to sign a message...";
-        const signature = await ethereum.request({
+        const signature = await store.state.ethereum.request({
           method: "personal_sign",
           params: [nonce, account],
         });
@@ -289,7 +284,9 @@ export default defineComponent({
     };
     const updateNftData = async (tokenId: string) => {
       try {
-        const provider = new ethers.providers.Web3Provider(ethereum);
+        const provider = new ethers.providers.Web3Provider(
+          store.state.ethereum
+        );
         const contract = new ethers.Contract(
           contractAddress,
           nounsTokenJson.abi,
