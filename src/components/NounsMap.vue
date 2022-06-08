@@ -49,7 +49,7 @@ import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
-import Wallet, { NFT } from "./Wallet.vue";
+import { NFT } from "@/models/SmartContract";
 
 import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
@@ -159,7 +159,6 @@ export default defineComponent({
     const store = useStore();
     const mapRef = ref();
     const photoRef = ref();
-    const walletRef = ref<InstanceType<typeof Wallet>>();
     const pLevel = ref();
 
     const mapInstance = ref();
@@ -211,7 +210,6 @@ export default defineComponent({
         //TBD: need to re-think UX
         //Disabled Ukraine demo icon,  make default to NULL position
         mapObj.value.setCenter(new mapInstance.value.maps.LatLng(0, 0));
-
       }
       processing.value = false;
       pLevel.value = 5;
@@ -474,7 +472,6 @@ export default defineComponent({
     return {
       mapRef,
       photoRef,
-      walletRef,
       user,
       pLevel,
       dataURL,

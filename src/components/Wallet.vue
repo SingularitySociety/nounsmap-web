@@ -33,7 +33,7 @@
                 >
                   <div class="relative w-full">
                     <a
-                      :href="`${openseaUrl}/assets/${contractAddress}/${ownedTokenId}`"
+                      :href="`${openseaUrl}/${contractAddress}/${ownedTokenId}`"
                       target="_blank"
                     >
                       <img :src="nftstore.image" class="w-full" />
@@ -137,21 +137,7 @@ import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
 import { UserData } from "@/components/NounsUser.vue";
 import { requestAccount } from "@/utils/MetaMask";
-
-interface Token {
-  tokenID: string;
-  tokenName: string;
-  tokenSymbol: string;
-  contractAddress: string;
-  hash: string;
-}
-
-export interface NFT {
-  name: string;
-  description: string;
-  image: string;
-  token: Token;
-}
+import { Token, NFT } from "@/models/SmartContract";
 
 export default defineComponent({
   components: {},
@@ -168,9 +154,13 @@ export default defineComponent({
     },
   },
   setup(props, context) {
-    const { contractAddress, openseaUrl, networkName } = ethereumConfig;
     const store = useStore();
     const account = computed(() => store.state.account);
+    const contractAddress = computed(
+      (): string => store.state.contractConfig.contractAddress
+    );
+    const openseaUrl = computed(() => store.state.contractConfig.openseaUrl);
+    const networkName = computed(() => store.state.contractConfig.networkName);
     const nName = computed(() => store.state.networkName);
     const nChainId = computed(() => store.state.chainId);
     const isSignedIn = computed(() => store.getters.isSignedIn);
@@ -183,6 +173,7 @@ export default defineComponent({
     const isBusy = ref("");
     const isContentShown = ref(false);
     const open = () => (isContentShown.value = true);
+    store.commit("setContractConfig", ethereumConfig.contracts[0]);
     onMounted(async () => {
       if (store.getters.hasMetaMask) {
         //for already connected user , re-conect,
@@ -203,15 +194,15 @@ export default defineComponent({
       store.commit("setChainId", chainId);
       contractInfo.value = await ethScan.fetch("account", {
         action: "tokennfttx",
-        contractaddress: contractAddress,
-        address: contractAddress,
+        contractaddress: contractAddress.value,
+        address: contractAddress.value,
         apikey: tmpKey,
       });
       console.log(contractInfo.value);
       if (account.value) {
         tokens.value = await ethScan.fetch("account", {
           action: "tokennfttx",
-          contractaddress: contractAddress,
+          contractaddress: contractAddress.value,
           address: account.value,
           apikey: tmpKey,
         });
@@ -288,7 +279,7 @@ export default defineComponent({
           store.state.ethereum
         );
         const contract = new ethers.Contract(
-          contractAddress,
+          contractAddress.value,
           nounsTokenJson.abi,
           provider
         );

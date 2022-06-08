@@ -19,9 +19,20 @@ export const nounsMapConfig = {
 };
 
 export const ethereumConfig = {
-  chainId: "0x4", // local
-  networkName: "Rinkeby",
-  contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
-  //contractAddress: "0xA409B4d308D6234b1E47b63ae1AEbE4fb5030D2a", old 0524version
-  openseaUrl: "https://testnets.opensea.io",
+  contracts:[
+    {
+      name:"NounsLove(testnets)",
+      chainId: "0x4", 
+      networkName: "Rinkeby",
+      contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
+      openseaUrl: "https://testnets.opensea.io/assets/rinkeby",
+    },
+    {
+      name:"NamedNoun(polygon)",
+      chainId: "0x89", 
+      networkName: "Polygon",
+      contractAddress: "0x2953399124F0cBB46d2CbACD8A89cF0599974963",
+      openseaUrl: "https://opensea.io/assets/matic",
+    },
+  ]
 };
