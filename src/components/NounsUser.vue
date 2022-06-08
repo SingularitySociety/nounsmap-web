@@ -100,11 +100,13 @@ export default defineComponent({
           }
           store.commit("setUser", user.user);
           store.commit("setUserType", user.userType);
+          isContentShown.value = false;
         } else {
           store.commit("setUserType", undefined);
           store.commit("setUser", null);
           user.userType = undefined;
           user.user = null;
+          isContentShown.value = true;
         }
       });
     });

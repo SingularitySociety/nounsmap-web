@@ -44,7 +44,7 @@ import { defineComponent, ref, onMounted, computed, Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
-import { doc, setDoc, getDoc, getDocs, DocumentData } from "firebase/firestore";
+import { doc, setDoc, getDoc, getDocs, DocumentData, collection } from "firebase/firestore";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
@@ -54,7 +54,6 @@ import { NFT } from "@/models/SmartContract";
 import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { nounsMapConfig } from "../config/project";
 import { photoPosted } from "@/utils/functions";
-import { collection } from "firebase/firestore";
 
 import { generateNewPhotoData } from "@/models/photo";
 import router from "@/router";
@@ -219,9 +218,6 @@ export default defineComponent({
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
-      if (route.params.photoId == null) {
-        showDemoIcons();
-      }
       processing.value = false;
       pLevel.value = 5;
       if (route.params.photoId != null) {
@@ -387,19 +383,6 @@ export default defineComponent({
           scaledSize: new mapInstance.value.maps.Size(80, 30),
         };
       }
-    };
-    const showDemoIcons = () => {
-      //update for demofor Demo
-      // 49, 34.5 is around Ukraine, demo photo about Ukraine crisis
-      mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
-      pins["demo"] = new Pin(mapInstance, mapObj, {
-        pid: null,
-        icon: defaultIcon(),
-        photoURL: require("@/assets/sample/pexels-11518762.jpg"),
-        lat: 47,
-        lng: 34.5,
-        visibility: true,
-      });
     };
     const loadUserPhotos = async () => {
       if (!user.value) {
