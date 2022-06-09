@@ -1,5 +1,6 @@
 export interface Token {
   tokenID: string;
+  dispalyID: string;
   tokenName: string;
   image: string;
 }

@@ -19,6 +19,7 @@
                     {{ contract.name }} : {{ contract.chainId }}
                   </option>
                 </select>
+                <br />
                 Account: {{ account }} <br />
                 chainID({{ nChainId }})
                 <br />
@@ -32,7 +33,7 @@
                   :value="token.tokenID"
                   :key="token.tokenID"
                 >
-                  {{ token.tokenID }} : {{ token.tokenName }}
+                  {{ token.displayID }} : {{ token.tokenName }}
                 </option>
               </select>
               <div v-if="nftstore" class="sm:flex">
@@ -228,8 +229,13 @@ export default defineComponent({
           return false;
         });
         tokens.value = target.map((nft: any) => {
+          const displayID =
+            nft.id.tokenId.length > 10
+              ? nft.id.tokenId.slice(0, 6) + "..." + nft.id.tokenId.slice(-4)
+              : nft.id.tokenId;
           return {
             tokenID: nft.id.tokenId,
+            displayID: displayID,
             tokenName: nft.title,
             image: nft.metadata.image,
           };
@@ -239,7 +245,14 @@ export default defineComponent({
       }
       console.log(tokens.value);
       if (nftstore?.value?.token?.tokenID) {
-        ownedTokenId.value = nftstore?.value?.token?.tokenID;
+        const selected = tokens.value.filter(
+          (token) => token.tokenID == nftstore?.value?.token?.tokenID
+        );
+        ownedTokenId.value = selected[0]
+          ? selected[0].tokenID
+          : tokens.value[0]
+          ? tokens.value[0].tokenID
+          : undefined;
       } else if (tokens.value[0]) {
         ownedTokenId.value = tokens.value[0].tokenID;
       }
@@ -325,6 +338,8 @@ export default defineComponent({
             contractAddress: contract.value.contractAddress,
             token: token,
           };
+        } else {
+          nft.value = undefined;
         }
       } catch (e) {
         //nft.value = "broken";
@@ -347,6 +362,11 @@ export default defineComponent({
       store.commit("setTokenContract", contract[0]);
       switchNetwork(contract[0].chainId);
     });
+    watch(nChainId, () => {
+      console.log(nChainId);
+      fetchNFT();
+    });
+
     return {
       hasMetaMask,
       validTokenContracts,
