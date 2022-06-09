@@ -1,7 +1,7 @@
 import { createStore } from "vuex";
 import { User } from "firebase/auth";
 import { startMonitoringMetamask } from "@/utils/MetaMask";
-import { NFT, tokenConfig } from "@/models/SmartContract";
+import { NFT, TokenContract } from "@/models/SmartContract";
 
 interface State {
   ethereum: any | null;
@@ -9,7 +9,7 @@ interface State {
   userType: string | undefined;
   networkName: string | null;
   chainId: string | null;
-  tokenConfig: tokenConfig | null;
+  tokenContract: TokenContract | null;
   account: undefined | null | string;
   nft: NFT | null;
 }
@@ -21,7 +21,7 @@ export default createStore<State>({
     userType: undefined,
     networkName: null,
     chainId: null,
-    tokenConfig: null,
+    tokenContract: null,
     account: undefined,
     nft: null,
   },
@@ -47,8 +47,8 @@ export default createStore<State>({
     setAccount(state: State, account) {
       state.account = account;
     },
-    settokenConfig(state: State, tokenConfig) {
-      state.tokenConfig = tokenConfig;
+    setTokenContract(state: State, tokenContract) {
+      state.tokenContract = tokenContract;
     },
     setNft(state: State, nft: NFT | null) {
       state.nft = nft;

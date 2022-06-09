@@ -19,7 +19,7 @@ export const nounsMapConfig = {
 };
 
 export const ethereumConfig = {
-  tokenConfigs:[
+  validTokenContracts:[
     {
       name:"NounsLove(testnets)",
       chainId: "0x4", 
