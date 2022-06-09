@@ -222,9 +222,16 @@ export default defineComponent({
             Number(nft.contract.address) ==
             Number(contract.value.contractAddress)
           ) {
-            return contract.value.filter
-              ? nft.metadata.external_link.includes(contract.value.filter)
-              : true;
+            if(contract.value.filter){
+              const base = ethers.BigNumber.from(contract.value.filter);
+              const target = ethers.BigNumber.from(nft.id.tokenId);
+              //opensea polygon ERC1155 uses 12 byte mask
+              const shift = contract.value.idmask*8; //8bit
+              console.log(base,target,base.shr(shift),target.shr(shift),shift );
+              return base.shr(shift).eq(target.shr(shift));
+            }else {
+              return true;
+            }
           }
           return false;
         });
