@@ -240,7 +240,8 @@ export default defineComponent({
             console.error(reason);
           });
       } else {
-        mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
+        // Tokyo
+        mapObj.value.setCenter(new mapInstance.value.maps.LatLng(35.6762, 139.6503));
       }
     });
 
