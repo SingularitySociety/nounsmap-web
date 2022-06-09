@@ -45,7 +45,7 @@
                       :href="`${contract.openseaUrl}/${contract.contractAddress}/${ownedTokenId}`"
                       target="_blank"
                     >
-                      <img :src="nftstore.image" class="w-full" />
+                      <img :src="nftstore.token.image" class="w-full" />
                     </a>
                   </div>
                 </div>
