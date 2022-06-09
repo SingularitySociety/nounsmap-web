@@ -2,8 +2,8 @@
   <transition>
     <div
       class="fixed container grid h-full w-full z-30 place-content-center bg-black bg-opacity-50"
-      v-if="isContentShown"
-      @close="isContentShown = false"
+      v-if="visibility"
+      @close="close"
     >
       <div
         class="bg-white flex-col mx-auto w-auto h-auto shadow-md rounded px-8 pt-6 pb-8 mb-4"
@@ -43,7 +43,7 @@
         </div>
         <div class="flex justify-end pt-4">
           <button
-            @click="isContentShown = false"
+            @click="close()"
             class="inline-block bg-gray-200 hover:bg-white rounded-full text-sm font-semibold text-gray-700 px-3 py-1"
             type="button"
           >
@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from "vue";
+import { computed, defineComponent, reactive, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
@@ -75,10 +75,12 @@ export default defineComponent({
     const store = useStore();
     const user = reactive<UserData>({ user: null, userType: undefined });
     const isContentShown = ref(false);
-    const open = () => (isContentShown.value = true);
+    const open = () => store.commit('setUserModalVisibility', true);
+    const close = () => store.commit('setUserModalVisibility', false);
     const selectView = ref(true);
     const twitterView = ref(false);
     const metaMaskView = ref(false);
+    const visibility = computed<boolean>(() => store.state.userModalVisibility);
 
     onMounted(async () => {
       auth.onAuthStateChanged((fbuser) => {
@@ -110,6 +112,9 @@ export default defineComponent({
       metaMaskView,
       user,
       open,
+      close,
+      visibility,
+      store
     };
   },
 });

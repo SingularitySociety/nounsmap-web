@@ -242,6 +242,7 @@ export default defineComponent({
       } else {
         // Tokyo
         mapObj.value.setCenter(new mapInstance.value.maps.LatLng(35.6762, 139.6503));
+        store.commit('setUserModalVisibility', true);
       }
     });
 

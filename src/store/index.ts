@@ -9,6 +9,7 @@ interface State {
   chainId: string | null;
   account: undefined | null | string;
   nft: NFT | null;
+  userModalVisibility: boolean;
 }
 
 export default createStore<State>({
@@ -19,6 +20,7 @@ export default createStore<State>({
     chainId: null,
     account: undefined,
     nft: null,
+    userModalVisibility: false
   },
   mutations: {
     setUser(state: State, user: User | null) {
@@ -39,6 +41,9 @@ export default createStore<State>({
     setNft(state: State, nft: NFT | null) {
       state.nft = nft;
     },
+    setUserModalVisibility(state: State, visibility: boolean) {
+      state.userModalVisibility = visibility;
+    }
   },
   getters: {
     isSignedIn: (state: State) => {
@@ -46,7 +51,7 @@ export default createStore<State>({
     },
     NFT: (state) => {
       return state.nft;
-    },
+    }
   },
   actions: {},
   modules: {},
