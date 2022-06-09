@@ -37,6 +37,39 @@ export const ChainIds = {
   Polygon: "0x89",
 };
 
+const ChainConfigs = {
+  Mainnet: {
+    chainId: ChainIds.Mainnet,
+    chainName: "Ethereum Mainnet",
+    rpcUrls: ["https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
+    nativeCurrency: {
+      decimals: 18,
+      name: "ETH",
+      symbol: "ETH",
+    },
+  },
+  Polygon: {
+    chainId: ChainIds.Polygon,
+    chainName: "Polygon Mainnet",
+    rpcUrls: ["https://polygon-rpc.com/"],
+    nativeCurrency: {
+      decimals: 18,
+      name: "Polygon",
+      symbol: "MATIC",
+    },
+  },
+  Rinkeby: {
+    chainId: ChainIds.RinkebyTestNet,
+    chainName: "Rinkeby",
+    rpcUrls: ["https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
+    nativeCurrency: {
+      decimals: 18,
+      name: "RIN",
+      symbol: "ETH",
+    },
+  },
+};
+
 export const initializeEthereum = () => {
   const setEthereum = () => {
     const ethereum = (window as any).ethereum;
@@ -95,7 +128,27 @@ export const switchNetwork = async (chainId: string) => {
       method: "wallet_switchEthereumChain",
       params: [{ chainId }],
     });
-  } catch (e) {
+  } catch (e: any) {
     console.log(e);
+    // This error code indicates that the chain has not been added to MetaMask.
+    if (e.code === 4902) {
+      const config =
+        chainId == ChainIds.Mainnet
+          ? ChainConfigs.Mainnet
+          : chainId == ChainIds.Polygon
+          ? ChainConfigs.Polygon
+          : chainId == ChainIds.RinkebyTestNet
+          ? ChainConfigs.Rinkeby
+          : console.error("not suppported chain:", chainId);
+      try {
+        await ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [config],
+        });
+      } catch (addError) {
+        console.error("cannot add", config);
+        // handle "add" error
+      }
+    }
   }
 };

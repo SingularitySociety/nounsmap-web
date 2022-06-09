@@ -3,6 +3,7 @@ export interface Token {
   tokenName: string;
   tokenSymbol: string;
   contractAddress: string;
+  image: string;
   hash: string;
 }
 
@@ -16,7 +17,7 @@ export interface NFT {
 export interface ContractConfig {
   name: string;
   chainId: string;
-  networkNamee: string;
   contractAddress: string;
   openseaUrl: string;
+  filter: string | null;
 }

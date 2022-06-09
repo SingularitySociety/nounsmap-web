@@ -9,9 +9,18 @@
           <div class="">
             <div class="mb-8">
               <p class="text-gray-700 overflow-hidden text-base">
-                {{ $t("message.youNeedNet", { networkName }) }}<br />
+                {{ $t("message.selectContract") }}:
+                <select v-model="contractName">
+                  <option
+                    v-for="contract in contractConfigs"
+                    :value="contract.name"
+                    :key="contract.name"
+                  >
+                    {{ contract.name }} : {{ contract.chainId }}
+                  </option>
+                </select>
                 Account: {{ account }} <br />
-                Network: {{ nName }} chainID({{ nChainId }})
+                chainID({{ nChainId }})
                 <br />
               </p>
             </div>
@@ -136,8 +145,9 @@ import { auth } from "@/utils/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
 import { UserData } from "@/components/NounsUser.vue";
-import { requestAccount } from "@/utils/MetaMask";
+import { requestAccount, switchNetwork, ChainIds } from "@/utils/MetaMask";
 import { Token, NFT } from "@/models/SmartContract";
+import axios, { AxiosRequestConfig } from "axios";
 
 export default defineComponent({
   components: {},
@@ -156,17 +166,18 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const account = computed(() => store.state.account);
+    const contract = computed(() => store.state.contractConfig);
     const contractAddress = computed(
       (): string => store.state.contractConfig.contractAddress
     );
     const openseaUrl = computed(() => store.state.contractConfig.openseaUrl);
-    const networkName = computed(() => store.state.contractConfig.networkName);
-    const nName = computed(() => store.state.networkName);
     const nChainId = computed(() => store.state.chainId);
     const isSignedIn = computed(() => store.getters.isSignedIn);
     const hasMetaMask = computed(() => store.getters.hasMetaMask);
     const nft = ref<NFT>();
     const nftstore = computed(() => store.state.nft);
+    const contractConfigs = ethereumConfig.contracts;
+    const contractName = ref();
     const ownedTokenId = ref();
     const contractInfo = ref();
     const tokens = ref<Array<Token>>([]);
@@ -185,33 +196,54 @@ export default defineComponent({
     });
     const fetchNFT = async () => {
       const provider = new ethers.providers.Web3Provider(store.state.ethereum);
-      const ethScan = new ethers.providers.EtherscanProvider("rinkeby");
-      const tmpKey = "WPHTZ9QQ5WXJRNCWNXC2B3AMPD6AWCWTXB";
-
       const { name, chainId } = await provider.getNetwork();
-      console.debug({ name }, { chainId });
-      store.commit("setNetworkName", name);
+      console.info({ name }, { chainId });
       store.commit("setChainId", chainId);
-      contractInfo.value = await ethScan.fetch("account", {
-        action: "tokennfttx",
-        contractaddress: contractAddress.value,
-        address: contractAddress.value,
-        apikey: tmpKey,
-      });
-      console.log(contractInfo.value);
-      if (account.value) {
-        tokens.value = await ethScan.fetch("account", {
-          action: "tokennfttx",
-          contractaddress: contractAddress.value,
-          address: account.value,
-          apikey: tmpKey,
+      console.log(contract.value, ChainIds);
+      const base =
+        Number(contract.value.chainId) == Number(ChainIds.Mainnet)
+          ? "https://eth-mainnet.alchemyapi.io/v2/"
+          : Number(contract.value.chainId) == Number(ChainIds.RinkebyTestNet)
+          ? "https://eth-rinkeby.alchemyapi.io/v2/"
+          : Number(contract.value.chainId) == Number(ChainIds.Polygon)
+          ? "https://polygon-mainnet.g.alchemy.com/v2/"
+          : "invalid";
+      const tmpkey = "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T";
+      var config = {
+        method: "get",
+        url: `${base}${tmpkey}/getNFTs/?owner=${account.value}`,
+      };
+      try {
+        const response = await axios(config);
+        console.log(response);
+        const target = response.data.ownedNfts.filter((nft: any) => {
+          console.log(nft.metadata.external_link);
+          if (
+            Number(nft.contract.address) ==
+            Number(contract.value.contractAddress)
+          ) {
+            return contract.value.filter
+              ? nft.metadata.external_link.includes(contract.value.filter)
+              : true;
+          }
+          return false;
         });
-        console.log(tokens.value);
-        if (nftstore?.value?.token?.tokenID) {
-          ownedTokenId.value = nftstore?.value?.token?.tokenID;
-        } else if (tokens.value[0]) {
-          ownedTokenId.value = tokens.value[0].tokenID;
-        }
+        tokens.value = target.map((nft: any) => {
+          return {
+            tokenID: nft.id.tokenId,
+            tokenName: nft.title,
+            contractAddress: nft.contract.address,
+            image: nft.metadata.image,
+          };
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      console.log(tokens.value);
+      if (nftstore?.value?.token?.tokenID) {
+        ownedTokenId.value = nftstore?.value?.token?.tokenID;
+      } else if (tokens.value[0]) {
+        ownedTokenId.value = tokens.value[0].tokenID;
       }
     };
     const connect = async () => {
@@ -275,23 +307,26 @@ export default defineComponent({
     };
     const updateNftData = async (tokenId: string) => {
       try {
-        const provider = new ethers.providers.Web3Provider(
-          store.state.ethereum
-        );
-        const contract = new ethers.Contract(
-          contractAddress.value,
-          nounsTokenJson.abi,
-          provider
-        );
-        const dataURI = await contract.functions.dataURI(tokenId);
-        const data = JSON.parse(
-          Buffer.from(dataURI[0].substring(29), "base64").toString("ascii")
-        );
-        nft.value = data;
-        if (nft.value) {
-          nft.value.token = tokens.value.filter(
-            (x: Token) => x.tokenID == tokenId
-          )[0];
+        const token = tokens.value.filter(
+          (x: Token) => x.tokenID == tokenId
+        )[0];
+        if (token) {
+          if (token.image.indexOf("http") == 0) {
+            const config = { responseType: "arraybuffer" };
+            const ret = await axios.get(
+              token.image,
+              config as AxiosRequestConfig
+            );
+            //const data = Buffer.from(ret.data , "base64").toString("ascii");
+            const data = Buffer.from(ret.data).toString("base64");
+            token.image = "data:image/svg+xml;base64," + data;
+          }
+          nft.value = {
+            name: "",
+            description: "",
+            image: token.image,
+            token: token,
+          };
         }
       } catch (e) {
         //nft.value = "broken";
@@ -306,15 +341,23 @@ export default defineComponent({
         store.commit("setNft", nft.value);
       }
     });
+    watch(contractName, () => {
+      const contract = contractConfigs.filter(
+        (a) => a.name == contractName.value
+      );
+      console.log(contractAddress.value, contract[0]);
+      store.commit("setContractConfig", contract[0]);
+      switchNetwork(contract[0].chainId);
+    });
     return {
       hasMetaMask,
       contractAddress,
+      contractConfigs,
+      contractName,
       contractInfo,
       openseaUrl,
-      networkName,
       account,
       nftstore,
-      nName,
       nChainId,
       tokens,
       ownedTokenId,

@@ -15,6 +15,7 @@ const lang = {
     processing: "Processing...",
     selectPhotoLocation:
       "Please move the map so that the location of the photo is in the center.",
+    selectContract: "Please select your NFT token contract",
     selectToken: "Please select your Token",
     youNeedMeta: "Please install MetaMask.",
     youNeedNet: "You need to connect to {networkName}",

@@ -22,16 +22,16 @@ export const ethereumConfig = {
     {
       name:"NounsLove(testnets)",
       chainId: "0x4", 
-      networkName: "Rinkeby",
       contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
       openseaUrl: "https://testnets.opensea.io/assets/rinkeby",
+      filter: null,
     },
     {
       name:"NamedNoun(polygon)",
       chainId: "0x89", 
-      networkName: "Polygon",
       contractAddress: "0x2953399124F0cBB46d2CbACD8A89cF0599974963",
       openseaUrl: "https://opensea.io/assets/matic",
+      filter: "https://nounsfes",
     },
   ]
 };

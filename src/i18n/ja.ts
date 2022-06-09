@@ -13,6 +13,7 @@ const lang = {
     processing: "送信中です...",
     selectPhotoLocation: "写真の場所が中心になるように地図を移動してください",
     spotPrivacyLevel: "場所のプライバシーレベル",
+    selectContract: "あなたのNFTの種類を選んでください",
     selectToken: "あなたのTokenを選んでください",
     youNeedMeta: "MetaMaskをインストールしてください.",
     youNeedNet: "{networkName}に切り替えてください",
