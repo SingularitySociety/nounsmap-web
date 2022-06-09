@@ -14,7 +14,7 @@ export interface NFT {
   token: Token;
 }
 
-export interface ContractConfig {
+export interface tokenConfig{
   name: string;
   chainId: string;
   contractAddress: string;

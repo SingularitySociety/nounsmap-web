@@ -12,7 +12,7 @@
                 {{ $t("message.selectContract") }}:
                 <select v-model="contractName">
                   <option
-                    v-for="contract in contractConfigs"
+                    v-for="contract in tokenConfigs"
                     :value="contract.name"
                     :key="contract.name"
                   >
@@ -166,17 +166,17 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const account = computed(() => store.state.account);
-    const contract = computed(() => store.state.contractConfig);
+    const contract = computed(() => store.state.tokenConfig);
     const contractAddress = computed(
-      (): string => store.state.contractConfig.contractAddress
+      (): string => store.state.tokenConfig.contractAddress
     );
-    const openseaUrl = computed(() => store.state.contractConfig.openseaUrl);
+    const openseaUrl = computed(() => store.state.tokenConfig.openseaUrl);
     const nChainId = computed(() => store.state.chainId);
     const isSignedIn = computed(() => store.getters.isSignedIn);
     const hasMetaMask = computed(() => store.getters.hasMetaMask);
     const nft = ref<NFT>();
     const nftstore = computed(() => store.state.nft);
-    const contractConfigs = ethereumConfig.contracts;
+    const tokenConfigs = ethereumConfig.tokenConfigs;
     const contractName = ref();
     const ownedTokenId = ref();
     const contractInfo = ref();
@@ -184,7 +184,7 @@ export default defineComponent({
     const isBusy = ref("");
     const isContentShown = ref(false);
     const open = () => (isContentShown.value = true);
-    store.commit("setContractConfig", ethereumConfig.contracts[0]);
+    store.commit("settokenConfig", ethereumConfig.tokenConfigs[0]);
     onMounted(async () => {
       if (store.getters.hasMetaMask) {
         //for already connected user , re-conect,
@@ -342,17 +342,17 @@ export default defineComponent({
       }
     });
     watch(contractName, () => {
-      const contract = contractConfigs.filter(
+      const contract = tokenConfigs.filter(
         (a) => a.name == contractName.value
       );
       console.log(contractAddress.value, contract[0]);
-      store.commit("setContractConfig", contract[0]);
+      store.commit("settokenConfig", contract[0]);
       switchNetwork(contract[0].chainId);
     });
     return {
       hasMetaMask,
       contractAddress,
-      contractConfigs,
+      tokenConfigs,
       contractName,
       contractInfo,
       openseaUrl,
