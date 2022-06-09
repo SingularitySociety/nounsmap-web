@@ -10,7 +10,7 @@
             <div class="mb-8">
               <p class="text-gray-700 overflow-hidden text-base">
                 {{ $t("message.selectContract") }}:
-                <select v-model="contractName">
+                <select v-model="ownedContract">
                   <option
                     v-for="contract in validTokenContracts"
                     :value="contract.name"
@@ -30,7 +30,7 @@
                 <option
                   v-for="token in tokens"
                   :value="token.tokenID"
-                  :key="token.hash"
+                  :key="token.tokenID"
                 >
                   {{ token.tokenID }} : {{ token.tokenName }}
                 </option>
@@ -42,7 +42,7 @@
                 >
                   <div class="relative w-full">
                     <a
-                      :href="`${openseaUrl}/${contractAddress}/${ownedTokenId}`"
+                      :href="`${contract.openseaUrl}/${contract.contractAddress}/${ownedTokenId}`"
                       target="_blank"
                     >
                       <img :src="nftstore.image" class="w-full" />
@@ -52,11 +52,10 @@
               </div>
             </div>
             <div v-else>
-              <div v-if="contractInfo">
+              <div v-if="contract">
                 {{
                   $t("message.youDonthaveToken", {
-                    tokenSymbol: contractInfo[0].tokenSymbol,
-                    tokenName: contractInfo[0].tokenName,
+                    tokenName: contract.name,
                   })
                 }}<br />
               </div>
@@ -156,7 +155,12 @@ export default defineComponent({
   },
   emits: {
     updated: (param: NFT) => {
-      if (param.image && param.token) {
+      if (
+        param.name &&
+        param.contractAddress &&
+        param.token &&
+        param.token.image
+      ) {
         return true;
       } else {
         return false;
@@ -167,19 +171,14 @@ export default defineComponent({
     const store = useStore();
     const account = computed(() => store.state.account);
     const contract = computed(() => store.state.tokenContract);
-    const contractAddress = computed(
-      (): string => store.state.tokenContract.contractAddress
-    );
-    const openseaUrl = computed(() => store.state.tokenContract.openseaUrl);
     const nChainId = computed(() => store.state.chainId);
     const isSignedIn = computed(() => store.getters.isSignedIn);
     const hasMetaMask = computed(() => store.getters.hasMetaMask);
     const nft = ref<NFT>();
     const nftstore = computed(() => store.state.nft);
     const validTokenContracts = ethereumConfig.validTokenContracts;
-    const contractName = ref();
+    const ownedContract = ref();
     const ownedTokenId = ref();
-    const contractInfo = ref();
     const tokens = ref<Array<Token>>([]);
     const isBusy = ref("");
     const isContentShown = ref(false);
@@ -232,7 +231,6 @@ export default defineComponent({
           return {
             tokenID: nft.id.tokenId,
             tokenName: nft.title,
-            contractAddress: nft.contract.address,
             image: nft.metadata.image,
           };
         });
@@ -322,9 +320,9 @@ export default defineComponent({
             token.image = "data:image/svg+xml;base64," + data;
           }
           nft.value = {
-            name: "",
+            name: contract.value.name,
             description: "",
-            image: token.image,
+            contractAddress: contract.value.contractAddress,
             token: token,
           };
         }
@@ -336,26 +334,24 @@ export default defineComponent({
     watch(ownedTokenId, async () => {
       console.log("ownedTokenId:", ownedTokenId.value);
       await updateNftData(ownedTokenId.value);
-      if (nft.value && nft.value.image) {
+      if (nft.value && nft.value.token.image) {
         context.emit("updated", nft.value as NFT);
         store.commit("setNft", nft.value);
       }
     });
-    watch(contractName, () => {
+    watch(ownedContract, () => {
       const contract = validTokenContracts.filter(
-        (a) => a.name == contractName.value
+        (a) => a.name == ownedContract.value
       );
-      console.log(contractAddress.value, contract[0]);
-      store.commit("settokenContract", contract[0]);
+      console.log(contract[0]);
+      store.commit("setTokenContract", contract[0]);
       switchNetwork(contract[0].chainId);
     });
     return {
       hasMetaMask,
-      contractAddress,
       validTokenContracts,
-      contractName,
-      contractInfo,
-      openseaUrl,
+      contract,
+      ownedContract,
       account,
       nftstore,
       nChainId,

@@ -309,9 +309,7 @@ export default defineComponent({
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
       if (nft.value) {
         const _id =
-          nft.value.token.tokenID +
-          nft.value.token.tokenSymbol +
-          nft.value.token.contractAddress;
+          nft.value.token.tokenID + nft.value.name + nft.value.contractAddress;
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
         const downloadURL = await getFileDownloadURL(storage_path);
         if (downloadURL) {
@@ -320,7 +318,7 @@ export default defineComponent({
           return [_id, downloadURL];
         } else {
           //new icon
-          const newURL = await uploadSVG(nft.value.image, storage_path);
+          const newURL = await uploadSVG(nft.value.token.image, storage_path);
           console.log("new icon", { newURL });
           return [_id, newURL];
         }
@@ -396,9 +394,9 @@ export default defineComponent({
     };
 
     const defaultIcon = () => {
-      if (nft.value && nft.value.image) {
+      if (nft.value && nft.value.token.image) {
         return {
-          url: nft.value.image,
+          url: nft.value.token.image,
           scaledSize: new mapInstance.value.maps.Size(80, 80),
         };
       } else {
