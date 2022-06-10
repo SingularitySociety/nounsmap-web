@@ -139,14 +139,14 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
-import nounsTokenJson from "@/abi/NounsToken";
+//import nounsTokenJson from "@/abi/NounsToken";
 import { ethereumConfig } from "@/config/project";
 import { auth } from "@/utils/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
 import { UserData } from "@/components/NounsUser.vue";
 import { requestAccount, switchNetwork, ChainIds } from "@/utils/MetaMask";
-import { Token, NFT } from "@/models/SmartContract";
+import { Token, NFT, AlchemyOwnedTokens } from "@/models/SmartContract";
 import axios, { AxiosRequestConfig } from "axios";
 
 export default defineComponent({
@@ -184,14 +184,25 @@ export default defineComponent({
     const isBusy = ref("");
     const isContentShown = ref(false);
     const open = () => (isContentShown.value = true);
-    store.commit("setTokenContract", ethereumConfig.validTokenContracts[0]);
     onMounted(async () => {
       if (store.getters.hasMetaMask) {
         //for already connected user , re-conect,
-        if (props.user?.userType == "wallet" && !account.value) {
-          await connect();
+        console.log(props);
+        if (props.user?.userType == "wallet") {
+          if (account.value) {
+            if (contract.value) {
+              ownedContract.value = contract.value.name;
+            } else {
+              store.commit(
+                "setTokenContract",
+                ethereumConfig.validTokenContracts[0]
+              );
+            }
+            await fetchNFT();
+          } else {
+            await connect();
+          }
         }
-        await fetchNFT();
       }
     });
     const fetchNFT = async () => {
@@ -216,26 +227,34 @@ export default defineComponent({
       try {
         const response = await axios(config);
         console.log(response);
-        const target = response.data.ownedNfts.filter((nft: any) => {
-          console.log(nft.metadata.external_link);
-          if (
-            Number(nft.contract.address) ==
-            Number(contract.value.contractAddress)
-          ) {
-            if(contract.value.filter){
-              const base = ethers.BigNumber.from(contract.value.filter);
-              const target = ethers.BigNumber.from(nft.id.tokenId);
-              //opensea polygon ERC1155 uses 12 byte mask
-              const shift = contract.value.idmask*8; //8bit
-              console.log(base,target,base.shr(shift),target.shr(shift),shift );
-              return base.shr(shift).eq(target.shr(shift));
-            }else {
-              return true;
+        const target = response.data.ownedNfts.filter(
+          (nft: AlchemyOwnedTokens) => {
+            console.log(nft.metadata.external_link);
+            if (
+              Number(nft.contract.address) ==
+              Number(contract.value.contractAddress)
+            ) {
+              if (contract.value.filter) {
+                const base = ethers.BigNumber.from(contract.value.filter);
+                const target = ethers.BigNumber.from(nft.id.tokenId);
+                //opensea polygon ERC1155 uses 12 byte mask
+                const shift = contract.value.idmask * 8; //8bit
+                console.log(
+                  base,
+                  target,
+                  base.shr(shift),
+                  target.shr(shift),
+                  shift
+                );
+                return base.shr(shift).eq(target.shr(shift));
+              } else {
+                return true;
+              }
             }
+            return false;
           }
-          return false;
-        });
-        tokens.value = target.map((nft: any) => {
+        );
+        tokens.value = target.map((nft: AlchemyOwnedTokens) => {
           const displayID =
             nft.id.tokenId.length > 10
               ? nft.id.tokenId.slice(0, 6) + "..." + nft.id.tokenId.slice(-4)

@@ -4,6 +4,7 @@ import { startMonitoringMetamask } from "@/utils/MetaMask";
 import { NFT, TokenContract } from "@/models/SmartContract";
 
 interface State {
+  //eslint-disable-next-line  @typescript-eslint/no-explicit-any
   ethereum: any | null;
   user: User | null | undefined;
   userType: string | undefined;
@@ -26,6 +27,17 @@ export default createStore<State>({
     nft: null,
   },
   mutations: {
+    load(state: State) {
+      const contract = localStorage.getItem("tokenContract");
+      if (contract) {
+        state.tokenContract = JSON.parse(contract);
+      }
+      const nft = localStorage.getItem("nft");
+      if (nft) {
+        state.nft = JSON.parse(nft);
+      }
+    },
+    //eslint-disable-next-line  @typescript-eslint/no-explicit-any
     setEthereum(state: State, ethereum: any | null) {
       state.ethereum = ethereum;
       if (state.ethereum) {
@@ -49,9 +61,11 @@ export default createStore<State>({
     },
     setTokenContract(state: State, tokenContract) {
       state.tokenContract = tokenContract;
+      localStorage.setItem("tokenContract", JSON.stringify(tokenContract));
     },
     setNft(state: State, nft: NFT | null) {
       state.nft = nft;
+      localStorage.setItem("nft", JSON.stringify(nft));
     },
   },
   getters: {

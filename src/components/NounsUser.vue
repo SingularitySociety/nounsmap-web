@@ -87,14 +87,9 @@ export default defineComponent({
     const debugmessage = ref<string>();
     initializeEthereum();
     onMounted(async () => {
-      if (localStorage.user) {
-        console.log(localStorage.user);
-        debugmessage.value = localStorage.user;
-      }
       auth.onAuthStateChanged((fbuser) => {
         console.log({ fbuser });
         if (fbuser) {
-          localStorage.user = JSON.stringify({ uid: fbuser.uid });
           user.user = fbuser;
           if (fbuser.providerData?.[0]?.providerId) {
             user.userType = fbuser.providerData?.[0].providerId;
