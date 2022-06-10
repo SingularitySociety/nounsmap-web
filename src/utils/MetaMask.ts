@@ -72,12 +72,12 @@ const ChainConfigs = {
 
 export const initializeEthereum = () => {
   const setEthereum = () => {
-    const ethereum = (window as any).ethereum;
+    const ethereum = window.ethereum;
     if (store.state.ethereum != ethereum) {
       store.commit("setEthereum", ethereum);
     }
   };
-  const ethereum = (window as any).ethereum;
+  const ethereum = window.ethereum;
   if (ethereum) {
     setEthereum();
   } else {
@@ -128,10 +128,11 @@ export const switchNetwork = async (chainId: string) => {
       method: "wallet_switchEthereumChain",
       params: [{ chainId }],
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.log(e);
+    const code = (e as { code: number }).code;
     // This error code indicates that the chain has not been added to MetaMask.
-    if (e.code === 4902) {
+    if (code === 4902) {
       const config =
         chainId == ChainIds.Mainnet
           ? ChainConfigs.Mainnet

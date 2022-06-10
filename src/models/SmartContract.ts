@@ -18,4 +18,19 @@ export interface TokenContract {
   contractAddress: string;
   openseaUrl: string;
   filter: string | null;
+  idmask: number;
+}
+
+export interface AlchemyOwnedTokens {
+  title: string;
+  id: {
+    tokenId: string;
+  };
+  contract: {
+    address: string;
+  };
+  metadata: {
+    external_link: string;
+    image: string;
+  };
 }
