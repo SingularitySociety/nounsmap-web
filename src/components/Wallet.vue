@@ -222,7 +222,7 @@ export default defineComponent({
           default:
             return "invalid";
         }
-      })(contract.value.chainID);
+      })(contract.value.chainId);
       const request = {
         method: "get",
         url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${account.value}`,
@@ -259,8 +259,8 @@ export default defineComponent({
         );
         tokens.value = target.map((nft: AlchemyOwnedTokens) => {
           const displayID =
-            nft.id.tokenId.length > 10
-              ? nft.id.tokenId.slice(0, 6) + "..." + nft.id.tokenId.slice(-4)
+            nft.id.tokenId.length > 18
+              ? nft.id.tokenId.slice(0, 6) + "..." + nft.id.tokenId.slice(-12)
               : nft.id.tokenId;
           return {
             tokenID: nft.id.tokenId,
