@@ -202,13 +202,12 @@ export default defineComponent({
         libraries: ["places", "visualization"],
       });
       const mapOptions = {
-        zoom: 3,
+        zoom: 6,
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       if (route.params.photoId == null) {
-        //disable demo icon make temporary default to NULL position
-        mapObj.value.setCenter(new mapInstance.value.maps.LatLng(0, 0));
+        showDemoIcons();
       }
       processing.value = false;
       pLevel.value = 5;
