@@ -37,7 +37,17 @@ export const ChainIds = {
   Polygon: "0x89",
 };
 
-const ChainConfigs = {
+interface ChainConfig {
+  chainId: string,
+  chainName: string,
+  rpcUrls:[string],
+  nativeCurrency:{
+    decimals: number,
+    name:string,
+    symbol:string
+  }
+}
+const ChainConfigs:{[key:string]:ChainConfig} = {
   Mainnet: {
     chainId: ChainIds.Mainnet,
     chainName: "Ethereum Mainnet",
@@ -58,7 +68,7 @@ const ChainConfigs = {
       symbol: "MATIC",
     },
   },
-  Rinkeby: {
+  RinkebyTestNet: {
     chainId: ChainIds.RinkebyTestNet,
     chainName: "Rinkeby",
     rpcUrls: ["https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
@@ -122,7 +132,7 @@ export const startMonitoringMetamask = () => {
 };
 
 export const switchNetwork = async (chainId: string) => {
-  const ethereum = store.state.ethereum;
+  const ethereum = store.state.ethereum;  
   try {
     await ethereum.request({
       method: "wallet_switchEthereumChain",
@@ -133,21 +143,17 @@ export const switchNetwork = async (chainId: string) => {
     const code = (e as { code: number }).code;
     // This error code indicates that the chain has not been added to MetaMask.
     if (code === 4902) {
-      const config =
-        chainId == ChainIds.Mainnet
-          ? ChainConfigs.Mainnet
-          : chainId == ChainIds.Polygon
-          ? ChainConfigs.Polygon
-          : chainId == ChainIds.RinkebyTestNet
-          ? ChainConfigs.Rinkeby
-          : console.error("not suppported chain:", chainId);
+      const configs = Object.values(ChainConfigs).filter((item)=> parseInt(item.chainId)==parseInt(chainId));
+      console.log(configs);      
       try {
-        await ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [config],
-        });
+        if(configs[0]){
+          await ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [configs[0]],
+          });
+        }
       } catch (addError) {
-        console.error("cannot add", config);
+        console.error("cannot add", configs[0]);
         // handle "add" error
       }
     }
