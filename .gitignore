@@ -23,6 +23,7 @@ pnpm-debug.log*
 *.sw?
 
 *~
+xxxbak*
 
 #firebase
 hosting*cache

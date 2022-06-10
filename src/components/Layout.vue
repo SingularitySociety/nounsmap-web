@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-//import { useStore } from "vuex";
+import { useStore } from "vuex";
 
 //import { auth } from "@/utils/firebase";
 //import { User } from "firebase/auth";
@@ -62,7 +62,8 @@ export default defineComponent({
   },
   setup() {
     // Saved for future changes. Currently causes error.
-    // const store = useStore();
+    const store = useStore();
+    store.commit("load");
     // const user = reactive<UserData>({ user: null });
     const nounsUserRef = ref<InstanceType<typeof NounsUser>>();
 
