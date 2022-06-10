@@ -15,6 +15,7 @@ export const nounsMapConfig = {
   region: "JP",
   hostName: "dev.nounsmap.com",
   introduction: "Comming soon. NOOOOOOOOOOOOOUNS map!!",
+  alchemy: "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T",
 };
 
 export const ethereumConfig = {

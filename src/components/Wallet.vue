@@ -140,7 +140,7 @@ import {
 import { useStore } from "vuex";
 import { ethers } from "ethers";
 //import nounsTokenJson from "@/abi/NounsToken";
-import { ethereumConfig } from "@/config/project";
+import { nounsMapConfig, ethereumConfig } from "@/config/project";
 import { auth } from "@/utils/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
@@ -211,21 +211,24 @@ export default defineComponent({
       console.info({ name }, { chainId });
       store.commit("setChainId", chainId);
       console.log(contract.value, ChainIds);
-      const base =
-        Number(contract.value.chainId) == Number(ChainIds.Mainnet)
-          ? "https://eth-mainnet.alchemyapi.io/v2/"
-          : Number(contract.value.chainId) == Number(ChainIds.RinkebyTestNet)
-          ? "https://eth-rinkeby.alchemyapi.io/v2/"
-          : Number(contract.value.chainId) == Number(ChainIds.Polygon)
-          ? "https://polygon-mainnet.g.alchemy.com/v2/"
-          : "invalid";
-      const tmpkey = "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T";
-      var config = {
+      const base = ((chainId) => {
+        switch (parseInt(chainId)) {
+          case parseInt(ChainIds.Mainnet):
+            return "https://eth-mainnet.alchemyapi.io/v2/";
+          case parseInt(ChainIds.RinkebyTestNet):
+            return "https://eth-rinkeby.alchemyapi.io/v2/";
+          case parseInt(ChainIds.Polygon):
+            return "https://polygon-mainnet.g.alchemy.com/v2/";
+          default:
+            return "invalid";
+        }
+      })(contract.value.chainID);
+      const request = {
         method: "get",
-        url: `${base}${tmpkey}/getNFTs/?owner=${account.value}`,
+        url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${account.value}`,
       };
       try {
-        const response = await axios(config);
+        const response = await axios(request);
         console.log(response);
         const target = response.data.ownedNfts.filter(
           (nft: AlchemyOwnedTokens) => {

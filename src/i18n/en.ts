@@ -19,8 +19,7 @@ const lang = {
     selectToken: "Please select your Token",
     youNeedMeta: "Please install MetaMask.",
     youNeedNet: "You need to connect to {networkName}",
-    youDonthaveToken:
-      'If you have tokens of "{tokenSymbol}":"{tokenName}", you can select it!',
+    youDonthaveToken: 'If you have tokens of "{tokenName}", you can select it!',
   },
   function: {
     requestAccount: "Connect MetaMask",

@@ -17,8 +17,7 @@ const lang = {
     selectToken: "あなたのTokenを選んでください",
     youNeedMeta: "MetaMaskをインストールしてください.",
     youNeedNet: "{networkName}に切り替えてください",
-    youDonthaveToken:
-      '"{tokenSymbol}":"{tokenName}"のNFTトークンを持っていると選択できます！',
+    youDonthaveToken: '"{tokenName}"のNFTトークンを持っていると選択できます！',
   },
   function: {
     requestAccount: "MetaMaskと接続",

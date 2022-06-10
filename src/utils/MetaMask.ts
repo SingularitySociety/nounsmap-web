@@ -38,16 +38,16 @@ export const ChainIds = {
 };
 
 interface ChainConfig {
-  chainId: string,
-  chainName: string,
-  rpcUrls:[string],
-  nativeCurrency:{
-    decimals: number,
-    name:string,
-    symbol:string
-  }
+  chainId: string;
+  chainName: string;
+  rpcUrls: [string];
+  nativeCurrency: {
+    decimals: number;
+    name: string;
+    symbol: string;
+  };
 }
-const ChainConfigs:{[key:string]:ChainConfig} = {
+const ChainConfigs: { [key: string]: ChainConfig } = {
   Mainnet: {
     chainId: ChainIds.Mainnet,
     chainName: "Ethereum Mainnet",
@@ -132,7 +132,7 @@ export const startMonitoringMetamask = () => {
 };
 
 export const switchNetwork = async (chainId: string) => {
-  const ethereum = store.state.ethereum;  
+  const ethereum = store.state.ethereum;
   try {
     await ethereum.request({
       method: "wallet_switchEthereumChain",
@@ -143,10 +143,12 @@ export const switchNetwork = async (chainId: string) => {
     const code = (e as { code: number }).code;
     // This error code indicates that the chain has not been added to MetaMask.
     if (code === 4902) {
-      const configs = Object.values(ChainConfigs).filter((item)=> parseInt(item.chainId)==parseInt(chainId));
-      console.log(configs);      
+      const configs = Object.values(ChainConfigs).filter(
+        (item) => parseInt(item.chainId) == parseInt(chainId)
+      );
+      console.log(configs);
       try {
-        if(configs[0]){
+        if (configs[0]) {
           await ethereum.request({
             method: "wallet_addEthereumChain",
             params: [configs[0]],

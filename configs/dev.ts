@@ -16,6 +16,7 @@ export const nounsMapConfig = {
   hostName: "dev.nounsmap.com",
   introduction: "Comming soon. NOOOOOOOOOOOOOUNS map!!",
   useEmulator: false,
+  alchemy: "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T",
 };
 
 export const ethereumConfig = {
