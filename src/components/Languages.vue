@@ -14,11 +14,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 
 import { languages } from "@/i18n/index";
+import { getBrowserLocale } from "@/i18n/utils";
 
 export default defineComponent({
   setup() {
@@ -27,6 +28,21 @@ export default defineComponent({
     const i18n = useI18n();
 
     const selectedValue = ref(i18n.locale.value);
+
+    onMounted(() => {
+      if (route.params.lang) {
+        return;
+      }
+      //make default lang as browser setting
+      const blocale = getBrowserLocale({ countryCodeOnly: true });
+      if(blocale) {
+        const locale = languages.includes(blocale) ? blocale : "en";
+        console.log(blocale, locale, route.params);
+        if (locale) {
+          i18n.locale.value = locale;
+        }
+      }
+    });
 
     const updateValue = (value: { target: HTMLSelectElement }) => {
       const basePath = (() => {

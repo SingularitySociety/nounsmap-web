@@ -2,12 +2,13 @@ import languages from "./languages";
 
 const lang = {
   menu: {
-    map: "Map",
-    upload: "写真Up",
-    user: "User",
+    map: "地図",
+    upload: "写真投稿",
+    user: "",
   },
   message: {
     hello: "こんにちは、世界",
+    selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
     processing: "送信中です...",

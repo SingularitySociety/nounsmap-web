@@ -57,8 +57,10 @@ import { photoPosted } from "@/utils/functions";
 import { collection } from "firebase/firestore";
 
 import { generateNewPhotoData } from "@/models/photo";
+import router from "@/router";
 
 interface PinData {
+  pid: string | null;
   icon?: google.maps.Icon;
   photoURL: string;
   lat: number;
@@ -109,6 +111,8 @@ class Pin {
         map: mapObj.value,
         shouldFocus: false,
       });
+      //const route = useRoute();
+      router.push({ name: "map", params: { photoId: data.pid } });
     });
     this._data = data;
   }
@@ -164,6 +168,7 @@ export default defineComponent({
     const mapInstance = ref();
     const mapObj = ref();
 
+    const pins: { [id: string]: Pin } = {};
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
@@ -180,21 +185,24 @@ export default defineComponent({
     });
     watch(
       () => route.path,
-      (cur) => {
-        console.log(cur);
-        if (route.path == "/user/photos") {
-          loadUserPhotos();
-        }
+      () => {
+        routeCheck();
       }
     );
     watch(user, (cur) => {
       console.log(cur);
-      if (route.path == "/user/photos") {
+      routeCheck();
+    });
+    const routeCheck = () => {
+      console.log(route.path, route.params);
+      if (route.path == "/map" || route.path == `/${route.params.lang}/map`) {
+        store.commit("setSelectedPhoto", null);
         loadUserPhotos();
       }
-    });
-
-    const pins: { [id: string]: Pin } = {};
+      if (route.params.photoId != null) {
+        loadPhoto(route.params.photoId as string);
+      }
+    };
 
     onMounted(async () => {
       const loader = new Loader({
@@ -212,38 +220,7 @@ export default defineComponent({
       processing.value = false;
       pLevel.value = 5;
       if (route.params.photoId != null) {
-        const photoDoc = getDoc(doc(db, `photos/${route.params.photoId}`));
-        photoDoc
-          .then((doc) => {
-            if (doc.exists()) {
-              const { iconURL, photoURL, lat, lng, zoom } = doc.data();
-              //default icon size is 80, 30
-              const size = iconURL.match(/red160px/)
-                ? new mapInstance.value.maps.Size(80, 30)
-                : new mapInstance.value.maps.Size(80, 80);
-              pins[doc.id] = new Pin(mapInstance, mapObj, {
-                icon: {
-                  url: iconURL,
-                  scaledSize: size,
-                },
-                photoURL,
-                lat,
-                lng,
-                visibility: true,
-              });
-              if (lat != null && lng != null) {
-                mapObj.value.setCenter(
-                  new mapInstance.value.maps.LatLng(lat, lng)
-                );
-              }
-              if (zoom != null) {
-                mapObj.value.setZoom(zoom);
-              }
-            }
-          })
-          .catch((reason) => {
-            console.error(reason);
-          });
+        loadPhoto(route.params.photoId as string);
       }
     });
 
@@ -261,6 +238,7 @@ export default defineComponent({
       mapObj.value.setCenter(location);
       mapObj.value.setZoom(12);
       pins["upload"] = new Pin(mapInstance, mapObj, {
+        pid: null,
         icon: defaultIcon(),
         photoURL: "",
         lat: location.lat,
@@ -410,6 +388,7 @@ export default defineComponent({
       // 49, 34.5 is around Ukraine, demo photo about Ukraine crisis
       mapObj.value.setCenter(new mapInstance.value.maps.LatLng(49, 34.5));
       pins["demo"] = new Pin(mapInstance, mapObj, {
+        pid: null,
         icon: defaultIcon(),
         photoURL: require("@/assets/sample/pexels-11518762.jpg"),
         lat: 47,
@@ -440,6 +419,7 @@ export default defineComponent({
         const _iconurl = iconURL ? iconURL : require("@/assets/red160px.png");
         const _hsize = iconURL ? 80 : 30;
         pins[doc.id] = new Pin(mapInstance, mapObj, {
+          pid: doc.id,
           icon: {
             url: _iconurl,
             scaledSize: new mapInstance.value.maps.Size(80, _hsize),
@@ -476,7 +456,45 @@ export default defineComponent({
         mapObj.value.fitBounds(latLngBounds);
       }
     };
-
+    const loadPhoto = (photoId: string) => {
+      if (pins[photoId]) {
+        pins[photoId].delete();
+      }
+      const photoDoc = getDoc(doc(db, `photos/${photoId}`));
+      photoDoc
+        .then((doc) => {
+          if (doc.exists()) {
+            store.commit("setSelectedPhoto", doc.data());
+            const { iconURL, photoURL, lat, lng, zoom } = doc.data();
+            //default icon size is 80, 30
+            const size = iconURL.match(/red160px/)
+              ? new mapInstance.value.maps.Size(80, 30)
+              : new mapInstance.value.maps.Size(80, 80);
+            pins[doc.id] = new Pin(mapInstance, mapObj, {
+              pid: doc.id,
+              icon: {
+                url: iconURL,
+                scaledSize: size,
+              },
+              photoURL,
+              lat,
+              lng,
+              visibility: true,
+            });
+            if (lat != null && lng != null) {
+              mapObj.value.setCenter(
+                new mapInstance.value.maps.LatLng(lat, lng)
+              );
+            }
+            if (zoom != null) {
+              mapObj.value.setZoom(zoom);
+            }
+          }
+        })
+        .catch((reason) => {
+          console.error(reason);
+        });
+    };
     return {
       mapRef,
       photoRef,

@@ -1,8 +1,9 @@
 <template>
   <div class="layout">
+    <PhotoView />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
-    <ul class="grid grid-cols-3 gap-4 justify-items-stretch">
+    <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
       <li class="mr-3">
         <router-link to="/user/photos">
           <div
@@ -32,7 +33,6 @@
       </li>
     </ul>
     <NounsUser ref="nounsUserRef" />
-
     <router-view />
     <Languages class="mt-4" />
   </div>
@@ -49,6 +49,7 @@ import { useI18nParam } from "@/i18n/utils";
 
 import Languages from "@/components/Languages.vue";
 import NounsUser from "@/components/NounsUser.vue";
+import PhotoView from "@/components/PhotoView.vue";
 
 //interface UserData {
 //  user: User | null;
@@ -59,6 +60,7 @@ export default defineComponent({
   components: {
     Languages,
     NounsUser,
+    PhotoView,
   },
   setup() {
     // Saved for future changes. Currently causes error.

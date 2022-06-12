@@ -5,35 +5,39 @@ import NotFound from "../components/NotFound.vue";
 
 import Account from "../views/Account.vue";
 import About from "../views/About.vue";
-
 import NounsMap from "../components/NounsMap.vue";
 
-const routeChildren: Array<RouteRecordRaw> = [
-  {
-    path: "",
-    component: NounsMap,
-  },
-  {
-    path: "user",
-    component: NounsMap,
-  },
-  {
-    path: "user/photos",
-    component: NounsMap,
-  },
-  {
-    path: "p/:photoId",
-    component: NounsMap,
-  },
-  {
-    path: "about",
-    component: About,
-  },
-  {
-    path: "account",
-    component: Account,
-  },
-];
+const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
+  return [
+    {
+      path: "",
+      component: NounsMap,
+    },
+    {
+      path: "user",
+      name: prefix + "user",
+      component: NounsMap,
+    },
+    {
+      path: "map",
+      name: prefix + "map",
+      component: NounsMap,
+    },
+    {
+      path: "p/:photoId",
+      name: prefix + "photo",
+      component: NounsMap,
+    },
+    {
+      path: "about",
+      component: About,
+    },
+    {
+      path: "account",
+      component: Account,
+    },
+  ];
+};
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -43,12 +47,12 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/:lang",
         component: Blank,
-        children: routeChildren,
+        children: routeChildren("loc"),
       },
       {
         path: "",
         component: Blank,
-        children: routeChildren,
+        children: routeChildren("noloc"),
       },
     ],
   },

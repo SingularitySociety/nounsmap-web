@@ -2,6 +2,7 @@ import { createStore } from "vuex";
 import { User } from "firebase/auth";
 import { startMonitoringMetamask } from "@/utils/MetaMask";
 import { NFT, TokenContract } from "@/models/SmartContract";
+import { PhotoPubData } from "@/models/photo";
 
 interface State {
   //eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -13,6 +14,7 @@ interface State {
   tokenContract: TokenContract | null;
   account: undefined | null | string;
   nft: NFT | null;
+  selectedPhoto: PhotoPubData | null;
 }
 
 export default createStore<State>({
@@ -25,6 +27,7 @@ export default createStore<State>({
     tokenContract: null,
     account: undefined,
     nft: null,
+    selectedPhoto: null,
   },
   mutations: {
     load(state: State) {
@@ -66,6 +69,9 @@ export default createStore<State>({
     setNft(state: State, nft: NFT | null) {
       state.nft = nft;
       localStorage.setItem("nft", JSON.stringify(nft));
+    },
+    setSelectedPhoto(state: State, photo: PhotoPubData | null) {
+      state.selectedPhoto = photo;
     },
   },
   getters: {
