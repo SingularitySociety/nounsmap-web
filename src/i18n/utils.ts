@@ -1,15 +1,31 @@
 import { App, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
+import { useRoute, Router } from "vue-router";
 
 export const i18nUtils = (app: App) => {
   app.config.globalProperties.localizedUrl = (path: string) => {
-    const lang = app.config.globalProperties.$route.params.lang;
+    const lang = app.config.globalProperties.$route.params?.lang;
     if (lang) {
       return `/${lang}` + path;
     }
     return path;
   };
+};
+
+export const getLocalePath = (router: Router, path: string) => {
+  const lang = router.currentRoute.value.params?.lang;
+  if (lang) {
+    return `/${lang}` + path;
+  }
+  return path;
+};
+
+export const getLocaleName = (router: Router, name: string) => {
+  const lang = router.currentRoute.value.params.lang;
+  if (lang) {
+    return "loc" + name;
+  }
+  return "noloc" + name;
 };
 
 export const useI18nParam = () => {

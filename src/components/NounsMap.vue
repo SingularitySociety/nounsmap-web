@@ -58,6 +58,7 @@ import { collection } from "firebase/firestore";
 
 import { generateNewPhotoData } from "@/models/photo";
 import router from "@/router";
+import { getLocalePath, getLocaleName } from "@/i18n/utils";
 
 interface PinData {
   pid: string | null;
@@ -111,8 +112,10 @@ class Pin {
         map: mapObj.value,
         shouldFocus: false,
       });
-      //const route = useRoute();
-      router.push({ name: "map", params: { photoId: data.pid } });
+      router.push({
+        name: getLocaleName(router, "photo"),
+        params: { photoId: data.pid },
+      });
     });
     this._data = data;
   }
@@ -195,7 +198,7 @@ export default defineComponent({
     });
     const routeCheck = () => {
       console.log(route.path, route.params);
-      if (route.path == "/map" || route.path == `/${route.params.lang}/map`) {
+      if (route.path == getLocalePath(router, "/map")) {
         store.commit("setSelectedPhoto", null);
         loadUserPhotos();
       }

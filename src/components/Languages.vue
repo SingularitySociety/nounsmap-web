@@ -35,7 +35,7 @@ export default defineComponent({
       }
       //make default lang as browser setting
       const blocale = getBrowserLocale({ countryCodeOnly: true });
-      if(blocale) {
+      if (blocale) {
         const locale = languages.includes(blocale) ? blocale : "en";
         console.log(blocale, locale, route.params);
         if (locale) {
