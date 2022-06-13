@@ -221,7 +221,7 @@ export default defineComponent({
         libraries: ["places", "visualization"],
       });
       const mapOptions = {
-        zoom: 6,
+        zoom: 10,
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
@@ -229,6 +229,11 @@ export default defineComponent({
       pLevel.value = 5;
       if (route.params.photoId != null) {
         loadPhoto(route.params.photoId as string);
+      } else {
+        //default tokyo
+        mapObj.value.setCenter(
+          new mapInstance.value.maps.LatLng(35.6762, 139.6503)
+        );
       }
     });
 
