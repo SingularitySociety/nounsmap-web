@@ -32,9 +32,6 @@
         {{ $t("message.processing") }}
       </button>
     </div>
-    <div>
-      <a :href="dataURL" v-if="dataURL"> {{ $t("message.shareTwitter") }} </a>
-    </div>
   </div>
   <div ref="mapRef" class="nouns-map" />
 </template>
@@ -59,7 +56,6 @@ import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import { NFT } from "@/models/SmartContract";
 
 import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
-import { nounsMapConfig } from "../config/project";
 import { photoPosted } from "@/utils/functions";
 
 import { generateNewPhotoData } from "@/models/photo";
@@ -158,6 +154,9 @@ class Pin {
 
     if (data.visibility != null) {
       this._marker.setVisible(data.visibility);
+      if (!data.visibility) {
+        this.hidePhoto();
+      }
     }
   }
   delete() {
@@ -362,8 +361,11 @@ export default defineComponent({
       });
       console.log({ _pid }, { data });
       if (data.success) {
-        dataURL.value = `https://twitter.com/intent/tweet?url=https://${nounsMapConfig.hostName}/p/${_pid}`;
-        console.debug(dataURL.value);
+        pins["upload"]?.delete();
+        router.push({
+          name: getLocaleName(router, "photo"),
+          params: { photoId: _pid },
+        });
       } else {
         console.error("failed");
       }
