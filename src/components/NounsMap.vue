@@ -44,7 +44,14 @@ import { defineComponent, ref, onMounted, computed, Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
-import { doc, setDoc, getDoc, getDocs, DocumentData, collection } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  DocumentData,
+  collection,
+} from "firebase/firestore";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 
