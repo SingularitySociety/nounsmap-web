@@ -14,7 +14,7 @@ interface State {
   tokenContract: TokenContract | null;
   account: undefined | null | string;
   nft: NFT | null;
-  selectedPhoto: PhotoPubData | null;
+  clickedPhoto: PhotoPubData | null;
 }
 
 export default createStore<State>({
@@ -27,7 +27,7 @@ export default createStore<State>({
     tokenContract: null,
     account: undefined,
     nft: null,
-    selectedPhoto: null,
+    clickedPhoto: null,
   },
   mutations: {
     load(state: State) {
@@ -70,8 +70,8 @@ export default createStore<State>({
       state.nft = nft;
       localStorage.setItem("nft", JSON.stringify(nft));
     },
-    setSelectedPhoto(state: State, photo: PhotoPubData | null) {
-      state.selectedPhoto = photo;
+    setClickedPhoto(state: State, photo: PhotoPubData | null) {
+      state.clickedPhoto = photo;
     },
   },
   getters: {

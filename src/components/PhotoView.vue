@@ -1,7 +1,7 @@
 <template>
   <div
     class="fixed grid grid-rows-5 grid-cols-5 grid-flow-col items-stretch h-screen w-screen z-40 justify-items-center bg-black bg-opacity-50"
-    v-if="selectedPhoto"
+    v-if="clickedPhoto"
   >
     <div
       class="col-start-4 row-span-1 col-span-1 flex justify-center items-center"
@@ -15,7 +15,7 @@
       <img
         ref="imageRef"
         class="rounded-md"
-        :src="selectedPhoto.photoURL"
+        :src="clickedPhoto.photoURL"
         alt="selected photo"
       />
     </div>
@@ -26,7 +26,7 @@
         <img
           ref="imageRef"
           class="h-32 lg:h-32 rounded-full p-2"
-          :src="selectedPhoto.iconURL"
+          :src="clickedPhoto.iconURL"
           alt="nft icon"
         />
         <a
@@ -34,7 +34,7 @@
             'https://twitter.com/intent/tweet?url=https://' +
             nounsMapConfig.hostName +
             '/p/' +
-            selectedPhoto.photoId
+            clickedPhoto.photoId
           "
           target="_blank"
           rel="noopener noreferrer"
@@ -57,16 +57,16 @@ export default defineComponent({
   emits: {},
   setup() {
     const store = useStore();
-    const selectedPhoto = computed({
-      get: () => store.state.selectedPhoto,
-      set: (val) => store.commit("setSelectedPhoto", val),
+    const clickedPhoto = computed({
+      get: () => store.state.clickedPhoto,
+      set: (val) => store.commit("setClickedPhoto", val),
     });
     const close = () => {
       router.push("../map");
     };
     return {
       nounsMapConfig,
-      selectedPhoto,
+      clickedPhoto,
       close,
     };
   },

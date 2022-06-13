@@ -99,7 +99,6 @@ class Pin {
     this._mapObj = mapObj;
     this._marker = new mapInstance.value.maps.Marker({
       icon: data.icon,
-      animation: google.maps.Animation.BOUNCE,
       position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
       map: mapObj.value,
       visible: data.visibility,
@@ -204,9 +203,9 @@ export default defineComponent({
       routeCheck();
     });
     const routeCheck = () => {
-      console.log(route.path, route.params);
+      console.log(route.path, route.params, pins);
       if (route.path == getLocalePath(router, "/map")) {
-        store.commit("setSelectedPhoto", null);
+        store.commit("setClickedPhoto", null);
         loadUserPhotos();
       }
       if (route.params.photoId != null) {
@@ -242,7 +241,7 @@ export default defineComponent({
         return;
       }
       photoLocal.value = info;
-      Object.values(pins).forEach((site) => site.update({ visibility: false }));
+      Object.values(pins).forEach((pin) => pin.update({ visibility: false }));
       mapObj.value.addListener("center_changed", () => {
         locationUpdated();
       });
@@ -362,6 +361,8 @@ export default defineComponent({
       console.log({ _pid }, { data });
       if (data.success) {
         pins["upload"]?.delete();
+        delete pins["upload"];
+        Object.values(pins).forEach((pin) => pin.update({ visibility: true }));
         router.push({
           name: getLocaleName(router, "photo"),
           params: { photoId: _pid },
@@ -403,11 +404,14 @@ export default defineComponent({
         console.error("no user info");
         return;
       }
+      if (0 < Object.keys(pins).length) {
+        console.log(pins);
+        //Object.keys(pins).forEach((key: string) => pins[key].showPhoto());
+        return;
+      }
       const photos = await getDocs(
         collection(db, `users/${user.value.uid}/public_photos/`)
       );
-      console.log(pins);
-      Object.keys(pins).forEach((key: string) => pins[key].delete());
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
@@ -459,14 +463,16 @@ export default defineComponent({
       }
     };
     const loadPhoto = (photoId: string) => {
+      console.log(photoId);
       if (pins[photoId]) {
         pins[photoId].delete();
       }
+      Object.values(pins).forEach((pin) => pin.hidePhoto());
       const photoDoc = getDoc(doc(db, `photos/${photoId}`));
       photoDoc
         .then((doc) => {
           if (doc.exists()) {
-            store.commit("setSelectedPhoto", doc.data());
+            store.commit("setClickedPhoto", doc.data());
             const { iconURL, photoURL, lat, lng, zoom } = doc.data();
             //default icon size is 80, 30
             const size = iconURL.match(/red160px/)
