@@ -112,10 +112,12 @@ class Pin {
         map: mapObj.value,
         shouldFocus: false,
       });
-      router.push({
-        name: getLocaleName(router, "photo"),
-        params: { photoId: data.pid },
-      });
+      if (data.pid) {
+        router.push({
+          name: getLocaleName(router, "photo"),
+          params: { photoId: data.pid },
+        });
+      }
     });
     this._data = data;
   }
