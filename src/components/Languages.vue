@@ -38,9 +38,7 @@ export default defineComponent({
       if (blocale) {
         const locale = languages.includes(blocale) ? blocale : "en";
         console.log(blocale, locale, route.params);
-        if (locale) {
-          i18n.locale.value = locale;
-        }
+        i18n.locale.value = locale;
       }
     });
 

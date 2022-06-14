@@ -51,13 +51,11 @@ import {
 } from "firebase/firestore";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
-
+import { defaultMapConfig, privacyCircleConfig } from "@/config/project";
 import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import { NFT } from "@/models/SmartContract";
-
 import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
-
 import { generateNewPhotoData } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
@@ -215,22 +213,24 @@ export default defineComponent({
 
     onMounted(async () => {
       const loader = new Loader({
-        apiKey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
+        apiKey: defaultMapConfig.mapkey,
         libraries: ["places", "visualization"],
       });
       const mapOptions = {
-        zoom: 10,
+        zoom: defaultMapConfig.zoom,
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       processing.value = false;
-      pLevel.value = 5;
+      pLevel.value = privacyCircleConfig.pLevel;
       if (route.params.photoId != null) {
         loadPhoto(route.params.photoId as string);
       } else {
-        //default tokyo
         mapObj.value.setCenter(
-          new mapInstance.value.maps.LatLng(35.6762, 139.6503)
+          new mapInstance.value.maps.LatLng(
+            defaultMapConfig.lan,
+            defaultMapConfig.lng
+          )
         );
       }
     });
@@ -273,11 +273,11 @@ export default defineComponent({
         return;
       }
       locationCircle = new google.maps.Circle({
-        strokeColor: "#FF0000",
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: "#FF0000",
-        fillOpacity: 0.35,
+        strokeColor: privacyCircleConfig.color,
+        strokeOpacity: privacyCircleConfig.strokeOpacity,
+        strokeWeight: privacyCircleConfig.strokeWeight,
+        fillColor: privacyCircleConfig.color,
+        fillOpacity: privacyCircleConfig.fillOpacity,
         map: mapObj.value,
         center: mapObj.value.getCenter(),
         radius: privacyLevel,
@@ -289,7 +289,10 @@ export default defineComponent({
         return degree;
       } else {
         return (
-          degree + (pLevel.value / 10 + (Math.random() % pLevel.value)) * 0.001
+          degree +
+          (pLevel.value * privacyCircleConfig.baseShiftRate +
+            (Math.random() % pLevel.value)) *
+            privacyCircleConfig.kmToDeg
         );
       }
     };
