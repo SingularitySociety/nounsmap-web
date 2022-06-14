@@ -19,6 +19,23 @@ export const nounsMapConfig = {
   alchemy: "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T",
 };
 
+export const defaultMapConfig = {
+  lan: 35.6762, //tokyo
+  lng: 139.6503, //tokyo
+  zoom: 10, //for kanto area
+  mapkey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
+};
+
+export const privacyCircleConfig = {
+  pLevel: 5, //about 5km
+  color: "#FF0000",
+  strokeOpacity: 0.8,
+  strokeWeight: 2,
+  fillOpacity: 0.35,
+  baseShiftRate: 0.1,
+  kmToDeg: 1 / 50, //about 1degree = 0-111km
+};
+
 export const ethereumConfig = {
   validTokenContracts: [
     {
