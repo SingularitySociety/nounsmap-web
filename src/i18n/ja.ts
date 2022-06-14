@@ -8,6 +8,7 @@ const lang = {
   },
   message: {
     hello: "こんにちは、世界",
+    pleasesignin: "ログイン方法を選んでください",
     selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",

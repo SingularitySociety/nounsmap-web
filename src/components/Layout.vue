@@ -1,6 +1,8 @@
 <template>
   <div class="layout">
     <PhotoView />
+    <NounsUser />
+    <GuideLogin ref="guideLogin" />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
     <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
@@ -21,7 +23,7 @@
           {{ $t("menu.upload") }}</a
         >
       </li>
-      <li class="mr-3" @click="nounsUserRef?.open()">
+      <li class="mr-3">
         <router-link :to="localizedUrl(`/user`)">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
@@ -32,28 +34,23 @@
         </router-link>
       </li>
     </ul>
-    <NounsUser ref="nounsUserRef" />
     <router-view />
     <Languages class="mt-4" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import router from "@/router";
 import { useStore } from "vuex";
-
-//import { auth } from "@/utils/firebase";
-//import { User } from "firebase/auth";
-
-import { useI18nParam } from "@/i18n/utils";
+import {getLocalePath, useI18nParam } from "@/i18n/utils";
+import { auth } from "@/utils/firebase";
 
 import Languages from "@/components/Languages.vue";
 import NounsUser from "@/components/NounsUser.vue";
 import PhotoView from "@/components/PhotoView.vue";
-
-//interface UserData {
-//  user: User | null;
-//}
+import GuideLogin from "@/components/GuideLogin.vue";
 
 export default defineComponent({
   name: "AppLayout",
@@ -61,34 +58,42 @@ export default defineComponent({
     Languages,
     NounsUser,
     PhotoView,
+    GuideLogin,
   },
   setup() {
-    // Saved for future changes. Currently causes error.
+    const route = useRoute();
     const store = useStore();
     store.commit("load");
-    // const user = reactive<UserData>({ user: null });
-    const nounsUserRef = ref<InstanceType<typeof NounsUser>>();
+    const user = computed(() => store.state.user);
+    const guideLogin = ref();
+    let isShownGuideLogin = false;
+    onMounted(() =>{
+      auth.onAuthStateChanged((fbuser) => {
+        routeCheck();
+      });
+    });
+    watch(
+      () => route.path,
+      () => {
+        routeCheck();
+      }
+    );
+    const routeCheck = ()=>{
+      if (route.path == getLocalePath(router, "/map")) {
+        //for not sign in user (isShown stored to memory, so if reloaded show again.)
+        if(!user.value && !isShownGuideLogin){
+          console.log("guideOpen");
+          guideLogin.value.open();
+          isShownGuideLogin=true;
+        }
+      }
+
+    }
 
     useI18nParam();
-
-    // Saved for future changes. Currently causes error.
-    // onMounted(() => {
-    //   auth.onAuthStateChanged((fbuser) => {
-    //     if (fbuser) {
-    //       console.log("authStateChanged:");
-    //       user.user = fbuser;
-    //       store.commit("setUser", fbuser);
-    //     } else {
-    //       store.commit("setUser", null);
-    //     }
-    //   });
-    // });
-
     return {
-      nounsUserRef,
+      guideLogin
     };
-    //   user,
-    // };
   },
 });
 </script>

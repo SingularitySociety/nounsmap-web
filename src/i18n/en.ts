@@ -8,6 +8,7 @@ const lang = {
   },
   message: {
     hello: "hello world",
+    pleasesignin: "Please SignIn by",
     selectImage: "Select image",
     uploadImage: "Upload Image!",
     spotPrivacyLevel: "SpotPrivacyLevel",
