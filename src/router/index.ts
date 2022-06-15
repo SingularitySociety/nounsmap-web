@@ -11,7 +11,7 @@ const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
   return [
     {
       path: "",
-      component: NounsMap,
+      redirect: "map",
     },
     {
       path: "user",

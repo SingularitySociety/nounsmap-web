@@ -82,7 +82,6 @@ export default defineComponent({
       if (route.path == getLocalePath(router, "/map")) {
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if(!user.value && !isShownGuideLogin){
-          console.log("guideOpen");
           guideLogin.value.open();
           isShownGuideLogin=true;
         }

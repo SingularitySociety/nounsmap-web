@@ -8,6 +8,7 @@ const lang = {
   },
   message: {
     hello: "hello world",
+    guidesignin: "You can share(Tweet) photo with maps, Try it now!",
     pleasesignin: "Please SignIn by",
     selectImage: "Select image",
     uploadImage: "Upload Image!",
@@ -28,6 +29,7 @@ const lang = {
     signinTwitter: "SignIn(Twitter)",
     signinWallet: "SignIn(Wallet)",
     signout: "SignOut",
+    trynow: "Start!",
   },
   languages,
 };

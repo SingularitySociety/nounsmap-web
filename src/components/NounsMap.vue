@@ -404,7 +404,7 @@ export default defineComponent({
     };
     const loadUserPhotos = async () => {
       if (!user.value) {
-        console.error("no user info");
+        console.info("no user info");
         return;
       }
       if (0 < Object.keys(pins).length) {

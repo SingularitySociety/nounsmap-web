@@ -8,6 +8,7 @@ const lang = {
   },
   message: {
     hello: "こんにちは、世界",
+    guidesignin: "地図情報付きの写真を簡単にTwitterで共有できます！  今すぐ試してみませんか？",
     pleasesignin: "ログイン方法を選んでください",
     selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
@@ -27,6 +28,7 @@ const lang = {
     signinTwitter: "ログイン(Twitter)",
     signinWallet: "ログイン(Wallet)",
     signout: "ログアウト",
+    trynow: "使ってみる",
   },
   languages,
 };

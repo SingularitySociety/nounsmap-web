@@ -10,16 +10,17 @@
       <i class="text-6xl material-icons text-white mr-2">cancel</i>
     </div>
     <div
-      class="row-start-2 col-start-2 col-span-3 row-span-3 col-end-5 justify-center items-center font-mono"
+      class="row-start-2 col-start-2 col-span-3 row-span-3 col-end-5 justify-center items-center font-mono text-2xl text-white"
     >
-    初めての人はログインしてね。ここを押してね。
-    </div>
-    <div
-      class="row-start-5 col-start-2 col-span-2 row-span-1 shrink-0 py-2 flex justify-center items-center"
-    >
-      <div class="flex flex-column items-center">
-
-      
+    <div class="flex flex-col items-stretch md:items-center">
+     {{ $t("message.guidesignin") }}
+     <br><br>
+      <button
+        @click="gotoLogin"
+        class="bg-green-800 hover:bg-green-100 text-white md:w-2/3 justify-center font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+      >
+        {{ $t("function.trynow") }}
+      </button>
       </div>
     </div>
   </div>
@@ -27,8 +28,9 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useStore } from "vuex";
-import { nounsMapConfig } from "@/config/project";
 import router from "@/router";
+import { getLocaleName } from "@/i18n/utils";
+
 
 export default defineComponent({
   emits: {},
@@ -42,11 +44,17 @@ export default defineComponent({
     const open = () => {
       isShow.value = true;
     };
+    const gotoLogin = () => {
+        isShow.value = false;
+        router.push({
+          name: getLocaleName(router, "user"),
+        });
+    };
     return {
-      nounsMapConfig,
       clickedPhoto,
       isShow,
       open,
+      gotoLogin,
     };
   },
 });
