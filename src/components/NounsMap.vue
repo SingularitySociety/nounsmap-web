@@ -415,6 +415,12 @@ export default defineComponent({
       const photos = await getDocs(
         collection(db, `users/${user.value.uid}/public_photos/`)
       );
+      if (photos.size) {
+        store.commit("setUserPhotoState", "exist");
+      } else {
+        store.commit("setUserPhotoState", "empty");
+        return;
+      }
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());

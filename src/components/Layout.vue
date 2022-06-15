@@ -3,6 +3,7 @@
     <PhotoView />
     <NounsUser />
     <GuideLogin ref="guideLogin" />
+    <GuidePhoto ref="guidePhoto" />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
     <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
@@ -44,13 +45,14 @@ import { defineComponent, ref, watch, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import router from "@/router";
 import { useStore } from "vuex";
-import {getLocalePath, useI18nParam } from "@/i18n/utils";
+import { getLocalePath, useI18nParam } from "@/i18n/utils";
 import { auth } from "@/utils/firebase";
 
 import Languages from "@/components/Languages.vue";
 import NounsUser from "@/components/NounsUser.vue";
 import PhotoView from "@/components/PhotoView.vue";
 import GuideLogin from "@/components/GuideLogin.vue";
+import GuidePhoto from "@/components/GuidePhoto.vue";
 
 export default defineComponent({
   name: "AppLayout",
@@ -59,16 +61,20 @@ export default defineComponent({
     NounsUser,
     PhotoView,
     GuideLogin,
+    GuidePhoto,
   },
   setup() {
     const route = useRoute();
     const store = useStore();
     store.commit("load");
     const user = computed(() => store.state.user);
+    const userPhotoState = computed(() => store.state.userPhotoState);
     const guideLogin = ref();
     let isShownGuideLogin = false;
-    onMounted(() =>{
-      auth.onAuthStateChanged((fbuser) => {
+    const guidePhoto = ref();
+    let isShownGuidePhoto = false;
+    onMounted(() => {
+      auth.onAuthStateChanged(() => {
         routeCheck();
       });
     });
@@ -78,20 +84,33 @@ export default defineComponent({
         routeCheck();
       }
     );
-    const routeCheck = ()=>{
+    watch(userPhotoState, () => {
+      console.log("userPhoto:", userPhotoState.value);
+      routeCheck();
+    });
+    const routeCheck = () => {
       if (route.path == getLocalePath(router, "/map")) {
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
-        if(!user.value && !isShownGuideLogin){
+        if (!user.value && !isShownGuideLogin) {
           guideLogin.value.open();
-          isShownGuideLogin=true;
+          isShownGuideLogin = true;
+        }
+        if (
+          user.value &&
+          userPhotoState.value == "empty" &&
+          !isShownGuidePhoto
+        ) {
+          //for not photo uploaded (isShown stored to memory, so if reloaded show again.)
+          guidePhoto.value.open();
+          isShownGuidePhoto = true;
         }
       }
-
-    }
+    };
 
     useI18nParam();
     return {
-      guideLogin
+      guideLogin,
+      guidePhoto,
     };
   },
 });

@@ -9,6 +9,8 @@ const lang = {
   message: {
     hello: "hello world",
     guidesignin: "You can share(Tweet) photo with maps, Try it now!",
+    guidephoto:
+      "Click on the above button to upload your photos. Or try it with following button now!",
     pleasesignin: "Please SignIn by",
     selectImage: "Select image",
     uploadImage: "Upload Image!",
@@ -30,6 +32,7 @@ const lang = {
     signinWallet: "SignIn(Wallet)",
     signout: "SignOut",
     trynow: "Start!",
+    tryphoto: "Upload now!",
   },
   languages,
 };

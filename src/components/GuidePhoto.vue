@@ -13,13 +13,15 @@
       class="row-start-2 col-start-2 col-span-3 row-span-3 col-end-5 justify-center items-center font-mono text-2xl text-white"
     >
       <div class="flex flex-col items-stretch md:items-center">
-        {{ $t("message.guidesignin") }}
+        Photo あげようよ
+        {{ $t("message.guidephoto") }}
+
         <br /><br />
         <button
-          @click="gotoLogin"
+          @click="gotoPhotoSelect"
           class="bg-green-800 hover:bg-green-100 text-white md:w-2/3 justify-center font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         >
-          {{ $t("function.trynow") }}
+          {{ $t("function.tryphoto") }}
         </button>
       </div>
     </div>
@@ -43,7 +45,7 @@ export default defineComponent({
     const open = () => {
       isShow.value = true;
     };
-    const gotoLogin = () => {
+    const gotoPhotoSelect = () => {
       isShow.value = false;
       router.push({
         name: getLocaleName(router, "user"),
@@ -53,7 +55,7 @@ export default defineComponent({
       clickedPhoto,
       isShow,
       open,
-      gotoLogin,
+      gotoPhotoSelect,
     };
   },
 });

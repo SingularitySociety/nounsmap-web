@@ -4,11 +4,14 @@ import { startMonitoringMetamask } from "@/utils/MetaMask";
 import { NFT, TokenContract } from "@/models/SmartContract";
 import { PhotoPubData } from "@/models/photo";
 
+export type UserPhotoState = "checking" | "empty" | "exist";
+
 interface State {
   //eslint-disable-next-line  @typescript-eslint/no-explicit-any
   ethereum: any | null;
   user: User | null | undefined;
   userType: string | undefined;
+  userPhotoState: UserPhotoState;
   networkName: string | null;
   chainId: string | null;
   tokenContract: TokenContract | null;
@@ -22,6 +25,7 @@ export default createStore<State>({
     ethereum: null,
     user: undefined,
     userType: undefined,
+    userPhotoState: "checking",
     networkName: null,
     chainId: null,
     tokenContract: null,
@@ -52,6 +56,9 @@ export default createStore<State>({
     },
     setUserType(state: State, userType: string | undefined) {
       state.userType = userType;
+    },
+    setUserPhotoState(state: State, userPhotoState: UserPhotoState) {
+      state.userPhotoState = userPhotoState;
     },
     setChainId(state: State, chainId: string | null) {
       state.chainId = chainId;
