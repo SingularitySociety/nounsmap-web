@@ -26,20 +26,14 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, computed, ref } from "vue";
-import { useStore } from "vuex";
+import { defineComponent, ref } from "vue";
 import router from "@/router";
 import { getLocaleName } from "@/i18n/utils";
 
 export default defineComponent({
   emits: {},
   setup() {
-    const store = useStore();
     const isShow = ref();
-    const clickedPhoto = computed({
-      get: () => store.state.clickedPhoto,
-      set: (val) => store.commit("setClickedPhoto", val),
-    });
     const open = () => {
       isShow.value = true;
     };
@@ -50,7 +44,6 @@ export default defineComponent({
       });
     };
     return {
-      clickedPhoto,
       isShow,
       open,
       gotoLogin,

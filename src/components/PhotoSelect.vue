@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-2 py-4">
+  <div v-if="isShow" class="flex flex-col items-center mx-auto px-2 py-4">
     <canvas ref="resized" width="600" height="600" v-if="false" />
     <span class="sr-only">{{ $t("message.selectImage") }}</span>
     <input
@@ -20,17 +20,12 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { resizeImage } from "@/utils/image";
+import { defineComponent, onMounted, ref, watch } from "vue";
 import exifr from "exifr";
 import heic2any from "heic2any";
-
-export interface PhotoInfo {
-  file: File | null;
-  size: { w: number; h: number } | null;
-  resizedBlob: Blob | null;
-  location: { lat: number; lng: number } | null;
-}
+import { resizeImage } from "@/utils/image";
+import { PhotoInfo } from "@/models/photo";
+import store from "@/store";
 
 export default defineComponent({
   emits: {
@@ -48,12 +43,15 @@ export default defineComponent({
     },
   },
   setup(_, context) {
+    const isShow = ref<boolean>();
     const fileInput = ref();
     const previewImage = ref();
     const imageRef = ref();
     const resized = ref();
     let photoInfo = {} as PhotoInfo;
-
+    onMounted(() => {
+      window.onload;
+    });
     const selectImage = () => {
       fileInput.value.click();
     };
@@ -78,6 +76,7 @@ export default defineComponent({
           fileInput.value.value = "";
           previewImage.value = "";
           context.emit("selected", null);
+          store.commit("setUploadPhoto", null);
         }
       }
     };
@@ -127,8 +126,34 @@ export default defineComponent({
       }
       photoInfo.file = files[0];
       context.emit("selected", photoInfo);
+      store.commit("setUploadPhoto", photoInfo);
+    };
+    const show = () => {
+      isShow.value = true;
+      if (fileInput.value) {
+        fileInput.value.disabled = false;
+      }
+    };
+    watch(fileInput, () => {
+      console.log(fileInput.value);
+      fileInput.value?.click();
+    });
+    const hide = () => {
+      isShow.value = false;
+      if (fileInput.value) {
+        fileInput.value.value = "";
+        previewImage.value = "";
+        context.emit("selected", null);
+        store.commit("setUploadPhoto", null);
+      }
+    };
+    const disable = () => {
+      if (fileInput.value) {
+        fileInput.value.disabled = true;
+      }
     };
     return {
+      isShow,
       fileInput,
       imageRef,
       previewImage,
@@ -136,6 +161,9 @@ export default defineComponent({
       selectImage,
       pickFile,
       onImageLoad,
+      show,
+      hide,
+      disable,
     };
   },
 });

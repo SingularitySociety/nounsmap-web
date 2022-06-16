@@ -13,7 +13,6 @@
       class="row-start-2 col-start-2 col-span-3 row-span-3 col-end-5 justify-center items-center font-mono text-2xl text-white"
     >
       <div class="flex flex-col items-stretch md:items-center">
-        Photo あげようよ
         {{ $t("message.guidephoto") }}
 
         <br /><br />
@@ -28,31 +27,23 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, computed, ref } from "vue";
-import { useStore } from "vuex";
-import router from "@/router";
-import { getLocaleName } from "@/i18n/utils";
+import { defineComponent, ref } from "vue";
+import PhotoSelect from "@/components/PhotoSelect.vue";
 
 export default defineComponent({
-  emits: {},
-  setup() {
-    const store = useStore();
+  props: {
+    photoSelect: PhotoSelect,
+  },
+  setup(props) {
     const isShow = ref();
-    const clickedPhoto = computed({
-      get: () => store.state.clickedPhoto,
-      set: (val) => store.commit("setClickedPhoto", val),
-    });
     const open = () => {
       isShow.value = true;
     };
     const gotoPhotoSelect = () => {
       isShow.value = false;
-      router.push({
-        name: getLocaleName(router, "user"),
-      });
+      props.photoSelect?.show();
     };
     return {
-      clickedPhoto,
       isShow,
       open,
       gotoPhotoSelect,

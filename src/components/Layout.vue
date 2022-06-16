@@ -1,9 +1,9 @@
 <template>
   <div class="layout">
-    <PhotoView />
     <NounsUser />
+    <PhotoView />
     <GuideLogin ref="guideLogin" />
-    <GuidePhoto ref="guidePhoto" />
+    <GuidePhoto ref="guidePhoto" :photoSelect="photoSelect" />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
     <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
@@ -18,8 +18,8 @@
       </li>
       <li class="mr-3">
         <a
-          class="cursor-not-allowed flex justify-center items-center border border-white rounded hover:border-gray-200 text-gray-500 hover:bg-gray-200 py-2 px-4"
-          href="#"
+          class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+          @click="showUpload"
         >
           {{ $t("menu.upload") }}</a
         >
@@ -35,6 +35,7 @@
         </router-link>
       </li>
     </ul>
+    <photo-select ref="photoSelect" />
     <router-view />
     <Languages class="mt-4" />
   </div>
@@ -53,6 +54,7 @@ import NounsUser from "@/components/NounsUser.vue";
 import PhotoView from "@/components/PhotoView.vue";
 import GuideLogin from "@/components/GuideLogin.vue";
 import GuidePhoto from "@/components/GuidePhoto.vue";
+import PhotoSelect from "@/components/PhotoSelect.vue";
 
 export default defineComponent({
   name: "AppLayout",
@@ -60,6 +62,7 @@ export default defineComponent({
     Languages,
     NounsUser,
     PhotoView,
+    PhotoSelect,
     GuideLogin,
     GuidePhoto,
   },
@@ -73,6 +76,7 @@ export default defineComponent({
     let isShownGuideLogin = false;
     const guidePhoto = ref();
     let isShownGuidePhoto = false;
+    const photoSelect = ref();
     onMounted(() => {
       auth.onAuthStateChanged(() => {
         routeCheck();
@@ -90,6 +94,7 @@ export default defineComponent({
     });
     const routeCheck = () => {
       if (route.path == getLocalePath(router, "/map")) {
+        photoSelect.value.hide();
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if (!user.value && !isShownGuideLogin) {
           guideLogin.value.open();
@@ -106,11 +111,19 @@ export default defineComponent({
         }
       }
     };
-
+    const showUpload = () => {
+      if (photoSelect.value.isShow) {
+        photoSelect.value.hide();
+      } else {
+        photoSelect.value.show();
+      }
+    };
     useI18nParam();
     return {
       guideLogin,
       guidePhoto,
+      photoSelect,
+      showUpload,
     };
   },
 });

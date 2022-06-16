@@ -2,7 +2,7 @@ import { createStore } from "vuex";
 import { User } from "firebase/auth";
 import { startMonitoringMetamask } from "@/utils/MetaMask";
 import { NFT, TokenContract } from "@/models/SmartContract";
-import { PhotoPubData } from "@/models/photo";
+import { PhotoPubData, PhotoInfo } from "@/models/photo";
 
 export type UserPhotoState = "checking" | "empty" | "exist";
 
@@ -18,6 +18,7 @@ interface State {
   account: undefined | null | string;
   nft: NFT | null;
   clickedPhoto: PhotoPubData | null;
+  uploadPhoto: PhotoInfo | null;
 }
 
 export default createStore<State>({
@@ -32,6 +33,7 @@ export default createStore<State>({
     account: undefined,
     nft: null,
     clickedPhoto: null,
+    uploadPhoto: null,
   },
   mutations: {
     load(state: State) {
@@ -79,6 +81,9 @@ export default createStore<State>({
     },
     setClickedPhoto(state: State, photo: PhotoPubData | null) {
       state.clickedPhoto = photo;
+    },
+    setUploadPhoto(state: State, photo: PhotoInfo | null) {
+      state.uploadPhoto = photo;
     },
   },
   getters: {
