@@ -20,7 +20,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import exifr from "exifr";
 import heic2any from "heic2any";
 import { resizeImage } from "@/utils/image";
@@ -49,9 +49,6 @@ export default defineComponent({
     const imageRef = ref();
     const resized = ref();
     let photoInfo = {} as PhotoInfo;
-    onMounted(() => {
-      window.onload;
-    });
     const selectImage = () => {
       fileInput.value.click();
     };

@@ -4,7 +4,7 @@
     v-if="isShow"
   >
     <div
-      class="col-start-4 row-span-1 col-span-1 flex justify-center items-center"
+      class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
       @click="isShow = false"
     >
       <i class="text-6xl material-icons text-white mr-2">cancel</i>
@@ -13,8 +13,9 @@
       class="row-start-2 col-start-2 col-span-3 row-span-3 col-end-5 justify-center items-center font-mono text-2xl text-white"
     >
       <div class="flex flex-col items-stretch md:items-center">
-        {{ $t("message.guidesignin") }}
-        <br /><br />
+        <span class="my-8">
+          {{ $t("message.guidesignin") }}
+        </span>
         <button
           @click="gotoLogin"
           class="bg-green-800 hover:bg-green-100 text-white md:w-2/3 justify-center font-semibold py-2 px-4 border border-gray-400 rounded shadow"
