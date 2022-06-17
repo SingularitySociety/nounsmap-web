@@ -1,6 +1,5 @@
 <template>
   <div class="p-6" align="center">
-    <photo-select v-if="user" ref="photoRef" @selected="photoSelected" />
     <div align="center" v-if="photoLocal">
       <div>
         {{ $t("message.selectPhotoLocation") }}<br />
@@ -52,11 +51,10 @@ import {
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
 import { defaultMapConfig, privacyCircleConfig } from "@/config/project";
-import PhotoSelect, { PhotoInfo } from "@/components/PhotoSelect.vue";
 import { NFT } from "@/models/SmartContract";
 import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
-import { generateNewPhotoData } from "@/models/photo";
+import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
 
@@ -162,14 +160,10 @@ class Pin {
 }
 
 export default defineComponent({
-  components: {
-    PhotoSelect,
-  },
   setup() {
     const route = useRoute();
     const store = useStore();
     const mapRef = ref();
-    const photoRef = ref();
     const pLevel = ref();
 
     const mapInstance = ref();
@@ -190,6 +184,12 @@ export default defineComponent({
       console.log({ cur }, { prev });
       nftUpdate();
     });
+    const localPhoto = computed<PhotoInfo>(() => store.state.uploadPhoto);
+    watch(localPhoto, (cur, prev) => {
+      console.log({ cur }, { prev });
+      photoSelected(localPhoto.value);
+    });
+
     watch(
       () => route.path,
       () => {
@@ -330,7 +330,6 @@ export default defineComponent({
       }
       processing.value = true;
       const _uid = user.value.uid;
-      photoRef.value.fileInput.disabled = true;
       const [iconId, iconURL] = await uploadIcon(_uid);
 
       //generate random id  "hoge" is not created actually
@@ -373,9 +372,6 @@ export default defineComponent({
       } else {
         console.error("failed");
       }
-      photoRef.value.fileInput.value = null;
-      photoRef.value.previewImage = null;
-      photoRef.value.fileInput.disabled = false;
       processing.value = false;
       photoLocal.value = null;
       if (locationCircle) {
@@ -404,7 +400,7 @@ export default defineComponent({
     };
     const loadUserPhotos = async () => {
       if (!user.value) {
-        console.error("no user info");
+        console.info("no user info");
         return;
       }
       if (0 < Object.keys(pins).length) {
@@ -415,6 +411,12 @@ export default defineComponent({
       const photos = await getDocs(
         collection(db, `users/${user.value.uid}/public_photos/`)
       );
+      if (photos.size) {
+        store.commit("setUserPhotoState", "exist");
+      } else {
+        store.commit("setUserPhotoState", "empty");
+        return;
+      }
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
@@ -508,7 +510,6 @@ export default defineComponent({
     };
     return {
       mapRef,
-      photoRef,
       user,
       pLevel,
       dataURL,

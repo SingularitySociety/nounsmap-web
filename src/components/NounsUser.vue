@@ -1,9 +1,8 @@
 <template>
   <transition>
     <div
-      class="fixed container grid h-full w-full z-30 place-content-center bg-black bg-opacity-50"
+      class="fixed  grid items-stretch h-screen w-screen z-30 place-content-center bg-black bg-opacity-50"
       v-if="isContentShown"
-      @close="isContentShown = false"
     >
       <div
         class="bg-white flex-col mx-auto w-auto h-auto shadow-md rounded px-8 pt-6 pb-8 mb-4"
@@ -14,7 +13,7 @@
               class="block text-gray-700 text-sm font-bold mb-2"
               for="username"
             >
-              Plsease SignIn by
+              {{ $t("message.pleasesignin") }}
             </label>
           </div>
           <div class="grid grid-cols-4">
@@ -43,7 +42,7 @@
         </div>
         <div class="flex justify-end pt-4">
           <button
-            @click="isContentShown = false"
+            @click="close"
             class="inline-block bg-gray-200 hover:bg-white rounded-full text-sm font-semibold text-gray-700 px-3 py-1"
             type="button"
           >
@@ -53,17 +52,20 @@
       </div>
     </div>
   </transition>
-  <div v-if="true">
+  <div v-if="false">
     {{ debugmessage }}
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from "vue";
+import { defineComponent, reactive, ref, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
+import router from "@/router";
 import { useStore } from "vuex";
 import { auth } from "@/utils/firebase";
 import { User } from "firebase/auth";
 import { initializeEthereum } from "@/utils/MetaMask";
+import { getLocalePath, getLocaleName } from "@/i18n/utils";
 
 import TwitterLogin from "./TwitterLogin.vue";
 import Wallet from "./Wallet.vue";
@@ -77,16 +79,20 @@ export default defineComponent({
     Wallet,
   },
   setup() {
+    const route = useRoute();
     const store = useStore();
     const user = reactive<UserData>({ user: null, userType: undefined });
     const isContentShown = ref(false);
-    const open = () => (isContentShown.value = true);
     const selectView = ref(true);
     const twitterView = ref(false);
     const metaMaskView = ref(false);
     const debugmessage = ref<string>();
     initializeEthereum();
     onMounted(async () => {
+      if (route.path == getLocalePath(router, "/user")) {
+        console.log(route.path);
+        isContentShown.value = true;
+      }
       auth.onAuthStateChanged((fbuser) => {
         console.log({ fbuser });
         if (fbuser) {
@@ -100,16 +106,31 @@ export default defineComponent({
           }
           store.commit("setUser", user.user);
           store.commit("setUserType", user.userType);
-          isContentShown.value = false;
         } else {
           store.commit("setUserType", undefined);
           store.commit("setUser", null);
           user.userType = undefined;
           user.user = null;
-          isContentShown.value = true;
         }
       });
     });
+    watch(
+      () => route.path,
+      () => {
+        if (route.path == getLocalePath(router, "/user")) {
+          console.log(route.path);
+          isContentShown.value = true;
+        } else {
+          isContentShown.value = false;
+        }
+      }
+    );
+    const close = () => {
+      router.push({
+        name: getLocaleName(router, "map"),
+      });
+    };
+
     return {
       isContentShown,
       selectView,
@@ -117,7 +138,7 @@ export default defineComponent({
       metaMaskView,
       user,
       debugmessage,
-      open,
+      close,
     };
   },
 });

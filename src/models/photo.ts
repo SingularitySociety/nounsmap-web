@@ -1,4 +1,10 @@
 import { serverTimestamp, FieldValue } from "firebase/firestore";
+export interface PhotoInfo {
+  file: File | null;
+  size: { w: number; h: number } | null;
+  resizedBlob: Blob | null;
+  location: { lat: number; lng: number } | null;
+}
 export interface PhotoPubData {
   uid: string;
   photoId: string;
