@@ -6,6 +6,7 @@ import NotFound from "../components/NotFound.vue";
 import Account from "../views/Account.vue";
 import About from "../views/About.vue";
 import NounsMap from "../components/NounsMap.vue";
+import TestMint from "../components/TestMint.vue";
 
 const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
   return [
@@ -35,6 +36,10 @@ const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
     {
       path: "account",
       component: Account,
+    },
+    {
+      path: "testMint",
+      component: TestMint,
     },
   ];
 };
