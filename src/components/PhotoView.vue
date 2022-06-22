@@ -29,20 +29,11 @@
           :src="clickedPhoto.iconURL"
           alt="nft icon"
         />
-        <a
-          :href="
-            'https://twitter.com/intent/tweet?url=https://' +
-            nounsMapConfig.hostName +
-            '/p/' +
-            clickedPhoto.photoId
-          "
-          target="_blank"
-          rel="noopener noreferrer"
-        >
           <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+          @click="openTweetPopup(clickedPhoto.photoId)"
             >share</i
           >
-        </a>
+        <!-- </a> -->
       </div>
     </div>
   </div>
@@ -64,10 +55,19 @@ export default defineComponent({
     const close = () => {
       router.push("../map");
     };
+    const openTweetPopup = (photoId: string) => {
+      const url = 'https://twitter.com/intent/tweet?url=https://' + nounsMapConfig.hostName + '/p/' + photoId;
+      const width = 600, height = 400;
+      const params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
+                      width=${width},height=${height},left=${(window.screen.width - width) / 2},top=${(window.screen.height - height) / 2}`;
+
+      window.open(url, url, params);
+    }
     return {
       nounsMapConfig,
       clickedPhoto,
       close,
+      openTweetPopup
     };
   },
 });
