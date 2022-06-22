@@ -57,7 +57,7 @@ export default defineComponent({
     };
     const openTweetPopup = (photoId: string) => {
       const url = 'https://twitter.com/intent/tweet?url=https://' + nounsMapConfig.hostName + '/p/' + photoId;
-      const width = 600, height = 400;
+      const width = 400, height = 300;
       const params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
                       width=${width},height=${height},left=${(window.screen.width - width) / 2},top=${(window.screen.height - height) / 2}`;
 
