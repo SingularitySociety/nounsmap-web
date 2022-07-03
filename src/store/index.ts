@@ -38,7 +38,7 @@ export default createStore<State>({
   mutations: {
     load(state: State) {
       const contract = localStorage.getItem("tokenContract");
-      if (contract) {
+      if (contract && contract != "undefined") {
         state.tokenContract = JSON.parse(contract);
       }
       const nft = localStorage.getItem("nft");
