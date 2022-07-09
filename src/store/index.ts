@@ -18,6 +18,7 @@ interface State {
   account: undefined | null | string;
   nft: NFT | null;
   clickedPhoto: PhotoPubData | null;
+  nftRequestPhoto: PhotoPubData | null;
   uploadPhoto: PhotoInfo | null;
 }
 
@@ -33,6 +34,7 @@ export default createStore<State>({
     account: undefined,
     nft: null,
     clickedPhoto: null,
+    nftRequestPhoto: null,
     uploadPhoto: null,
   },
   mutations: {
@@ -81,6 +83,9 @@ export default createStore<State>({
     },
     setClickedPhoto(state: State, photo: PhotoPubData | null) {
       state.clickedPhoto = photo;
+    },
+    setNftRequestPhoto(state: State, photo: PhotoPubData | null) {
+      state.nftRequestPhoto = photo;
     },
     setUploadPhoto(state: State, photo: PhotoInfo | null) {
       state.uploadPhoto = photo;

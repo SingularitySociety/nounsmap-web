@@ -5,6 +5,13 @@ export interface Token {
   image: string;
 }
 
+export interface TokenMeta {
+  description: string;
+  external_url: string;
+  image: string;
+  name: string;
+}
+
 export interface NFT {
   name: string;
   description: string;
