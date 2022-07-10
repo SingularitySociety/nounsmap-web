@@ -92,6 +92,27 @@
       (free, but you need to pay a gas fee).
     </p>   
   </div>
+  <div v-if="nftRequestPhotos" class="mt-4">
+    NFT Request photos!
+
+    <div v-for="(photo,key) in nftRequestPhotos" :key="key" >
+      <p>.</p>
+        <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
+        request from {{photo.owner}}: <BR/>
+        Do you want to support mint it?
+        Gas estimation (XXXXX)
+            <p>
+            <button
+              @click="mint(photo.owner,photo.photoId)"
+              class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
+            >
+              MINT
+            </button>
+            (free, but you need to pay a gas fee).
+          </p>   
+
+    </div>
+  </div>    
   <div v-if="nftPhotos" class="mt-4">
     NFT photos!
 
@@ -116,7 +137,7 @@ import { defineComponent, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
 import { ChainIds, switchNetwork } from "../utils/MetaMask";
-import { NftPhoto } from "@/models/photo";
+import { NftPhoto, PhotoPubData } from "@/models/photo";
 import { db } from "@/utils/firebase";
 import {
   serverTimestamp,
@@ -128,16 +149,10 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
-import { NFT } from "@/models/SmartContract";
-
-const HappyToken = {
-  wabi: require("@/abi/HappyToken.json"), // wrapped abi
-  address: "0x4F700D279b7046BE3B31DcFD9D94166bF4E6FBb1",
-};
 
 const ContentsToken = {
   wabi: require("@/abi/ContentsToken.json"), // wrapped abi
-  address: "0xd4Ea3587D9eA7a24BE1cE222E7E917e589AB8984",
+  address: "0xFd0A8de60f4Fbe523c0B748BE1E59aD69946A481",
 };
 
 export default defineComponent({
@@ -163,6 +178,7 @@ export default defineComponent({
     const tokenId = ref(0);
     const images = ref([] as Array<string>);
 
+    const nftRequestPhotos = ref([] as Array<PhotoPubData>)
     const nftPhotos = ref([] as Array<NftPhoto>)
 
     let prevProvider: ethers.providers.Web3Provider | null = null;
@@ -205,6 +221,16 @@ export default defineComponent({
     const photoId = "PV0Bpa7Neyc2exi4tSAr";
     onMounted(async () => {
 
+      const photos = await getDocs(
+        collection(db, `nft_request_photos/`)
+      );
+      await photos.forEach((doc: DocumentData) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        const nreqphoto : PhotoPubData = doc.data();
+        nftRequestPhotos.value.push(nreqphoto);
+      });      
+
       const photoDoc = getDoc(doc(db, `photos/${photoId}`));
       photoDoc
         .then((doc) => {
@@ -235,7 +261,10 @@ export default defineComponent({
       for(let i =0; i<limit.value; i++){
         const uri = (await contractViewOnly.functions.tokenURI(i))[0];
         const tokenURI = JSON.parse(Buffer.from(uri.substr('data:application/json;base64,'.length) , "base64").toString());
-        //const photoId = await contractViewOnly.functions.contentsName(i);
+        const photoId = await contractViewOnly.functions.getContents(i);
+        console.log(photoId);
+        const attribute = await contractViewOnly.functions.getAttributes(i);
+        console.log(attribute)
         const owner = (await contractViewOnly.functions.ownerOf(i))[0];
         const photoDoc = await getDoc(doc(db, `photos/${photoId}`));
         if (photoDoc.exists()) {
@@ -283,12 +312,23 @@ export default defineComponent({
         nftPhotos.value.push(nphoto);
       });
     };
-    const mint = async () => {
+    const mint = async (_from:string, _photoId:string) => {
       if (!networkContext.value) return;
-      const nounslove = "0x1602155eB091F863e7e776a83e1c330c828ede19";
-      const test2 = "0xdFc6c245881eC5463A3C0c99221F324A8339d70d";
-      const photoId = "6oHFJbRhdqBpCseSVNOk";
-      await networkContext.value.contract.functions.mint(test2,nounslove,photoId,);
+
+      const assetBase:any = {
+        group: "photo",
+        category: "news",
+        tag: "",
+        width: 512, height: 512,
+        minter: ""
+      };
+      const asset = Object.assign({}, assetBase);
+      asset.name = "testContents";
+      asset.metadata = new Uint8Array();
+      asset.description = "this is test contents";
+      asset.soulbound = account.value;
+      const authorityToken = "0x1602155eB091F863e7e776a83e1c330c828ede19"; //nouns love
+      await networkContext.value.contract.functions.mint(_from,authorityToken,_photoId,asset);
       justMinted.value = true;
     };
     const tokenGate = computed(() => {
@@ -318,6 +358,7 @@ export default defineComponent({
 
     return {
       nftRequestPhoto,
+      nftRequestPhotos,      
       nftPhotos,
       birthDateRef,
       account,
