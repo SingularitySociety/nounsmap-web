@@ -1,5 +1,5 @@
 import { serverTimestamp, FieldValue } from "firebase/firestore";
-import {TokenMeta} from "./SmartContract";
+import { TokenMeta } from "./SmartContract";
 export interface PhotoInfo {
   file: File | null;
   size: { w: number; h: number } | null;
@@ -42,10 +42,10 @@ export interface PhotoOrgData {
 }
 
 export interface NftPhoto {
-  nounsmapCreated: boolean,
+  nounsmapCreated: boolean;
   tokenId: string;
-  tokenURI: TokenMeta,
-  owner: string,
+  tokenURI: TokenMeta;
+  owner: string;
   photoId: string;
   photoURL: string;
   uid: string | null;
