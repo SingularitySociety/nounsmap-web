@@ -38,9 +38,10 @@ const runSharp = async (
     });
     // generate public image url see: https://stackoverflow.com/questions/42956250/get-download-url-from-file-uploaded-with-cloud-functions-for-firebase
     const file = ret[0];
-    return `https://firebasestorage.googleapis.com/v0/b/${
-      bucket.name
-    }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    const url = (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) ?
+    `http://localhost:9199/v0/b/${bucket.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`:
+    `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    return url;
   } catch (e) {
     console.log("error", e);
   }
@@ -164,6 +165,36 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
   return "";
 };
 
+export const blendWaterMarkLocal = async (photoPath, iconPath) => {
+  const tmpFile = path.join(os.tmpdir(), UUID()) + ".jpg";
+  const tmpFile2 = path.join(os.tmpdir(), UUID()) + ".jpg";
+  try {
+    const size = 200; //watermark_size
+    await sharp(iconPath)
+      .greyscale()
+      .resize(size, size, {
+        fit: "inside",
+      })
+      .toFile(tmpFile)
+
+    await sharp(photoPath)
+      .composite([
+         {
+          input: tmpFile,
+          blend: "multiply",
+          top: 10,
+          left: 20,
+        },
+      ])
+      .toFile(tmpFile2);
+    fs.unlinkSync(tmpFile);
+    return tmpFile2;
+  } catch (e) {
+    console.log("error", e);
+  }
+  return "";
+};
+
 export const uploadFileToBucket = async (tmpFile, object) => {
   const bucketObj = admin.storage().bucket(object.bucket);
   //const tmpResizeFile = path.join(os.tmpdir(), UUID());
@@ -180,9 +211,10 @@ export const uploadFileToBucket = async (tmpFile, object) => {
       },
     });
     const file = ret[0];
-    return `https://firebasestorage.googleapis.com/v0/b/${
-      object.bucket
-    }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    const url = (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) ?
+    `http://localhost:9199/v0/b/${object.bucket}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`:
+    `https://firebasestorage.googleapis.com/v0/b/${object.bucket}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    return url;
   } catch (e) {
     console.log("error", e);
   }

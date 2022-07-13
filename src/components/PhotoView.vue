@@ -80,18 +80,6 @@ export default defineComponent({
       router.push("../map");
     };
     const nftRequest = () => {
-      const { uid, photoId, iconURL, photoURL, lat, lng, zoom } = clickedPhoto.value;
-      setDoc(doc(db, `nft_request_photos/${photoId}`),{
-          photoId,
-          owner:uid,
-          iconURL,
-          photoURL,
-          lat,
-          lng,
-          zoom,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),              
-      });
     };
     return {
       nounsMapConfig,

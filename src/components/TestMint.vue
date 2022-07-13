@@ -77,21 +77,20 @@
       </div>
     </div>
   </div>
-  <div v-if="nftRequestPhoto">
-    Request from Ryuji(0x3e3....fa) photoID:0xFdfsadfasdf
-    Do you want to support mint it?
-    Gas estimation (XXXXX)
-    <img :src="nftRequestPhoto.photoURL" class="mt-4 w-48 rounded-xl" />
-    <p>
-      <button
-        @click="mint"
-        class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
-      >
-        MINT
-      </button>
-      (free, but you need to pay a gas fee).
-    </p>   
+  <div class="flex flex-col items-center mx-auto px-2 py-4">
+    NFT Request test
+    <canvas ref="resized" width="600" height="600" v-if="false" />
+    <span class="sr-only">{{ $t("message.selectImage") }}</span>
+    <button
+      ref="imageRef"
+      class="h-40 object-cover hover:bg-gray-100 font-semibold py-2 px-4 border border-gray-400  rounded-md"
+      @click="testNftPost"
+      alt="selected photo"
+    >
+    testNft
+    </button>
   </div>
+
   <div v-if="nftRequestPhotos" class="mt-4">
     NFT Request photos!
 
@@ -100,7 +99,6 @@
         <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
         request from {{photo.owner}}: <BR/>
         Do you want to support mint it?
-        Gas estimation (XXXXX)
             <p>
             <button
               @click="mint(photo.owner,photo.photoId)"
@@ -149,6 +147,7 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
+import {photoNFTPosted} from "@/utils/functions"
 
 const ContentsToken = {
   wabi: require("@/abi/ContentsToken.json"), // wrapped abi
@@ -355,6 +354,10 @@ export default defineComponent({
       get: () => store.state.nftRequestPhoto,
       set: (val) => store.commit("setClickedPhoto", val),
     });
+    const testNftPost = async () => {
+      const ret = await photoNFTPosted({photoId:"YQqU9TERDEOpuvcWd37P"});
+      console.log(ret);
+    }
 
     return {
       nftRequestPhoto,
@@ -373,6 +376,7 @@ export default defineComponent({
       images,
       tokenId,
       switchToValidNetwork,
+      testNftPost,
     };
   },
 });

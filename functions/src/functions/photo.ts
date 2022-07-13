@@ -19,6 +19,9 @@ const getIconPath = async (uid, pdata) => {
     const tmpIcon = await imageUtil.downloadFileFromBucket(iconObj);
     return await imageUtil.resizeLocal(tmpIcon, 96);
   } else {
+    //const tempFilePath = path.join(os.tmpdir(), UUID());
+    //fs.copyFileSync("./images/red160px.png",tempFilePath)
+    //return tempFilePath
     return "./images/red160px.png";
   }
 };
@@ -132,6 +135,110 @@ export const posted = async (
             },
           },
         },
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return { success: true, url };
+  } catch (error) {
+    throw utils.process_error(error);
+  }
+};
+
+// This function is called by users after post user's photo
+export const nftPosted = async (
+  db,
+  data: any,
+  context: functions.https.CallableContext | Context
+) => {
+  const { photoId } = data;
+  console.log(data);
+  const uid = utils.validate_auth(context);
+  const regex = /^[0-9a-zA-Z-]+$/;
+  if (!regex.test(photoId)) {
+    throw utils.process_error(`wrong photoId:${photoId}`);
+  }
+  utils.validate_params({ photoId }); // tip, sendSMS and lng are optinoal
+  const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
+  if (!photo || !photo.exists || !photo.data()) {
+    throw utils.process_error(
+      `fire store data ,notfound user:${uid} photoId:${photoId}`
+    );
+  }
+  const pdata = photo.data();
+  console.log(pdata);
+  const { lat, lng, zoom, iconURL } = pdata;
+  const _lat = Number(lat) || 0;
+  const _lng = Number(lng) || 0;
+  const _zoom = Number(zoom) || 10;
+  console.log(
+    `user:${uid} photo:${photoId} lat:${_lat} lng:${_lng} zoom:${_zoom}`
+  );
+  try {
+    // read from original
+    let tmpFile;
+    const fromObj = {
+      bucket: firebaseConfig.storageBucket,
+      name: `images/users/${uid}/public_photos/${photoId}/nft_original.jpg`,
+    };
+    // update resized 
+    const tmpFiles = await Promise.all([
+      imageUtil.downloadFileFromBucket(fromObj).then((tmpPhoto) => {
+        tmpFile = tmpPhoto;
+        return imageUtil.resizeLocal(tmpPhoto, 600);
+      }),
+      getIconPath(uid, pdata),
+    ]);
+    // watermarked (same as original posted)
+    const tmpBlend = await imageUtil.blendWaterMarkLocal(tmpFiles[0], tmpFiles[1]);
+    console.log(tmpBlend);
+    const watermarkPath = `images/users/${uid}/public_photos/${photoId}/watermark.jpg`;
+    const toObj = {
+      bucket: firebaseConfig.storageBucket,
+      name: watermarkPath,
+      context: "image/jpeg",
+    };
+    const ret = await Promise.all([
+      imageUtil.uploadFileToBucket(tmpBlend, toObj),
+      fs.unlinkSync(tmpFile),
+      fs.unlinkSync(tmpFiles[0]),
+      //fs.unlinkSync(tmpFiles[1]),
+    ]);
+    const url = ret[0];
+    console.log(ret,url);
+    fs.unlinkSync(tmpBlend as string);
+  
+    const FieldValue = require('firebase-admin').firestore.FieldValue;
+    // update image meta for user
+    await db.doc(`users/${uid}/public_photos/${photoId}`).update(
+      {
+        "images.resizedImages.wartermark": {
+          path: watermarkPath,
+          url,
+        },
+        "updatedAt": FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    // update image meta for public
+    await db.doc(`photos/${photoId}`).update(
+      {
+        photoURL: url,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    // create nft_request for public
+    await db.doc(`nft_request_photos/${photoId}`).set(
+      {
+        photoId,
+        owner:uid,
+        iconURL,
+        lat,
+        lng,
+        zoom,
+        photoURL: url,
+        createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
