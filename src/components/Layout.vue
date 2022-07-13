@@ -2,6 +2,7 @@
   <div class="layout">
     <NounsUser />
     <PhotoView />
+    <PhotoNFTRequest />
     <GuideLogin ref="guideLogin" />
     <GuidePhoto ref="guidePhoto" :photoSelect="photoSelect" />
     <!-- Saved for future changes. Currently causes error. -->
@@ -55,6 +56,7 @@ import PhotoView from "@/components/PhotoView.vue";
 import GuideLogin from "@/components/GuideLogin.vue";
 import GuidePhoto from "@/components/GuidePhoto.vue";
 import PhotoSelect from "@/components/PhotoSelect.vue";
+import PhotoNFTRequest from "@/components/PhotoNFTRequest.vue";
 
 export default defineComponent({
   name: "AppLayout",
@@ -63,6 +65,7 @@ export default defineComponent({
     NounsUser,
     PhotoView,
     PhotoSelect,
+    PhotoNFTRequest,
     GuideLogin,
     GuidePhoto,
   },

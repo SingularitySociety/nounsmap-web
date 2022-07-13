@@ -71,7 +71,7 @@ export default defineComponent({
       router.push("../map");
     };
     const nftRequest = () => {
-      console.log("XXXX need to implment request NFT ");
+      store.commit("setNftRequestPhoto", clickedPhoto.value);
     };
     return {
       nounsMapConfig,
