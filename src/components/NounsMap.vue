@@ -296,20 +296,22 @@ export default defineComponent({
         );
       }
     };
-    const shortID = (_id:string) => {
-      if(_id.length <= 6){
+    const shortID = (_id: string) => {
+      if (_id.length <= 6) {
         return _id;
-      } else if(_id.startsWith("0x")){
+      } else if (_id.startsWith("0x")) {
         return _id.slice(2, 6) + ".." + _id.slice(-3);
       } else {
         return _id.slice(0, 4) + ".." + _id.slice(-3);
       }
-    }  
+    };
 
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
       if (nft.value) {
         const _id =
-          shortID(nft.value.token.tokenID) + nft.value.name.trim() + shortID(nft.value.contractAddress);
+          shortID(nft.value.token.tokenID) +
+          nft.value.name.trim() +
+          shortID(nft.value.contractAddress);
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
         const downloadURL = await getFileDownloadURL(storage_path);
         if (downloadURL) {

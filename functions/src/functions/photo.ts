@@ -53,7 +53,11 @@ const uploadOGPImage = async (
     }),
     getIconPath(uid, pdata),
   ]);
-  const tmpBlend = await imageUtil.blendLocal(tmpFiles[0], tmpFiles[1], tmpFiles[2]);
+  const tmpBlend = await imageUtil.blendLocal(
+    tmpFiles[0],
+    tmpFiles[1],
+    tmpFiles[2]
+  );
   console.log(tmpBlend);
   const ret = await Promise.all([
     imageUtil.uploadFileToBucket(tmpBlend, toObj),
@@ -93,7 +97,7 @@ export const posted = async (
   }
   const pdata = photo.data();
   console.log(pdata);
-  const FieldValue = require('firebase-admin').firestore.FieldValue;
+  const FieldValue = require("firebase-admin").firestore.FieldValue;
   try {
     const ogpPath = `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`;
     const url = await uploadOGPImage(
@@ -181,7 +185,7 @@ export const nftPosted = async (
       bucket: firebaseConfig.storageBucket,
       name: `images/users/${uid}/public_photos/${photoId}/nft_original.jpg`,
     };
-    // update resized 
+    // update resized
     const tmpFiles = await Promise.all([
       imageUtil.downloadFileFromBucket(fromObj).then((tmpPhoto) => {
         tmpFile = tmpPhoto;
@@ -190,7 +194,10 @@ export const nftPosted = async (
       getIconPath(uid, pdata),
     ]);
     // watermarked (same as original posted)
-    const tmpBlend = await imageUtil.blendWaterMarkLocal(tmpFiles[0], tmpFiles[1]);
+    const tmpBlend = await imageUtil.blendWaterMarkLocal(
+      tmpFiles[0],
+      tmpFiles[1]
+    );
     console.log(tmpBlend);
     const watermarkPath = `images/users/${uid}/public_photos/${photoId}/watermark.jpg`;
     const toObj = {
@@ -205,10 +212,10 @@ export const nftPosted = async (
       //fs.unlinkSync(tmpFiles[1]),
     ]);
     const url = ret[0];
-    console.log(ret,url);
+    console.log(ret, url);
     fs.unlinkSync(tmpBlend as string);
-  
-    const FieldValue = require('firebase-admin').firestore.FieldValue;
+
+    const FieldValue = require("firebase-admin").firestore.FieldValue;
     // update image meta for user
     await db.doc(`users/${uid}/public_photos/${photoId}`).update(
       {
@@ -216,7 +223,7 @@ export const nftPosted = async (
           path: watermarkPath,
           url,
         },
-        "updatedAt": FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
@@ -232,7 +239,7 @@ export const nftPosted = async (
     await db.doc(`nft_request_photos/${photoId}`).set(
       {
         photoId,
-        owner:uid,
+        owner: uid,
         iconURL,
         lat,
         lng,

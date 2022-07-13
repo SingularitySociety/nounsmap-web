@@ -1,7 +1,7 @@
 <template>
   <transition>
     <div
-      class="fixed  grid items-stretch h-screen w-screen z-30 place-content-center bg-black bg-opacity-50"
+      class="fixed grid items-stretch h-screen w-screen z-30 place-content-center bg-black bg-opacity-50"
       v-if="isContentShown"
     >
       <div

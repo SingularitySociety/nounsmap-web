@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 import * as xmlbuilder from "xmlbuilder";
 import * as fs from "fs";
 import moment from "moment";
-import { nounsMapConfig,firebaseConfig } from "../common/project";
+import { nounsMapConfig, firebaseConfig } from "../common/project";
 
 import * as Sentry from "@sentry/node";
 
@@ -193,7 +193,7 @@ const image = async (req: any, res: any) => {
   const template_data = fs.readFileSync("./templates/index.html", {
     encoding: "utf8",
   });
-  
+
   if (!isId(contentsId)) {
     console.error(`isId ${contentsId} failed`);
     return res.status(404).send(template_data);
@@ -207,8 +207,8 @@ const image = async (req: any, res: any) => {
   const photouser_data: any = photouser.data();
 
   const photo = await db
-  .doc(`users/${photouser_data.uid}/public_photos/${contentsId}`)
-  .get();
+    .doc(`users/${photouser_data.uid}/public_photos/${contentsId}`)
+    .get();
   if (!photo || !photo.exists) {
     console.error(`user ${photouser_data.uid}/ photo ${contentsId} not found`);
     return res.status(404).send(template_data);
@@ -227,15 +227,17 @@ const image = async (req: any, res: any) => {
     name: `${path}`,
   };
   const bucketObj = admin.storage().bucket(imageObj.bucket);
-  const image = await bucketObj.file(imageObj.name).download().then((contents)=>{
-    return Buffer.from(contents[0].buffer);
-  });
+  const image = await bucketObj
+    .file(imageObj.name)
+    .download()
+    .then((contents) => {
+      return Buffer.from(contents[0].buffer);
+    });
   console.log(image);
-  res.setHeader('Content-Type', 'image/jpeg');
-  res.type('jpg');
+  res.setHeader("Content-Type", "image/jpeg");
+  res.type("jpg");
   res.send(image);
 };
-
 
 // eslint-disable-next-line
 const debugError = async (req: any, res: any) => {

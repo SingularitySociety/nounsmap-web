@@ -38,9 +38,14 @@ const runSharp = async (
     });
     // generate public image url see: https://stackoverflow.com/questions/42956250/get-download-url-from-file-uploaded-with-cloud-functions-for-firebase
     const file = ret[0];
-    const url = (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) ?
-    `http://localhost:9199/v0/b/${bucket.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`:
-    `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    const url =
+      process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST
+        ? `http://localhost:9199/v0/b/${bucket.name}/o/${encodeURIComponent(
+            file.name
+          )}?alt=media&token=${uuid}`
+        : `https://firebasestorage.googleapis.com/v0/b/${
+            bucket.name
+          }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
     return url;
   } catch (e) {
     console.log("error", e);
@@ -175,11 +180,11 @@ export const blendWaterMarkLocal = async (photoPath, iconPath) => {
       .resize(size, size, {
         fit: "inside",
       })
-      .toFile(tmpFile)
+      .toFile(tmpFile);
 
     await sharp(photoPath)
       .composite([
-         {
+        {
           input: tmpFile,
           blend: "multiply",
           top: 10,
@@ -211,9 +216,14 @@ export const uploadFileToBucket = async (tmpFile, object) => {
       },
     });
     const file = ret[0];
-    const url = (process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST) ?
-    `http://localhost:9199/v0/b/${object.bucket}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`:
-    `https://firebasestorage.googleapis.com/v0/b/${object.bucket}/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    const url =
+      process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST
+        ? `http://localhost:9199/v0/b/${object.bucket}/o/${encodeURIComponent(
+            file.name
+          )}?alt=media&token=${uuid}`
+        : `https://firebasestorage.googleapis.com/v0/b/${
+            object.bucket
+          }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
     return url;
   } catch (e) {
     console.log("error", e);
