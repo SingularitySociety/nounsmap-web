@@ -43,9 +43,11 @@
             >share</i
           >
         </a>
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          @click="nftRequest">generating_tokens</i
-        >        
+        <i
+          class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+          @click="nftRequest"
+          >generating_tokens</i
+        >
       </div>
     </div>
   </div>
@@ -55,24 +57,13 @@ import { useStore } from "vuex";
 import { nounsMapConfig } from "@/config/project";
 import { defineComponent, computed, WritableComputedRef } from "vue";
 import router from "@/router";
-import { NftPhoto,PhotoPubData } from "@/models/photo";
-import { db } from "@/utils/firebase";
-import {
-  serverTimestamp,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  collection,
-  getDocs,
-  DocumentData,
-} from "firebase/firestore";
+import { PhotoPubData } from "@/models/photo";
 
 export default defineComponent({
   emits: {},
   setup() {
     const store = useStore();
-    const clickedPhoto : WritableComputedRef<PhotoPubData> = computed({
+    const clickedPhoto: WritableComputedRef<PhotoPubData> = computed({
       get: () => store.state.clickedPhoto as PhotoPubData,
       set: (val) => store.commit("setClickedPhoto", val),
     });
@@ -80,6 +71,7 @@ export default defineComponent({
       router.push("../map");
     };
     const nftRequest = () => {
+      console.log("XXXX need to implment request NFT ");
     };
     return {
       nounsMapConfig,
