@@ -1,0 +1,20 @@
+{
+  "name": "images/users/0xa9faf095619e8a1d8873f6a940ec5906513ee079/public_photos/YQqU9TERDEOpuvcWd37P/nft_original.jpg",
+  "bucket": "nounsmap-web-dev.appspot.com",
+  "contentType": "image/jpeg",
+  "metageneration": 1,
+  "generation": 1657671458763,
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "cacheControl": "public, max-age=3600",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "ccf2c229-c386-4cd5-a36e-0cdb2f0eb745"
+  ],
+  "etag": "VHo+VyyT8W08QrBV1K86gPHXjwU",
+  "timeCreated": "2022-07-13T00:17:38.762Z",
+  "updated": "2022-07-13T00:17:38.770Z",
+  "size": 242287,
+  "md5Hash": "BqYTWe3d3ozRpMB8xCf3BQ==",
+  "crc32c": "1091878593"
+}
