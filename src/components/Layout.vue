@@ -7,13 +7,22 @@
     <GuidePhoto ref="guidePhoto" :photoSelect="photoSelect" />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
-    <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
+    <ul class="grid grid-cols-4 gap-0 justify-items-stretch">
       <li class="mr-3">
         <router-link :to="localizedUrl('/map')">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
           >
             {{ $t("menu.map") }}
+          </div>
+        </router-link>
+      </li>
+      <li class="mr-3">
+        <router-link :to="localizedUrl('/nft')">
+          <div
+            class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+          >
+            {{ $t("menu.nft") }}
           </div>
         </router-link>
       </li>

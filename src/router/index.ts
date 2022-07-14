@@ -6,7 +6,7 @@ import NotFound from "../components/NotFound.vue";
 import Account from "../views/Account.vue";
 import About from "../views/About.vue";
 import NounsMap from "../components/NounsMap.vue";
-import TestMint from "../components/TestMint.vue";
+import Mint from "../components/Mint.vue";
 
 const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
   return [
@@ -25,6 +25,11 @@ const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
       component: NounsMap,
     },
     {
+      path: "nft",
+      name: prefix + "nft",
+      component: Mint,
+    },
+    {
       path: "p/:photoId",
       name: prefix + "photo",
       component: NounsMap,
@@ -39,7 +44,7 @@ const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
     },
     {
       path: "testMint",
-      component: TestMint,
+      component: Mint,
     },
   ];
 };
