@@ -4,7 +4,11 @@ const lang = {
   menu: {
     map: "地図",
     upload: "写真投稿",
-    user: "",
+    user: "ユーザー",
+  },
+  label: {
+    name: "名前",
+    description: "説明",
   },
   message: {
     hello: "こんにちは、世界",
@@ -24,6 +28,12 @@ const lang = {
     youNeedMeta: "MetaMaskをインストールしてください.",
     youNeedNet: "{networkName}に切り替えてください",
     youDonthaveToken: '"{tokenName}"のNFTトークンを持っていると選択できます！',
+    NFTuploadTitle: "この写真をNFTトークン化することをリクエストします",
+    NFTuploadDetail:
+      "写真のオリジナルファイルを再度アップロードしますので選択してください（ファイルサイズによりUpload時間がかかります）。NFTトークンとして表示される名前、説明も記入してください。",
+    nftFileError: "オリジナルの画像を選択してください",
+    nameError: "タイトルを入力してください",
+    descError: "説明を入力してください",
   },
   function: {
     requestAccount: "MetaMaskと接続",
@@ -33,6 +43,7 @@ const lang = {
     signout: "ログアウト",
     trynow: "使ってみる",
     tryphoto: "今すぐ投稿",
+    requestNFT: "NFT化をリクエスト",
   },
   languages,
 };

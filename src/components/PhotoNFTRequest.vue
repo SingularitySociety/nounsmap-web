@@ -27,19 +27,19 @@
           @input="pickFile"
           class="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-1 file:text-sm file:font-semibold file:bg-white file:text-gray-800 hover:file:bg-gray-100"
         />
+        <span class="text-base text-red-400 font-bold ml-2" v-if="fileError">
+          {{ $t("message.nftFileError") }}
+        </span>
         <div class="shrink-0 py-2" v-if="previewImage">
           <img
             ref="imageRef"
             class="h-40 object-cover rounded-md"
             :src="previewImage"
-            @load="onImageLoad"
             alt="selected photo"
           />
         </div>
-        <div class="flex flex-row items-stretch items-left m-4">
-          <span class="text-xl text-white mr-2">
-            {{ $t("label.name") }} :
-          </span>
+        <div class="flex flex-row items-left m-4">
+          <span class="text-xl text-white mr-2"> {{ $t("label.name") }}: </span>
           <input
             type="text"
             ref="nameRef"
@@ -47,10 +47,13 @@
             minlength="1"
             class="text-sm my-2 text-slate-500 rounded-sm border-1 text-sm bg-white file:text-gray-800 hover:bg-gray-100"
           />
+          <span class="text-base text-red-400 font-bold ml-2" v-if="nameError">
+            {{ $t("message.nameError") }}
+          </span>
         </div>
-        <div class="flex flex-row items-stretch items-left m-4">
-          <span class="mt-8 text-xl text-white mr-2">
-            {{ $t("label.description") }} :
+        <div class="flex flex-row items-left m-4">
+          <span class="text-xl text-white mr-2">
+            {{ $t("label.description") }}:
           </span>
           <input
             type="text"
@@ -59,7 +62,28 @@
             minlength="1"
             class="text-sm my-2 text-slate-500 rounded-sm border-1 text-sm bg-white file:text-gray-800 hover:bg-gray-100"
           />
+          <span class="text-base text-red-400 font-bold ml-2" v-if="descError">
+            {{ $t("message.descError") }}
+          </span>
         </div>
+        <button
+          v-if="!processing"
+          @click="nftRequest"
+          class="bg-green-800 hover:bg-green-100 text-white md:w-2/3 justify-center font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+        >
+          {{ $t("function.requestNFT") }}
+        </button>
+        <button
+          v-else
+          type="button"
+          class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+          disabled
+        >
+          <i class="animate-spin material-icons text-lg text-op-teal mr-2"
+            >schedule</i
+          >
+          {{ $t("message.processing") }}
+        </button>
       </div>
     </div>
   </div>
@@ -75,28 +99,27 @@ import {
   WritableComputedRef,
   watch,
 } from "vue";
-import router from "@/router";
 import { PhotoPubData } from "@/models/photo";
-import exifr from "exifr";
+import { uploadFile } from "@/utils/storage";
 import heic2any from "heic2any";
 import { db } from "@/utils/firebase";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  DocumentData,
-  collection,
-} from "firebase/firestore";
+import { doc, updateDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { photoNFTPosted } from "@/utils/functions";
+
 export default defineComponent({
   emits: {},
   setup() {
     const user = computed<User>(() => store.state.user);
     const isShow = ref<boolean>();
     const fileInput = ref();
+    const fileError = ref<boolean>(false);
     const previewImage = ref();
-    const imageRef = ref();
+    const nameRef = ref();
+    const nameError = ref<boolean>(false);
+    const descRef = ref();
+    const descError = ref<boolean>(false);
     const store = useStore();
+    const processing = ref<boolean>(false);
     const nftRequestPhoto: WritableComputedRef<PhotoPubData | null> = computed({
       get: () => store.state.nftRequestPhoto as PhotoPubData,
       set: (val) => store.commit("setNftRequestPhoto", val),
@@ -124,26 +147,20 @@ export default defineComponent({
         }
       }
     };
-    const onImageLoad = async () => {
-      if (!imageRef.value || !fileInput.value || !fileInput.value.files[0]) {
-        console.error(imageRef.value, fileInput.value);
-        return false;
-      }
-    };
+
     const close = () => {
       nftRequestPhoto.value = null;
     };
     watch(nftRequestPhoto, async () => {
       console.log(nftRequestPhoto.value);
       if (nftRequestPhoto.value) {
+        //check request is from user(owner) or not.
         const photoId = nftRequestPhoto.value.photoId;
         const photoDoc = await getDoc(
           doc(db, `users/${user.value.uid}/public_photos/${photoId}`)
         );
         if (photoDoc.exists()) {
           console.log(photoDoc.data());
-          const { iconURL, photoURL, lat, lng, zoom, original_name } =
-            photoDoc.data();
           //default icon size is 80, 30
           isShow.value = true;
         } else {
@@ -153,48 +170,63 @@ export default defineComponent({
       }
     });
 
-    const nftRequest = () => {
-      console.log("XXXX need to implment request NFT ");
-      //File確認
+    const nftRequest = async () => {
+      if (!nftRequestPhoto.value) {
+        return;
+      }
+      const photoId = nftRequestPhoto.value.photoId;
+      console.log("request NFT ", photoId);
+
+      //Input確認
+      const file = fileInput.value.files[0];
+      console.log(file);
+      fileError.value = file ? false : true;
+      nameError.value = nameRef.value.value ? false : true;
+      descError.value = descRef.value.value ? false : true;
+      if (fileError.value || descError.value || nameError.value) {
+        return;
+      }
+
       //original 画像Upload
-      /*
-      const _pid = doc(collection(db, "hoge")).id;
-      const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
-      const photoURL = (await uploadFile(
-        photoLocal.value.resizedBlob,
-        storage_path
-      )) as string;
-      pins["upload"]?.update({ photoURL });
-      pins["upload"]?.showPhoto();
-      const pdata = generateNewPhotoData(
-        _pid,
-        photoURL,
-        photoLocal.value.file.name,
-        storage_path,
-        lat,
-        lng,
-        zoom,
-        iconId,
-        iconURL
-      );
-      await setDoc(doc(db, `users/${_uid}/public_photos/${_pid}`), pdata);
-      // eslint-disable-next-line
-      const { data }: any = await photoPosted({
-        photoId: _pid,
-        lat,
-        lng,
-        zoom,
-      });
-      */
-      //photo meta data 更新
-      // backend へ nft reqest送信
+      processing.value = true;
+      try {
+        const storage_path = `images/users/${user.value.uid}/public_photos/${photoId}/nft_original.jpg`;
+        const photoURL = (await uploadFile(
+          fileInput.value.files[0],
+          storage_path
+        )) as string;
+        console.log({ photoURL });
+        //photo meta data 更新
+        await updateDoc(
+          doc(db, `users/${user.value.uid}/public_photos/${photoId}`),
+          {
+            original_name: file.name,
+            title: nameRef.value.value,
+            description: descRef.value.value,
+            updatedAt: serverTimestamp(),
+          }
+        );
+        // backend へ nft reqest送信
+        const ret = await photoNFTPosted({ photoId });
+        console.log(ret);
+        processing.value = false;
+        close();
+      } catch (e: unknown) {
+        processing.value = false;
+      }
     };
     return {
       isShow,
       fileInput,
+      fileError,
       previewImage,
+      nameRef,
+      nameError,
+      descRef,
+      descError,
       nounsMapConfig,
       nftRequestPhoto,
+      processing,
       pickFile,
       close,
       nftRequest,
