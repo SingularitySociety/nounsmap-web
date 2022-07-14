@@ -62,7 +62,7 @@
       <div v-for="(photo, key) in nftRequestPhotos" :key="key">
         <div class="flex flex-col">
           <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
-          <span>{{ $t("label.creator") }}:{{ shortID(photo.owner) }}</span>
+          <span>{{ $t("label.creator") }}:{{ shortID(photo.creator) }}</span>
           <span>{{ $t("label.name") }}:{{ photo.title }}</span>
           <span>{{ $t("label.description") }}:{{ photo.description }}</span>
           <p>
@@ -131,7 +131,7 @@ import { defineComponent, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
 import { ChainIds, switchNetwork } from "../utils/MetaMask";
-import { NftPhoto, PhotoPubData } from "@/models/photo";
+import { NftPhoto, NftRequestPhoto } from "@/models/photo";
 import { db } from "@/utils/firebase";
 import {
   serverTimestamp,
@@ -172,7 +172,7 @@ export default defineComponent({
     const tokenId = ref(0);
     const images = ref([] as Array<string>);
 
-    const nftRequestPhotos = ref([] as Array<PhotoPubData>);
+    const nftRequestPhotos = ref([] as Array<NftRequestPhoto>);
     const nftPhotos = ref([] as Array<NftPhoto>);
 
     let prevProvider: ethers.providers.Web3Provider | null = null;
@@ -213,7 +213,7 @@ export default defineComponent({
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
-        const nreqphoto: PhotoPubData = doc.data();
+        const nreqphoto: NftRequestPhoto = doc.data();
         nftRequestPhotos.value.push(nreqphoto);
       });
     });
@@ -327,10 +327,6 @@ export default defineComponent({
       get: () => store.state.nftRequestPhoto,
       set: (val) => store.commit("setClickedPhoto", val),
     });
-    const testNftPost = async () => {
-      const ret = await photoNFTPosted({ photoId: "YQqU9TERDEOpuvcWd37P" });
-      console.log(ret);
-    };
 
     return {
       isRequestView,
@@ -350,7 +346,6 @@ export default defineComponent({
       images,
       tokenId,
       switchToValidNetwork,
-      testNftPost,
       shortID,
     };
   },

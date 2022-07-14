@@ -11,6 +11,8 @@ export interface PhotoPubData {
   photoId: string;
   iconURL: string;
   photoURL: string;
+  title:string | undefined;
+  description: string | undefined;
   lat: number;
   lng: number;
   zoom: number;
@@ -19,7 +21,8 @@ export interface PhotoPubData {
 }
 export interface PhotoOrgData {
   id: string;
-  description: string;
+  title:string | undefined;
+  description: string | undefined;
   original_name: string;
   images: {
     resizedImages: {
@@ -40,7 +43,19 @@ export interface PhotoOrgData {
   createdAt: FieldValue;
   updatedAt: FieldValue;
 }
-
+export interface NftRequestPhoto {
+  creator: string;
+  photoId: string;
+  photoURL: string;
+  title:string;
+  description: string;
+  iconURL: string | undefined;
+  lat: number | undefined;
+  lng: number | undefined;
+  zoom: number | undefined;
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+}
 export interface NftPhoto {
   nounsmapCreated: boolean;
   tokenId: string;
@@ -48,13 +63,15 @@ export interface NftPhoto {
   owner: string;
   photoId: string;
   photoURL: string;
-  uid: string | null;
-  iconURL: string | null;
-  lat: number | null;
-  lng: number | null;
-  zoom: number | null;
-  createdAt: FieldValue | null;
-  updatedAt: FieldValue | null;
+  title:string;
+  description: string;
+  uid: string | undefined;
+  iconURL: string | undefined;
+  lat: number | undefined;
+  lng: number | undefined;
+  zoom: number | undefined;
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
 }
 
 export const generateNewPhotoData = (
@@ -70,6 +87,7 @@ export const generateNewPhotoData = (
 ): PhotoOrgData => {
   const photoData = {
     id: pid,
+    title: "",
     description: "",
     original_name: org,
     images: {

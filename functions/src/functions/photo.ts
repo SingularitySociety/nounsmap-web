@@ -236,20 +236,20 @@ export const nftPosted = async (
       { merge: true }
     );
     // create nft_request for public
-    await db.doc(`nft_request_photos/${photoId}`).set(
-      {
-        photoId,
-        owner: uid,
-        iconURL,
-        lat,
-        lng,
-        zoom,
-        photoURL: url,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
+
+    await db.doc(`nft_request_photos/${photoId}`).set({
+      creator: uid,
+      photoId,
+      photoURL: url,
+      title: pdata.title,
+      description: pdata.description,
+      iconURL,
+      lat,
+      lng,
+      zoom,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
     return { success: true, url };
   } catch (error) {
     throw utils.process_error(error);
