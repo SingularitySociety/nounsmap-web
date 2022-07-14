@@ -1,130 +1,127 @@
 <template>
-  <div class="max-w-xl mx-auto text-left p-2">
-    <div class="mt-4 mb-8">
-      <p class="mb-4">This Page is for testing use only.</p>
-      <p class="mb-4">
-        This work was inspired by
-        <a href="https://opensea.io/collection/nouns" class="underline"
-          >Nouns</a
-        >
-      </p>
+  <ul class="flex border-b" v-if="isRequestView">
+    <li class="-mb-px mr-1">
+      <a
+        class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold"
+        href="#"
+        >{{ $t("menu.nftRequest") }}</a
       >
-    </div>
-    <div v-if="tokenGate == 'noAccount'">
-      <p>there are no Account</p>
-    </div>
-    <div v-else-if="tokenGate == 'invalidNetwork'">
-      <p>invalid network: we neeed to connect {{ networkName }}</p>
-      <button @click="switchToValidNetwork" class="underline">
-        Switch Network
-      </button>
-    </div>
-    <div v-else>
-      <div><b>Token Limit Count:</b> {{ $n(limit) }}</div>
-      <div v-if="currentToken < limit">
-        <b>Current Token count:</b> {{ currentToken }}
+    </li>
+    <li class="mr-1" @click="isRequestView = false">
+      <a
+        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
+        href="#"
+        >{{ $t("menu.nftMinted") }}</a
+      >
+    </li>
+  </ul>
+  <ul class="flex border-b" v-else>
+    <li class="-mb-px mr-1" @click="isRequestView = true">
+      <a
+        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
+        href="#"
+        >{{ $t("menu.nftRequest") }}</a
+      >
+    </li>
+    <li class="mr-1">
+      <a
+        class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold"
+        href="#"
+        >{{ $t("menu.nftMinted") }}</a
+      >
+    </li>
+  </ul>
+
+  <div v-if="nftRequestPhotos" class="flex flex-col items-center m-4">
+    <span class="my-4 text-2xl text-current">
+      {{ $t("message.nftRequestTitle") }}
+    </span>
+    <span class="my-4 text-xl text-current">
+      {{ $t("message.nftRequestDesc") }}
+    </span>
+
+    <div class="max-w-xl mx-auto text-left p-2">
+      <div v-if="tokenGate == 'noAccount'">
+        <p>there are no Account</p>
       </div>
-      <div v-else>Sold Out!</div>
-      <div v-if="tokenBalance == 0" class="mt-4">
+      <div v-else-if="tokenGate == 'invalidNetwork'">
+        <p>invalid network: we neeed to connect {{ networkName }}</p>
+        <button @click="switchToValidNetwork" class="underline">
+          Switch Network
+        </button>
+      </div>
+      <div v-else>
+        <b>Current Token count:</b> {{ currentToken }}
         <div v-if="justMinted">
           <p>Thank you for minting. Please wait a little bit...</p>
         </div>
-        <div v-else>
-          <div v-if="currentToken < limit">
-            Please select your Birth day, and create your special happy token!
-            <input
-              type="date"
-              ref="birthDateRef"
-              value="1990-01-1"
-              min="1970-01-01"
-              max="2022-12-31"
-            />
-            <p>
-              <button
-                @click="mint"
-                class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
-              >
-                MINT
-              </button>
-              (free, but you need to pay a gas fee).
-            </p>
-          </div>
-          <div v-else>
-            Thank you for the interest, but it is sold out unfortunately.
-          </div>
-        </div>
       </div>
-      <div v-else class="mt-4">
-        <div>
-          <p>Thank you for being a member of Happy Token community.</p>
-          <a
-            :href="
-              'https://opensea.io/assets/ethereum/0x433697232e3b55ec39050cb7a5678a3b1347eec4/' +
-              tokenId
-            "
-          >
-            <img :src="imageURL" class="mt-4 w-48 rounded-xl" />
-          </a>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div v-for="(photo, key) in nftRequestPhotos" :key="key">
+        <div class="flex flex-col">
+          <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
+          <span>{{ $t("label.creator") }}:{{ shortID(photo.owner) }}</span>
+          <span>{{ $t("label.name") }}:{{ photo.title }}</span>
+          <span>{{ $t("label.description") }}:{{ photo.description }}</span>
+          <p>
+            <button
+              @click="mint(photo.owner, photo.photoId)"
+              class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
+            >
+              {{ $t("label.mint") }}
+            </button>
+            {{ $t("message.mintCaution") }}
+          </p>
         </div>
-      </div>
-      <div class="mt-4">
-        <img
-          v-for="image in images"
-          :src="image"
-          class="w-24 inline-block mr-1 mt-1 rounded"
-          v-bind:key="image"
-        />
       </div>
     </div>
   </div>
-  <div class="flex flex-col items-center mx-auto px-2 py-4">
-    NFT Request test
-    <canvas ref="resized" width="600" height="600" v-if="false" />
-    <span class="sr-only">{{ $t("message.selectImage") }}</span>
-    <button
-      ref="imageRef"
-      class="h-40 object-cover hover:bg-gray-100 font-semibold py-2 px-4 border border-gray-400 rounded-md"
-      @click="testNftPost"
-      alt="selected photo"
-    >
-      testNft
-    </button>
-  </div>
 
-  <div v-if="nftRequestPhotos" class="mt-4">
-    NFT Request photos!
-
-    <div v-for="(photo, key) in nftRequestPhotos" :key="key">
-      <p>.</p>
-      <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
-      request from {{ photo.owner }}: <BR />
-      Do you want to support mint it?
-      <p>
-        <button
-          @click="mint(photo.owner, photo.photoId)"
-          class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
-        >
-          MINT
+  <div v-if="nftPhotos" class="flex flex-col items-center m-4">
+    <span class="my-4 text-2xl text-current">
+      {{ $t("message.nftMintedTitle") }}
+    </span>
+    <span class="my-4 text-xl text-current">
+      {{ $t("message.nftMintedDesc") }}
+    </span>
+    <div class="max-w-xl mx-auto text-left p-2">
+      <div v-if="tokenGate == 'noAccount'">
+        <p>there are no Account</p>
+      </div>
+      <div v-else-if="tokenGate == 'invalidNetwork'">
+        <p>invalid network: we neeed to connect {{ networkName }}</p>
+        <button @click="switchToValidNetwork" class="underline">
+          Switch Network
         </button>
-        (free, but you need to pay a gas fee).
-      </p>
+      </div>
+      <div v-else>
+        <b>Current Token count:</b> {{ currentToken }}
+        <div v-if="justMinted">
+          <p>Thank you for minting. Please wait a little bit...</p>
+        </div>
+      </div>
     </div>
-  </div>
-  <div v-if="nftPhotos" class="mt-4">
-    NFT photos!
-
-    <div v-for="(nphoto, key) in nftPhotos" :key="key">
-      <p>.</p>
-      <a
-        :href="
-          'https://opensea.io/assets/ethereum/0xd4Ea3587D9eA7a24BE1cE222E7E917e589AB8984/' +
-          nphoto.tokenId
-        "
-      >
-        <img :src="nphoto.photoURL" class="mt-4 w-48 rounded-xl" />
-        {{ nphoto.tokenURI.name }}: <BR />
-        {{ nphoto.tokenURI.description }}
-      </a>
+    <div class="grid grid-cols-2 gap-4">
+      <div v-for="(nphoto, key) in nftPhotos" :key="key">
+        <a
+          :href="
+            'https://opensea.io/assets/ethereum/0xd4Ea3587D9eA7a24BE1cE222E7E917e589AB8984/' +
+            nphoto.tokenId
+          "
+        >
+          <div class="flex flex-col">
+            <img :src="nphoto.photoURL" class="mt-4 w-48 rounded-xl" />
+            <span>{{ $t("label.name") }}:{{ nphoto.tokenURI.name }}</span>
+            <span
+              >{{ $t("label.description") }}:{{
+                nphoto.tokenURI.description
+              }}</span
+            >
+          </div>
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -147,15 +144,14 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { photoNFTPosted } from "@/utils/functions";
-
-const ContentsToken = {
-  wabi: require("@/abi/ContentsToken.json"), // wrapped abi
-  address: "0xFd0A8de60f4Fbe523c0B748BE1E59aD69946A481",
-};
+import { shortID } from "@/utils/utils";
+import { ContentsContract } from "@/config/project";
 
 export default defineComponent({
   components: {},
   setup() {
+    const isRequestView = ref(false);
+
     // Following three lines must be changed for other networks
     const expectedNetwork = ChainIds.RinkebyTestNet;
     const networkName = "Rinkeby Testnet";
@@ -163,8 +159,8 @@ export default defineComponent({
     const birthDateRef = ref();
 
     const contractViewOnly = new ethers.Contract(
-      ContentsToken.address,
-      ContentsToken.wabi.abi,
+      ContentsContract.address,
+      ContentsContract.wabi.abi,
       providerViewOnly
     );
     const store = useStore();
@@ -196,8 +192,8 @@ export default defineComponent({
         );
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
-          ContentsToken.address,
-          ContentsToken.wabi.abi,
+          ContentsContract.address,
+          ContentsContract.wabi.abi,
           signer
         );
         const mintFilter = contract.filters.ContentsBought();
@@ -207,16 +203,11 @@ export default defineComponent({
           fetchContentsTokens();
         });
         prevProvider = provider;
-        if (window.location.href == "http://localhost:8080/") {
-          fetchImages(contract);
-        }
-
         return { provider, signer, contract };
       }
       return null;
     });
 
-    const photoId = "PV0Bpa7Neyc2exi4tSAr";
     onMounted(async () => {
       const photos = await getDocs(collection(db, `nft_request_photos/`));
       await photos.forEach((doc: DocumentData) => {
@@ -225,29 +216,7 @@ export default defineComponent({
         const nreqphoto: PhotoPubData = doc.data();
         nftRequestPhotos.value.push(nreqphoto);
       });
-
-      const photoDoc = getDoc(doc(db, `photos/${photoId}`));
-      photoDoc
-        .then((doc) => {
-          if (doc.exists()) {
-            store.commit("setNftRequestPhoto", doc.data());
-          }
-        })
-        .catch((reason) => {
-          console.error(reason);
-        });
     });
-    // eslint-disable-next-line
-    const fetchImages = async (contract: any) => {
-      // debug only
-      let i = 0;
-      for (i = 0; i < 100; i++) {
-        const result = await contract.functions.generateSVG(i);
-        images.value[i] =
-          "data:image/svg+xml;base64," +
-          Buffer.from(result[0]).toString("base64");
-      }
-    };
 
     const fetchContentsTokens = async () => {
       if (!networkContext.value) return;
@@ -364,6 +333,7 @@ export default defineComponent({
     };
 
     return {
+      isRequestView,
       nftRequestPhoto,
       nftRequestPhotos,
       nftPhotos,
@@ -381,6 +351,7 @@ export default defineComponent({
       tokenId,
       switchToValidNetwork,
       testNftPost,
+      shortID,
     };
   },
 });

@@ -4,11 +4,16 @@ const lang = {
   menu: {
     map: "地図",
     upload: "写真投稿",
+    nft: "写真コンテンツ",
+    nftRequest: "NFT要望写真コンテンツ",
+    nftMinted: "NFT済み写真コンテンツ",
     user: "ユーザー",
   },
   label: {
-    name: "名前",
+    name: "タイトル",
     description: "説明",
+    creator: "作者",
+    mint: "ミント",
   },
   message: {
     hello: "こんにちは、世界",
@@ -34,6 +39,13 @@ const lang = {
     nftFileError: "オリジナルの画像を選択してください",
     nameError: "タイトルを入力してください",
     descError: "説明を入力してください",
+    nftRequestTitle: "NFT化を希望する写真コンテンツ",
+    nftRequestDesc:
+      "あなたが{tokenName}を保持している場合、下記の写真の下のミントボタンが有効化されていて、写真コンテンツのNFT化をサポートすることができます（ガス代がかかります）。わたしたちは、写真の流通を通して戦争や、被災地のみなさんを直接支援したいとかんがえています。ご自身で写真の内容、説明をよく見てサポートしたいと写真にご協力ください。",
+    nftMintedTitle: "NFT 写真コンテンツ",
+    nftMintedDesc:
+      "下記の写真をクリックした先のOpenSeaで写真を購入することができます。写真のOwnerになるとOwnerBoxに表示され元画像をDownload、利用することができます。",
+    mintCaution: "（ガス代は発生します）",
   },
   function: {
     requestAccount: "MetaMaskと接続",

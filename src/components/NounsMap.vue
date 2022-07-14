@@ -57,7 +57,7 @@ import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
-
+import { shortID } from "@/utils/utils";
 interface PinData {
   pid: string | null;
   icon?: google.maps.Icon;
@@ -294,15 +294,6 @@ export default defineComponent({
             (Math.random() % pLevel.value)) *
             privacyCircleConfig.kmToDeg
         );
-      }
-    };
-    const shortID = (_id: string) => {
-      if (_id.length <= 6) {
-        return _id;
-      } else if (_id.startsWith("0x")) {
-        return _id.slice(2, 6) + ".." + _id.slice(-3);
-      } else {
-        return _id.slice(0, 4) + ".." + _id.slice(-3);
       }
     };
 

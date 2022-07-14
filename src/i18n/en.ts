@@ -3,12 +3,17 @@ import languages from "./languages";
 const lang = {
   menu: {
     map: "Map",
+    nft: "NFT photos",
     upload: "Upload",
     user: "User",
+    nftRequest: "NFT Request contents",
+    nftMinted: "NFT Minted contents",
   },
   label: {
     name: "title",
     description: "description",
+    creator: "creator",
+    mint: "Mint",
   },
   message: {
     hello: "hello world",
@@ -34,6 +39,13 @@ const lang = {
     nftFileError: "please select original image file",
     nameError: "please input title",
     descError: "please input descriptio",
+    nftRequestTitle: "Photo content that someone wants to be NFT",
+    nftRequestDesc:
+      "If you have a {tokenName}, the mint button below the photo is enabled and can support NFT conversion of the photo content (it costs gas). We want to directly support those affected by wars and disasters through the distribution of photographs. Please take a closer look at the contents and explanations of the photos and cooperate with the NFT conversion of the photos you want to support.",
+    nftMintedTitle: "NFT Photo Contents",
+    nftMintedDesc:
+      "You can purchase photos at OpenSea by clicking on the photos below. When you become the owner of a photo, it will be displayed in the Owner Box and you can download and use the original image.",
+    mintCaution: "(You need to pay gas fee)",
   },
   function: {
     requestAccount: "Connect MetaMask",

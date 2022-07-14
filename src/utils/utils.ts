@@ -11,3 +11,12 @@ export const useIsSignedIn = () => {
   const isSignedIn = computed(() => store.getters.isSignedIn);
   return isSignedIn;
 };
+export const shortID = (_id: string) => {
+  if (_id.length <= 6) {
+    return _id;
+  } else if (_id.startsWith("0x")) {
+    return _id.slice(2, 6) + ".." + _id.slice(-3);
+  } else {
+    return _id.slice(0, 4) + ".." + _id.slice(-3);
+  }
+};
