@@ -46,9 +46,9 @@ export interface ContentsAttribute {
   group: string;
   category: string;
   tag: string;
-  width: number,
-  height: number,
-  minter: string,
+  width: number;
+  height: number;
+  minter: string;
   name: string;
   description: string;
   metadata: Uint8Array;

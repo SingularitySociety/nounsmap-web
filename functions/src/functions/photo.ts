@@ -4,8 +4,8 @@ import * as utils from "../lib/utils";
 import { Context } from "../models/TestType";
 import * as imageUtil from "./image/imageUtil";
 import * as map from "./map/map";
-
-import { firebaseConfig } from "../common/project";
+import { ethers } from "ethers";
+import { firebaseConfig, ContentsContract } from "../common/project";
 
 const defaultIconURL =
   "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
@@ -247,11 +247,76 @@ export const nftPosted = async (
       lat,
       lng,
       zoom,
-      status:'init',
+      status: "init",
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
     return { success: true, url };
+  } catch (error) {
+    throw utils.process_error(error);
+  }
+};
+
+// This function is called by users after post user's photo
+export const nftSync = async (
+  db,
+  data: any,
+  context: functions.https.CallableContext | Context
+) => {
+  const uid = utils.validate_auth(context);
+  console.log("nftSync request from:",uid,data);
+  try {
+    const providerViewOnly = new ethers.providers.AlchemyProvider(
+      ContentsContract.network
+    );
+    const contractViewOnly = new ethers.Contract(
+      ContentsContract.address,
+      ContentsContract.wabi.abi,
+      providerViewOnly
+    );
+
+    let result = await contractViewOnly.functions.totalSupply();
+    const limit = result[0].toNumber();
+    for (let i = 0; i < limit; i++) {
+      const uri = (await contractViewOnly.functions.tokenURI(i))[0];
+      const tokenURI = JSON.parse(
+        Buffer.from(
+          uri.substr("data:application/json;base64,".length),
+          "base64"
+        ).toString()
+      );
+      const photoId = await contractViewOnly.functions.getContents(i);
+      const attribute = await contractViewOnly.functions.getAttributes(i);
+      console.log(photoId, attribute);
+      const owner = (await contractViewOnly.functions.ownerOf(i))[0];
+      const photo = await db.doc(`nft_photos/${photoId}`).get();
+      if (photo && photo.exists && photo.data()) {
+        continue;
+      }
+      const reqDoc = await db.doc(`nft_request_photos/${photoId}`).get();
+      if (!reqDoc || !reqDoc.exists || !reqDoc.data()) {
+        console.error("no request doc on photoId:", photoId);
+        continue;
+      }
+      const FieldValue = require("firebase-admin").firestore.FieldValue;
+
+      const { iconURL, photoURL, lat, lng, zoom } = reqDoc.data();
+      db.doc(`nft_photos/${photoId}`).set({
+        nounsmapCreated: true,
+        photoId,
+        tokenURI,
+        tokenId: i,
+        iconURL,
+        photoURL,
+        lat,
+        lng,
+        zoom,
+        owner,
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
+    return { success: true, limit };
   } catch (error) {
     throw utils.process_error(error);
   }

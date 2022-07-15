@@ -11,7 +11,7 @@ export interface PhotoPubData {
   photoId: string;
   iconURL: string;
   photoURL: string;
-  title:string | undefined;
+  title: string | undefined;
   description: string | undefined;
   lat: number;
   lng: number;
@@ -21,7 +21,7 @@ export interface PhotoPubData {
 }
 export interface PhotoOrgData {
   id: string;
-  title:string | undefined;
+  title: string | undefined;
   description: string | undefined;
   original_name: string;
   images: {
@@ -47,7 +47,7 @@ export interface NftRequestPhoto {
   creator: string;
   photoId: string;
   photoURL: string;
-  title:string;
+  title: string;
   description: string;
   iconURL: string | undefined;
   lat: number | undefined;
@@ -64,7 +64,7 @@ export interface NftPhoto {
   owner: string;
   photoId: string;
   photoURL: string;
-  title:string;
+  title: string;
   description: string;
   uid: string | undefined;
   iconURL: string | undefined;

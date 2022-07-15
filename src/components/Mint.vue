@@ -60,7 +60,10 @@
 
     <div class="grid grid-cols-2 gap-4">
       <div v-for="(photo, key) in nftRequestPhotos" :key="key">
-        <div class="flex flex-col" v-if="photo.status=='init' || photo.status=='mint'">
+        <div
+          class="flex flex-col"
+          v-if="photo.status == 'init' || photo.status == 'mint'"
+        >
           <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
           <span>{{ $t("label.creator") }}:{{ shortID(photo.creator) }}</span>
           <span>{{ $t("label.name") }}:{{ photo.title }}</span>
@@ -83,7 +86,7 @@
                 >schedule</i
               >
               {{ $t("label.minting") }}
-            </button>            
+            </button>
             {{ $t("message.mintCaution") }}
           </p>
         </div>
@@ -155,10 +158,10 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
-//import { photoNFTPosted } from "@/utils/functions";
+import { photoNFTSync } from "@/utils/functions";
 import { shortID } from "@/utils/utils";
 import { ContentsContract } from "@/config/project";
-import { ContentsAttribute} from "@/models/SmartContract"
+import { ContentsAttribute } from "@/models/SmartContract";
 
 export default defineComponent({
   components: {},
@@ -168,14 +171,7 @@ export default defineComponent({
     // Following three lines must be changed for other networks
     const expectedNetwork = ChainIds.RinkebyTestNet;
     const networkName = "Rinkeby Testnet";
-    const providerViewOnly = new ethers.providers.AlchemyProvider("rinkeby");
     const birthDateRef = ref();
-
-    const contractViewOnly = new ethers.Contract(
-      ContentsContract.address,
-      ContentsContract.wabi.abi,
-      providerViewOnly
-    );
     const store = useStore();
     const tokenBalance = ref(0);
     const justMinted = ref(false);
@@ -233,51 +229,20 @@ export default defineComponent({
 
     const fetchContentsTokens = async () => {
       if (!networkContext.value) return;
+      const providerViewOnly = new ethers.providers.AlchemyProvider(
+        ContentsContract.network
+      );
+      const contractViewOnly = new ethers.Contract(
+        ContentsContract.address,
+        ContentsContract.wabi.abi,
+        providerViewOnly
+      );
+
       let result = await contractViewOnly.functions.totalSupply();
       limit.value = result[0].toNumber();
-      for (let i = 0; i < limit.value; i++) {
-        const uri = (await contractViewOnly.functions.tokenURI(i))[0];
-        const tokenURI = JSON.parse(
-          Buffer.from(
-            uri.substr("data:application/json;base64,".length),
-            "base64"
-          ).toString()
-        );
-        const photoId = await contractViewOnly.functions.getContents(i);
-        console.log(photoId);
-        const attribute = await contractViewOnly.functions.getAttributes(i);
-        console.log(attribute);
-        const owner = (await contractViewOnly.functions.ownerOf(i))[0];
-        const photoDoc = await getDoc(doc(db, `photos/${photoId}`));
-        if (photoDoc.exists()) {
-          const { iconURL, photoURL, lat, lng, zoom } = photoDoc.data();
-          setDoc(doc(db, `nft_photos/${photoId}`), {
-            nounsmapCreated: true,
-            photoId,
-            tokenURI,
-            tokenId: i,
-            iconURL,
-            photoURL,
-            lat,
-            lng,
-            zoom,
-            owner,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          });
-        } else {
-          updateDoc(doc(db, `nft_photos/${photoId}`), {
-            nounsmapCreated: false,
-            photoId,
-            tokenURI,
-            tokenId: i,
-            photoURL: tokenURI.image,
-            owner,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          });
-        }
-      }
+      console.log("limit is ",limit.value);
+      const log = await photoNFTSync();
+      console.log(log);
 
       const photos = await getDocs(collection(db, `nft_photos/`));
       await photos.forEach((doc: DocumentData) => {
@@ -292,15 +257,14 @@ export default defineComponent({
       });
     };
     const mint = async (_from: string, _photoId: string) => {
-
       if (!networkContext.value) return;
-      console.log(_from,_photoId);
+      console.log(_from, _photoId);
       const photo = await getDoc(doc(db, `nft_request_photos/${_photoId}`));
-      if (! photo.exists) {
-        console.error("invalid photoId",_photoId)
+      if (!photo.exists) {
+        console.error("invalid photoId", _photoId);
         return;
-      } 
-      const pdata:NftRequestPhoto = photo.data() as NftRequestPhoto;
+      }
+      const pdata: NftRequestPhoto = photo.data() as NftRequestPhoto;
       console.log(pdata);
       const asset: ContentsAttribute = {
         group: "photo",
@@ -309,10 +273,10 @@ export default defineComponent({
         width: 512,
         height: 512,
         minter: "",
-        metadata : new Uint8Array(),
-        name : pdata.title,
-        description : pdata.description,
-        soulbound : account.value,
+        metadata: new Uint8Array(),
+        name: pdata.title,
+        description: pdata.description,
+        soulbound: account.value,
       };
       await networkContext.value.contract.functions.mint(
         _from,
@@ -320,8 +284,10 @@ export default defineComponent({
         _photoId,
         asset
       );
-      const target = nftRequestPhotos.value.findIndex((v)=>v.photoId==_photoId);
-      console.log(target,nftRequestPhotos.value[target]);
+      const target = nftRequestPhotos.value.findIndex(
+        (v) => v.photoId == _photoId
+      );
+      console.log(target, nftRequestPhotos.value[target]);
       nftRequestPhotos.value[target].status = "mint";
 
       justMinted.value = true;
