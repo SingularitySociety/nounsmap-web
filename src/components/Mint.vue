@@ -60,18 +60,30 @@
 
     <div class="grid grid-cols-2 gap-4">
       <div v-for="(photo, key) in nftRequestPhotos" :key="key">
-        <div class="flex flex-col">
+        <div class="flex flex-col" v-if="photo.status=='init' || photo.status=='mint'">
           <img :src="photo.photoURL" class="mt-4 w-48 rounded-xl" />
           <span>{{ $t("label.creator") }}:{{ shortID(photo.creator) }}</span>
           <span>{{ $t("label.name") }}:{{ photo.title }}</span>
           <span>{{ $t("label.description") }}:{{ photo.description }}</span>
           <p>
             <button
-              @click="mint(photo.owner, photo.photoId)"
+              v-if="photo?.status == 'init'"
+              @click="mint(photo.creator, photo.photoId)"
               class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
             >
               {{ $t("label.mint") }}
             </button>
+            <button
+              v-else
+              type="button"
+              class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+              disabled
+            >
+              <i class="animate-spin material-icons text-lg text-op-teal mr-2"
+                >schedule</i
+              >
+              {{ $t("label.minting") }}
+            </button>            
             {{ $t("message.mintCaution") }}
           </p>
         </div>
@@ -143,9 +155,10 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
-import { photoNFTPosted } from "@/utils/functions";
+//import { photoNFTPosted } from "@/utils/functions";
 import { shortID } from "@/utils/utils";
 import { ContentsContract } from "@/config/project";
+import { ContentsAttribute} from "@/models/SmartContract"
 
 export default defineComponent({
   components: {},
@@ -196,7 +209,7 @@ export default defineComponent({
           ContentsContract.wabi.abi,
           signer
         );
-        const mintFilter = contract.filters.ContentsBought();
+        const mintFilter = contract.filters.ContentsCreated();
         provider.on(mintFilter, (log, event) => {
           console.log("**** got mint event", log, event);
           justMinted.value = false;
@@ -279,28 +292,38 @@ export default defineComponent({
       });
     };
     const mint = async (_from: string, _photoId: string) => {
-      if (!networkContext.value) return;
 
-      const assetBase: any = {
+      if (!networkContext.value) return;
+      console.log(_from,_photoId);
+      const photo = await getDoc(doc(db, `nft_request_photos/${_photoId}`));
+      if (! photo.exists) {
+        console.error("invalid photoId",_photoId)
+        return;
+      } 
+      const pdata:NftRequestPhoto = photo.data() as NftRequestPhoto;
+      console.log(pdata);
+      const asset: ContentsAttribute = {
         group: "photo",
         category: "news",
         tag: "",
         width: 512,
         height: 512,
         minter: "",
+        metadata : new Uint8Array(),
+        name : pdata.title,
+        description : pdata.description,
+        soulbound : account.value,
       };
-      const asset = Object.assign({}, assetBase);
-      asset.name = "testContents";
-      asset.metadata = new Uint8Array();
-      asset.description = "this is test contents";
-      asset.soulbound = account.value;
-      const authorityToken = "0x1602155eB091F863e7e776a83e1c330c828ede19"; //nouns love
       await networkContext.value.contract.functions.mint(
         _from,
-        authorityToken,
+        ContentsContract.authorityToken,
         _photoId,
         asset
       );
+      const target = nftRequestPhotos.value.findIndex((v)=>v.photoId==_photoId);
+      console.log(target,nftRequestPhotos.value[target]);
+      nftRequestPhotos.value[target].status = "mint";
+
       justMinted.value = true;
     };
     const tokenGate = computed(() => {

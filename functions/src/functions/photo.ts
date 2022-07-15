@@ -247,6 +247,7 @@ export const nftPosted = async (
       lat,
       lng,
       zoom,
+      status:'init',
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });

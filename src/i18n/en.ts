@@ -14,6 +14,7 @@ const lang = {
     description: "description",
     creator: "creator",
     mint: "Mint",
+    minting: "Minting,,",
   },
   message: {
     hello: "hello world",

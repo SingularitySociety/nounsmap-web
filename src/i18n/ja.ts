@@ -14,6 +14,7 @@ const lang = {
     description: "説明",
     creator: "作者",
     mint: "ミント",
+    minting: "ミント中です",
   },
   message: {
     hello: "こんにちは、世界",

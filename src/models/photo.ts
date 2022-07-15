@@ -53,6 +53,7 @@ export interface NftRequestPhoto {
   lat: number | undefined;
   lng: number | undefined;
   zoom: number | undefined;
+  status: string | undefined; //'init','mint','minted'
   createdAt: FieldValue;
   updatedAt: FieldValue;
 }
