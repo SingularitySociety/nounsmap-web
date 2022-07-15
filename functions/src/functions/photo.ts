@@ -264,7 +264,7 @@ export const nftSync = async (
   context: functions.https.CallableContext | Context
 ) => {
   const uid = utils.validate_auth(context);
-  console.log("nftSync request from:",uid,data);
+  console.log("nftSync request from:", uid, data);
   try {
     const providerViewOnly = new ethers.providers.AlchemyProvider(
       ContentsContract.network
@@ -275,9 +275,24 @@ export const nftSync = async (
       providerViewOnly
     );
 
+    //check latest token count, and already synced count
     let result = await contractViewOnly.functions.totalSupply();
     const limit = result[0].toNumber();
-    for (let i = 0; i < limit; i++) {
+    const config = await db.doc(`configs/nft_sync`).get();
+    const [start, end] = (() => {
+      if (config && config.exists && config.data()) {
+        if (config.data().checkedAddress != ContentsContract.address) {
+          return [0, limit];
+        }
+        if (config.data().checkedCount) {
+          return [config.data().checkedCount, limit];
+        }
+      }
+      return [0, limit];
+    })();
+    console.log(start, end);
+
+    for (let i = start; i < end; i++) {
       const uri = (await contractViewOnly.functions.tokenURI(i))[0];
       const tokenURI = JSON.parse(
         Buffer.from(
@@ -285,8 +300,8 @@ export const nftSync = async (
           "base64"
         ).toString()
       );
-      const photoId = await contractViewOnly.functions.getContents(i);
-      const attribute = await contractViewOnly.functions.getAttributes(i);
+      const photoId = (await contractViewOnly.functions.getContents(i))[0];
+      const attribute = (await contractViewOnly.functions.getAttributes(i))[0];
       console.log(photoId, attribute);
       const owner = (await contractViewOnly.functions.ownerOf(i))[0];
       const photo = await db.doc(`nft_photos/${photoId}`).get();
@@ -299,7 +314,6 @@ export const nftSync = async (
         continue;
       }
       const FieldValue = require("firebase-admin").firestore.FieldValue;
-
       const { iconURL, photoURL, lat, lng, zoom } = reqDoc.data();
       db.doc(`nft_photos/${photoId}`).set({
         nounsmapCreated: true,
@@ -315,6 +329,21 @@ export const nftSync = async (
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
+      await db.doc(`nft_request_photos/${photoId}`).update(
+        {
+          status: "minted",
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      await db.doc(`configs/nft_sync`).set(
+        {
+          checkedAddress: ContentsContract.address,
+          checkedCount: end,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
     }
     return { success: true, limit };
   } catch (error) {
