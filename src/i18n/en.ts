@@ -15,6 +15,8 @@ const lang = {
     creator: "creator",
     mint: "Mint",
     minting: "Minting,,",
+    requestCount: "Rquest count",
+    nftCount: "現在のNFT写真コンテンツ数",
   },
   message: {
     hello: "hello world",
