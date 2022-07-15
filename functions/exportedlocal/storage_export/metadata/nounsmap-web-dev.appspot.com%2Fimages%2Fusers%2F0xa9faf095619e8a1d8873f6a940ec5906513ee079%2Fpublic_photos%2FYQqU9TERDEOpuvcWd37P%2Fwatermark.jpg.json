@@ -3,18 +3,18 @@
   "bucket": "nounsmap-web-dev.appspot.com",
   "contentType": "image/jpeg",
   "metageneration": 1,
-  "generation": 1657676568606,
+  "generation": 1657842921177,
   "storageClass": "STANDARD",
   "contentDisposition": "inline",
   "cacheControl": "public, max-age=3600",
   "contentEncoding": "identity",
   "customMetadata": {},
   "downloadTokens": [
-    "28076e0f-192a-4101-b4e5-a49dc9de22bc"
+    "bad0d81c-834a-46b1-b691-4728ed6321bc"
   ],
-  "etag": "W/HpRwkIarDGMsJVHtSInK0q5ZI",
-  "timeCreated": "2022-07-13T01:42:48.605Z",
-  "updated": "2022-07-13T01:42:48.606Z",
+  "etag": "yzeUahJbyaSzC2aXT4d/Nh3PSLE",
+  "timeCreated": "2022-07-14T23:55:21.176Z",
+  "updated": "2022-07-14T23:55:21.177Z",
   "size": 47189,
   "md5Hash": "65ncvaHCkbaQLWvgQjqANQ==",
   "crc32c": "372715313"
