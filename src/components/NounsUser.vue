@@ -58,7 +58,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, watch } from "vue";
+import {
+  defineComponent,
+  reactive,
+  ref,
+  onMounted,
+  watch,
+  computed,
+} from "vue";
 import { useRoute } from "vue-router";
 import router from "@/router";
 import { useStore } from "vuex";
@@ -82,6 +89,7 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const user = reactive<UserData>({ user: null, userType: undefined });
+    const account = computed(() => store.state.account);
     const isContentShown = ref(false);
     const selectView = ref(true);
     const twitterView = ref(false);
@@ -101,6 +109,10 @@ export default defineComponent({
             user.userType = fbuser.providerData?.[0].providerId;
           } else if (!fbuser.displayName) {
             user.userType = "wallet";
+            if (user.user.uid.toLowerCase() != account.value.toLowerCase()) {
+              auth.signOut();
+              store.commit("setNft", null);
+            }
           } else {
             user.userType = undefined;
           }
@@ -125,6 +137,17 @@ export default defineComponent({
         }
       }
     );
+    watch(account, () => {
+      if (store.getters.hasMetaMask) {
+        if (user?.userType == "wallet") {
+          if (user.user?.uid.toLowerCase() != account.value.toLowerCase()) {
+            auth.signOut();
+            store.commit("setNft", null);
+          }
+        }
+      }
+    });
+
     const close = () => {
       router.push({
         name: getLocaleName(router, "map"),
