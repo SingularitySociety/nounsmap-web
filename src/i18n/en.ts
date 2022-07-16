@@ -24,6 +24,7 @@ const lang = {
     description: "description",
     creator: "creator",
     mint: "Mint",
+    mintNotHasAuthority: "Mint(AuthorityToken needed)",
     minting: "Minting,,",
     syncing: "NFT contents syncing,,",
     requestCount: "Rquest count",
@@ -62,7 +63,7 @@ const lang = {
     nftRequestButton: "If You can request make NFT this photo.",
     nftRequestTitle: "Photo content that someone wants to be NFT",
     nftRequestDesc:
-      "If you have a {tokenName}, the mint button below the photo is enabled and can support NFT conversion of the photo content (it costs gas). We want to directly support those affected by wars and disasters through the distribution of photographs. Please take a closer look at the contents and explanations of the photos and cooperate with the NFT conversion of the photos you want to support.",
+      "If you have a {tokenName}, the mint button below the photo is enabled and can support NFT conversion of the photo content (it costs gas).NFTed photos will be available for sale on OpenSea. For example, by distributing photos posted by people who have been affected by wars or disasters, we can directly support those who have been affected by the disaster. Please cooperate in NFT conversion of photos that you would like to support by carefully looking at the contents and explanations of the photos.",
     nftMintedTitle: "NFT Photo Contents",
     nftMintedDesc:
       "You can purchase photos at OpenSea by clicking on the photos below. When you become the owner of a photo, it will be displayed in the Owned NFT photo and you can download and use the original image.",
