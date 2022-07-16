@@ -338,6 +338,7 @@ export const nftSync = async (
         photoId,
         tokenURI,
         tokenId: i,
+        contract: ContentsContract.address,
         iconURL,
         photoURL,
         lat,
@@ -376,6 +377,7 @@ export const nftDownloadURL = async (
   context: functions.https.CallableContext | Context
 ) => {
   console.log(data);
+  const uid = utils.validate_auth(context);
   const { photoId } = data;
   utils.validate_params({ photoId });
   const regex = /^[0-9a-zA-Z-]+$/;
@@ -383,15 +385,16 @@ export const nftDownloadURL = async (
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   //check contents owner
-  /*
-  const uid = utils.validate_auth(context);
-  let result = await contractViewOnly.functions.ownerOfContents(photoId);
+  const nftphoto = await db.doc(`nft_photos/${photoId}`).get();
+  const tokenId = nftphoto.data().tokenId;
+  console.log("tokenId:",tokenId);
+  let result = await contractViewOnly.functions.ownerOf(tokenId);
   if (uid.toLowerCase() != result[0].toLowerCase()) {
     throw utils.process_error(
       `wrong user requested  request uid:${uid} actualOwner:${result[0]} photoId:${photoId}`
     );
   }
-  */
+  
   // check photo is exist
   const photo = await db.doc(`photos/${photoId}`).get();
   if (!photo || !photo.exists || !photo.data()) {

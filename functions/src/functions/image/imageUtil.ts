@@ -166,18 +166,18 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
     await sharp(mapFilePath)
       .composite([
         {
-          input: photoPath,
-          blend: "over",
-          top: 30,
-          left: 130,
-        },
-        {
           input: iconPath,
           blend: "over",
           top: 180,
           left: 270,
         },
-      ])
+        {
+          input: photoPath,
+          blend: "over",
+          top: 30,
+          left: 130,
+        },
+     ])
       .toFile(tmpFile);
     return tmpFile;
   } catch (e) {
