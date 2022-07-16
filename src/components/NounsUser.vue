@@ -5,7 +5,7 @@
       v-if="isContentShown"
     >
       <div
-        class="bg-white flex-col mx-auto w-auto h-auto shadow-md rounded px-8 pt-6 pb-8 mb-4"
+        class="bg-white flex-col mx-auto w-2/3 h-auto shadow-md rounded px-8 pt-6 pb-8 mb-4"
       >
         <div class="grid-cols-1" v-if="!user?.user && selectView">
           <div class="mb-4">
