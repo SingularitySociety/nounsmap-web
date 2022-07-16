@@ -44,14 +44,14 @@
         {{ $t("message.nftRequestTitle") }}
       </span>
       <span class="my-4 text-xl text-current">
-        {{ $t("message.nftRequestDesc") }}
+        {{
+          $t("message.nftRequestDesc", {
+            tokenName: ContentsContract.authorityTokenName,
+          })
+        }}
       </span>
       <b>{{ $t("label.requestCount") }} :</b>
-      {{
-        nftRequestPhotos.filter((v) => {
-          v.status == "init";
-        }).length
-      }}
+      {{ nftRequestPhotos.filter((v) => v.status == "init").length }}
 
       <div class="max-w-xl mx-auto text-left p-2">
         <div v-if="tokenGate == 'noAccount'">
@@ -84,11 +84,19 @@
             <span>{{ $t("label.description") }}:{{ photo.description }}</span>
             <p>
               <button
-                v-if="photo?.status == 'init'"
+                v-if="photo?.status == 'init' && hasAuthorityToken"
                 @click="mint(photo.creator, photo.photoId)"
                 class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
               >
                 {{ $t("label.mint") }}
+              </button>
+              <button
+                v-else-if="photo?.status == 'init'"
+                type="button"
+                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+                disabled
+              >
+                {{ $t("label.mintNotHasAuthority") }}
               </button>
               <button
                 v-else
@@ -198,7 +206,6 @@
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
-import { switchNetwork } from "../utils/MetaMask";
 import { User } from "firebase/auth";
 import { db } from "@/utils/firebase";
 import {
@@ -208,16 +215,20 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
+import axios from "axios";
+
+import { nounsMapConfig, ContentsContract } from "@/config/project";
 import { NftPhoto, NftRequestPhoto } from "@/models/photo";
 import { photoNFTSync, photoNFTDownload } from "@/utils/functions";
+import { switchNetwork } from "@/utils/MetaMask";
 import { shortID } from "@/utils/utils";
-import { ContentsContract } from "@/config/project";
-import { ContentsAttribute } from "@/models/SmartContract";
+import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
 
 export default defineComponent({
   components: {},
   setup() {
     const isRequestView = ref(false);
+    const hasAuthorityToken = ref(false);
     const store = useStore();
     const user = computed<User>(() => store.state.user);
     const errorAccount = ref(false);
@@ -329,19 +340,13 @@ export default defineComponent({
     };
 
     const fetchContentsTokens = async () => {
-      if (!networkContext.value) return;
-      const providerViewOnly = new ethers.providers.AlchemyProvider(
-        ContentsContract.network
-      );
-      const contractViewOnly = new ethers.Contract(
-        ContentsContract.address,
-        ContentsContract.wabi.abi,
-        providerViewOnly
-      );
-
+      if (networkContext.value) {
+        checkAuthorityToken();
+      }
+      if (!hasAuthorityToken.value) {
+        return;
+      }
       nftSyncing.value = true;
-      let result = await contractViewOnly.functions.totalSupply();
-      console.log("limit is ", result[0]);
       const log = await photoNFTSync();
       console.log(log);
       updateNftPhotos();
@@ -397,9 +402,51 @@ export default defineComponent({
         };
       downloadLink.value = ret.data.url;
     };
-
+    const checkAuthorityToken = async () => {
+      const provider = new ethers.providers.Web3Provider(store.state.ethereum);
+      const { name, chainId } = await provider.getNetwork();
+      console.info({ name }, { chainId });
+      const base = ContentsContract.alchemyUrl;
+      const request = {
+        method: "get",
+        url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${account.value}`,
+      };
+      try {
+        const response = await axios(request);
+        console.log(response);
+        const target = response.data.ownedNfts.filter(
+          (nft: AlchemyOwnedTokens) => {
+            console.log(nft.metadata.external_link);
+            if (
+              Number(nft.contract.address) ==
+              Number(ContentsContract.authorityToken)
+            ) {
+              if (ContentsContract.authorityTokenFilter) {
+                const base = ethers.BigNumber.from(
+                  ContentsContract.authorityTokenFilter
+                );
+                const target = ethers.BigNumber.from(nft.id.tokenId);
+                //opensea polygon ERC1155 uses 12 byte mask
+                const shift = ContentsContract.authorityTokenIdmask * 8; //8bit
+                return base.shr(shift).eq(target.shr(shift));
+              } else {
+                return true;
+              }
+            }
+            return false;
+          }
+        );
+        if (target.length > 0) {
+          console.log(target);
+          hasAuthorityToken.value = true;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
     return {
       isRequestView,
+      hasAuthorityToken,
       nftRequestPhotos,
       nftPhotos,
       nftOwnPhotos,
