@@ -105,7 +105,10 @@ export default defineComponent({
       routeCheck();
     });
     const routeCheck = () => {
-      if (route.path == getLocalePath(router, "/map")) {
+      if (
+        route.path == getLocalePath(router, "/map") ||
+        route.path == getLocalePath(router, "/nft")
+      ) {
         photoSelect.value.hide();
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if (!user.value && !isShownGuideLogin) {
