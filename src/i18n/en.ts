@@ -66,14 +66,14 @@ const lang = {
       "If you have a {tokenName}, the mint button below the photo is enabled and can support NFT conversion of the photo content (it costs gas).NFTed photos will be available for sale on OpenSea. For example, by distributing photos posted by people who have been affected by wars or disasters, we can directly support those who have been affected by the disaster. Please cooperate in NFT conversion of photos that you would like to support by carefully looking at the contents and explanations of the photos.",
     nftMintedTitle: "NFT Photo Contents",
     nftMintedDesc:
-      "You can purchase photos at OpenSea by clicking on the photos below. When you become the owner of a photo, it will be displayed in the Owned NFT photo and you can download and use the original image.",
+      "You can purchase photos at OpenSea by clicking on the photos below. When you become the owner of a photo and login with MetaMask, it will be displayed in the Owned NFT photo and you can download and use the original image.",
     mintCaution: "(You need to pay gas fee)",
     noAccount: "there are no Account",
     invalidNetwork: "invalid network: we neeed to connect ",
     switchNetwork: "Switch Network",
     justMint: "Thank you for minting. Please wait a little bit...",
     errorAccount:
-      "You haven't loign with valid wallet, Please logout once, and then login with MetaMask",
+      "You haven't loign with valid wallet, Please  Click top-right User menu, and logout once, and then login with MetaMask",
   },
   languages,
 };

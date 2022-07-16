@@ -55,7 +55,7 @@
 
       <div class="max-w-xl mx-auto text-left p-2">
         <div v-if="tokenGate == 'noAccount'">
-          <p>{{ $t("message.noAccount") }}</p>
+          <p>{{ $t("message.errorAccount") }}</p>
         </div>
         <div v-else-if="tokenGate == 'invalidNetwork'">
           <p>
@@ -128,7 +128,7 @@
 
       <div class="max-w-xl mx-auto text-left p-2">
         <div v-if="tokenGate == 'noAccount'">
-          <p>{{ $t("message.noAccount") }}</p>
+          <p>{{ $t("message.errorAccount") }}</p>
         </div>
         <div v-else-if="tokenGate == 'invalidNetwork'">
           <p>
@@ -325,7 +325,7 @@ export default defineComponent({
           console.log("not nounsmap created", doc.id);
           return;
         }
-        if (nphoto.owner.toLowerCase() == account.value.toLowerCase()) {
+        if (nphoto.owner.toLowerCase() == account.value?.toLowerCase()) {
           if (!nftOwnPhotos.value.find((v) => v.photoId == nphoto.photoId)) {
             console.log("new nft own found", nphoto);
             nftOwnPhotos.value.push(nphoto);
