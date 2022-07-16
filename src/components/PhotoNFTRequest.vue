@@ -13,7 +13,18 @@
       class="row-start-2 col-start-2 col-span-3 row-span-3 justify-center items-center font-mono"
       v-if="isShow"
     >
-      <div class="flex flex-col items-stretch md:items-center">
+      <div
+        v-if="errorAlready"
+        class="flex flex-col items-stretch md:items-center"
+      >
+        <span class="my-4 text-2xl text-white">
+          {{ $t("message.NFTuploadTitle") }}
+        </span>
+        <span class="my-4 text-xl text-white">
+          {{ $t("message.NFTAlreadyRequested") }}
+        </span>
+      </div>
+      <div v-else class="flex flex-col items-stretch md:items-center">
         <span class="my-4 text-2xl text-white">
           {{ $t("message.NFTuploadTitle") }}
         </span>
@@ -110,7 +121,8 @@ export default defineComponent({
   emits: {},
   setup() {
     const user = computed<User>(() => store.state.user);
-    const isShow = ref<boolean>();
+    const isShow = ref<boolean>(false);
+    const errorAlready = ref<boolean>(false);
     const fileInput = ref();
     const fileError = ref<boolean>(false);
     const previewImage = ref();
@@ -162,6 +174,12 @@ export default defineComponent({
         if (photoDoc.exists()) {
           console.log(photoDoc.data());
           //default icon size is 80, 30
+          const rphotoDoc = await getDoc(
+            doc(db, `nft_request_photos/${photoId}`)
+          );
+          if (rphotoDoc.exists()) {
+            errorAlready.value = true;
+          }
           isShow.value = true;
         } else {
           console.log("wrongUser", user.value?.uid);
@@ -217,6 +235,7 @@ export default defineComponent({
     };
     return {
       isShow,
+      errorAlready,
       fileInput,
       fileError,
       previewImage,

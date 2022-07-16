@@ -54,6 +54,8 @@ const lang = {
     NFTuploadTitle: "Will you request to make this photo to NFT?",
     NFTuploadDetail:
       "To make this photo to  NFT, please upload original imgae again (upload time depends on original photo quality, size), and input NFT title and description which is show with NFT.",
+    NFTAlreadyRequested:
+      "you already requested this contents. please go to NFT menu to check",
     nftFileError: "please select original image file",
     nameError: "please input title",
     descError: "please input descriptio",
