@@ -9,14 +9,28 @@ const lang = {
     nftMinted: "NFT済み写真コンテンツ",
     user: "ユーザー",
   },
+  function: {
+    requestAccount: "MetaMaskと接続",
+    fetchNFT: "再取得",
+    signinTwitter: "ログイン(Twitter)",
+    signinWallet: "ログイン(Wallet)",
+    signout: "ログアウト",
+    trynow: "使ってみる",
+    tryphoto: "今すぐ投稿",
+    requestNFT: "NFT化をリクエスト",
+  },
   label: {
     name: "タイトル",
     description: "説明",
     creator: "作者",
+    owner: "所有者",
     mint: "ミント",
     minting: "ミント中です",
     requestCount: "現在のリクエスト数",
     nftCount: "現在のNFT写真コンテンツ数",
+    nftOwnCount: "ご自身で保有しているNFT写真コンテンツ数",
+    downloadOriginal: "オリジナル画像のURLを取得",
+    downloadLink: "オリジナル画像をダウンロードする",
   },
   message: {
     hello: "こんにちは、世界",
@@ -24,7 +38,8 @@ const lang = {
       "地図情報付きの写真を簡単にTwitterで共有できます！  今すぐ試してみませんか？",
     guidephoto:
       "写真を投稿するには上記のボタンをクリック！　もしくは下記ボタンですぐに投稿できます！",
-    pleasesignin: "ログイン方法を選んでください",
+    pleasesignin:
+      "ログイン方法を選んでください(写真をNFT化したい場合はMetaMaskでログインしてください)",
     selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
@@ -47,18 +62,15 @@ const lang = {
       "あなたが{tokenName}を保持している場合、下記の写真の下のミントボタンが有効化されていて、写真コンテンツのNFT化をサポートすることができます（ガス代がかかります）。わたしたちは、写真の流通を通して戦争や、被災地のみなさんを直接支援したいとかんがえています。ご自身で写真の内容、説明をよく見てサポートしたいと写真にご協力ください。",
     nftMintedTitle: "NFT 写真コンテンツ",
     nftMintedDesc:
-      "下記の写真をクリックした先のOpenSeaで写真を購入することができます。写真のOwnerになるとOwnerBoxに表示され元画像をDownload、利用することができます。",
+      "下記の写真をクリックした先のOpenSeaで写真を購入することができます。写真のOwnerになると所有コンテンツに表示され元画像をDownload、利用することができます。",
     mintCaution: "（ガス代は発生します）",
-  },
-  function: {
-    requestAccount: "MetaMaskと接続",
-    fetchNFT: "再取得",
-    signinTwitter: "ログイン(Twitter)",
-    signinWallet: "ログイン(Wallet)",
-    signout: "ログアウト",
-    trynow: "使ってみる",
-    tryphoto: "今すぐ投稿",
-    requestNFT: "NFT化をリクエスト",
+    noAccount: "有効なWalletがありません",
+    invalidNetwork:
+      "ブロックチェーンのネットワークがNFTと異なります NFTネットワーク：",
+    switchNetwork: "ネットワークを切り替える",
+    justMint: "NFT化に協力ありがとうございます。しばらくお待ち下さい",
+    errorAccount:
+      "有効なWalletでログインしていません。一度ログアウトしてmetamaskでログインしてください。",
   },
   languages,
 };

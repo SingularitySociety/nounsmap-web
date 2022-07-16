@@ -220,7 +220,7 @@ const image = async (req: any, res: any) => {
     );
     return res.status(404).send(template_data);
   }
-  const path = photo_data.images.resizedImages["600"].path;
+  const path = photo_data.images.resizedImages["watermark"].path;
   console.log(path);
   const imageObj = {
     bucket: firebaseConfig.storageBucket,

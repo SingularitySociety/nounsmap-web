@@ -48,19 +48,19 @@
 
       <div class="max-w-xl mx-auto text-left p-2">
         <div v-if="tokenGate == 'noAccount'">
-          <p>there are no Account</p>
+          <p>{{ $t("message.noAccount") }}</p>
         </div>
         <div v-else-if="tokenGate == 'invalidNetwork'">
           <p>
-            invalid network: we neeed to connect {{ ContentsContract.network }}
+            {{ $t("message.invalidNetwork") }} {{ ContentsContract.network }}
           </p>
           <button @click="switchToValidNetwork" class="underline">
-            Switch Network
+            {{ $t("message.switchNetwork") }}
           </button>
         </div>
         <div v-else>
           <div v-if="justMinted">
-            <p>Thank you for minting. Please wait a little bit...</p>
+            <p>{{ $t("message.justMint") }}</p>
           </div>
         </div>
       </div>
@@ -102,28 +102,63 @@
     </div>
   </div>
   <div v-else>
-    <div v-if="nftPhotos" class="flex flex-col items-center m-4">
+    <div class="flex flex-col items-center m-4">
       <span class="my-4 text-2xl text-current">
         {{ $t("message.nftMintedTitle") }}
       </span>
       <span class="my-4 text-xl text-current">
         {{ $t("message.nftMintedDesc") }}
       </span>
-      <b>{{ $t("label.nftCount") }} :</b> {{ nftPhotos.length }}
+      <b>{{ $t("label.nftOwnCount") }} :</b> {{ nftOwnPhotos.length }}
 
       <div class="max-w-xl mx-auto text-left p-2">
         <div v-if="tokenGate == 'noAccount'">
-          <p>there are no Account</p>
+          <p>{{ $t("message.noAccount") }}</p>
         </div>
         <div v-else-if="tokenGate == 'invalidNetwork'">
           <p>
-            invalid network: we neeed to connect {{ ContentsContract.network }}
+            {{ $t("message.invalidNetwork") }} {{ ContentsContract.network }}
           </p>
           <button @click="switchToValidNetwork" class="underline">
-            Switch Network
+            {{ $t("message.switchNetwork") }}
           </button>
         </div>
       </div>
+      <div v-if="errorAccount" class="text-red-600">
+        {{ $t("message.errorAccount") }}
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div v-for="(nphoto, key) in nftOwnPhotos" :key="key">
+          <a
+            :href="
+              ContentsContract.openseaUrl +
+              ContentsContract.address +
+              nphoto.tokenId
+            "
+          >
+            <div class="flex flex-col">
+              <img :src="nphoto.photoURL" class="mt-4 w-48 rounded-xl" />
+              <span>{{ $t("label.name") }}:{{ nphoto.tokenURI.name }}</span>
+              <span
+                >{{ $t("label.description") }}:{{
+                  nphoto.tokenURI.description
+                }}</span
+              >
+            </div>
+          </a>
+          <button
+            @click="downloadOriginal(nphoto.photoId)"
+            class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
+          >
+            {{ $t("label.downloadOriginal") }}
+          </button>
+        </div>
+      </div>
+      <a v-if="downloadLink" :href="downloadLink" class="underline">
+        {{ $t("label.downloadLink") }}
+      </a>
+
+      <b class="mt-8">{{ $t("label.nftCount") }} :</b> {{ nftPhotos.length }}
 
       <div class="grid grid-cols-2 gap-4">
         <div v-for="(nphoto, key) in nftPhotos" :key="key">
@@ -142,6 +177,7 @@
                   nphoto.tokenURI.description
                 }}</span
               >
+              <span>{{ $t("label.owner") }}:{{ shortID(nphoto.owner) }}</span>
             </div>
           </a>
         </div>
@@ -154,8 +190,8 @@
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
-import { ChainIds, switchNetwork } from "../utils/MetaMask";
-import { NftPhoto, NftRequestPhoto } from "@/models/photo";
+import { switchNetwork } from "../utils/MetaMask";
+import { User } from "firebase/auth";
 import { db } from "@/utils/firebase";
 import {
   doc,
@@ -164,7 +200,8 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
-import { photoNFTSync } from "@/utils/functions";
+import { NftPhoto, NftRequestPhoto } from "@/models/photo";
+import { photoNFTSync, photoNFTDownload } from "@/utils/functions";
 import { shortID } from "@/utils/utils";
 import { ContentsContract } from "@/config/project";
 import { ContentsAttribute } from "@/models/SmartContract";
@@ -173,17 +210,38 @@ export default defineComponent({
   components: {},
   setup() {
     const isRequestView = ref(false);
-
-    // Following three lines must be changed for other networks
-    const expectedNetwork = ChainIds.RinkebyTestNet;
     const store = useStore();
+    const user = computed<User>(() => store.state.user);
+    const errorAccount = ref(false);
     const justMinted = ref(false);
-    const currentToken = ref(0);
 
     const nftRequestPhotos = ref([] as Array<NftRequestPhoto>);
     const nftPhotos = ref([] as Array<NftPhoto>);
+    const nftOwnPhotos = ref([] as Array<NftPhoto>);
+
+    const downloadLink = ref<string>();
 
     let prevProvider: ethers.providers.Web3Provider | null = null;
+    const tokenGate = computed(() => {
+      if (!store.state.account) {
+        return "noAccount";
+      }
+      if (parseInt(store.state.chainId) != parseInt(ContentsContract.chainId)) {
+        return "invalidNetwork";
+      }
+      fetchContentsTokens();
+      return "valid";
+    });
+    const switchToValidNetwork = async () => {
+      console.log(ContentsContract.chainId);
+      await switchNetwork(ContentsContract.chainId);
+    };
+    const account = computed(() => {
+      if (store.state.account) {
+        return store.state.account.toLowerCase();
+      }
+      return null;
+    });
     const networkContext = computed(() => {
       if (prevProvider) {
         console.log("Calling removeAllListners()");
@@ -193,7 +251,7 @@ export default defineComponent({
 
       if (
         store.state.account &&
-        parseInt(store.state.chainId) == parseInt(expectedNetwork)
+        parseInt(store.state.chainId) == parseInt(ContentsContract.chainId)
       ) {
         const provider = new ethers.providers.Web3Provider(
           store.state.ethereum
@@ -243,16 +301,20 @@ export default defineComponent({
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
         const nphoto: NftPhoto = doc.data();
-        if (!nphoto.nounsmapCreated) {
+        if (!nphoto.nounsmapCreated || !nphoto.photoId) {
           console.log("not nounsmap created", doc.id);
           return;
         }
-        if (
-          nphoto.photoId &&
-          !nftPhotos.value.find((v) => v.photoId == nphoto.photoId)
-        ) {
-          console.log("new nft found", nphoto);
-          nftPhotos.value.push(nphoto);
+        if (nphoto.owner.toLowerCase() == account.value.toLowerCase()) {
+          if (!nftOwnPhotos.value.find((v) => v.photoId == nphoto.photoId)) {
+            console.log("new nft own found", nphoto);
+            nftOwnPhotos.value.push(nphoto);
+          }
+        } else {
+          if (!nftPhotos.value.find((v) => v.photoId == nphoto.photoId)) {
+            console.log("new nft found", nphoto);
+            nftPhotos.value.push(nphoto);
+          }
         }
       });
     };
@@ -268,8 +330,7 @@ export default defineComponent({
         providerViewOnly
       );
       let result = await contractViewOnly.functions.totalSupply();
-      currentToken.value = result[0].toNumber();
-      console.log("limit is ", currentToken.value);
+      console.log("limit is ", result[0]);
       const log = await photoNFTSync();
       console.log(log);
       updateNftPhotos();
@@ -311,38 +372,35 @@ export default defineComponent({
 
       justMinted.value = true;
     };
-    const tokenGate = computed(() => {
-      if (!store.state.account) {
-        return "noAccount";
+    const downloadOriginal = async (_photoId: string) => {
+      console.log(user.value);
+      if (!account.value || account.value != user.value.uid) {
+        console.log("wrong user", account.value, user.value);
+        errorAccount.value = true;
+        return;
       }
-      if (parseInt(store.state.chainId) != parseInt(expectedNetwork)) {
-        return "invalidNetwork";
-      }
-      fetchContentsTokens();
-      return "valid";
-    });
-    const switchToValidNetwork = async () => {
-      console.log(expectedNetwork);
-      await switchNetwork(expectedNetwork);
+      const ret: { data: { success: boolean; url: string } } =
+        (await photoNFTDownload({ photoId: _photoId })) as {
+          data: { success: boolean; url: string };
+        };
+      downloadLink.value = ret.data.url;
     };
-    const account = computed(() => {
-      if (store.state.account) {
-        return store.state.account.toLowerCase();
-      }
-      return null;
-    });
+
     return {
       isRequestView,
       nftRequestPhotos,
       nftPhotos,
+      nftOwnPhotos,
+      downloadLink,
       account,
+      errorAccount,
       justMinted,
-      currentToken,
       tokenGate,
       ContentsContract,
       mint,
       switchToValidNetwork,
       shortID,
+      downloadOriginal,
     };
   },
 });

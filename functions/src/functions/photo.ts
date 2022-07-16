@@ -7,6 +7,15 @@ import * as map from "./map/map";
 import { ethers } from "ethers";
 import { firebaseConfig, ContentsContract } from "../common/project";
 
+const providerViewOnly = new ethers.providers.AlchemyProvider(
+  ContentsContract.network
+);
+const contractViewOnly = new ethers.Contract(
+  ContentsContract.address,
+  ContentsContract.wabi.abi,
+  providerViewOnly
+);
+
 const defaultIconURL =
   "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
 
@@ -26,14 +35,15 @@ const getIconPath = async (uid, pdata) => {
   }
 };
 
-const uploadOGPImage = async (
+const uploadImages = async (
   uid,
   photoId,
   pdata,
   _lat,
   _lng,
   _zoom,
-  ogpPath
+  ogpPath,
+  waterPath
 ) => {
   let tmpFile;
   const fromObj = {
@@ -43,6 +53,11 @@ const uploadOGPImage = async (
   const toObj = {
     bucket: firebaseConfig.storageBucket,
     name: ogpPath,
+    context: "image/jpeg",
+  };
+  const waterObj = {
+    bucket: firebaseConfig.storageBucket,
+    name: waterPath,
     context: "image/jpeg",
   };
   const tmpFiles = await Promise.all([
@@ -58,16 +73,25 @@ const uploadOGPImage = async (
     tmpFiles[1],
     tmpFiles[2]
   );
-  console.log(tmpBlend);
+  // watermarked (same as original posted)
+  const tmpWater = await imageUtil.blendWaterMarkLocal(
+    tmpFiles[1],
+    tmpFiles[2]
+  );
+
   const ret = await Promise.all([
     imageUtil.uploadFileToBucket(tmpBlend, toObj),
+    imageUtil.uploadFileToBucket(tmpWater, waterObj),
     fs.unlinkSync(tmpFile),
     fs.unlinkSync(tmpFiles[0]),
     fs.unlinkSync(tmpFiles[1]),
   ]);
   console.log(ret);
   fs.unlinkSync(tmpBlend as string);
-  return ret[0];
+  fs.unlinkSync(tmpWater as string);
+  return [ret[0],ret[1]];
+
+
 };
 
 // This function is called by users after post user's photo
@@ -100,18 +124,20 @@ export const posted = async (
   const FieldValue = require("firebase-admin").firestore.FieldValue;
   try {
     const ogpPath = `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`;
-    const url = await uploadOGPImage(
+    const waterPath = `images/users/${uid}/public_photos/${photoId}/watermark.jpg`;
+    const urls = await uploadImages(
       uid,
       photoId,
       pdata,
       _lat,
       _lng,
       _zoom,
-      ogpPath
+      ogpPath,
+      waterPath
     );
     const _iconURL = pdata.iconURL.length > 1 ? pdata.iconURL : defaultIconURL;
-    const _photoURL = pdata.images.resizedImages["600"].url;
-    console.log(url, _iconURL, _photoURL);
+    const _photoURL = urls[1];
+    console.log(urls, _iconURL, _photoURL);
     await db.doc(`photos/${photoId}`).set(
       {
         uid,
@@ -135,21 +161,27 @@ export const posted = async (
           ogp: {
             [600]: {
               path: ogpPath,
-              url,
+              url:urls[0],
             },
           },
+          resizedImages: {
+            "watermark": {
+              path: waterPath,
+              url:urls[1],
+            },
+          },          
         },
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
-    return { success: true, url };
+    return { success: true, urls};
   } catch (error) {
     throw utils.process_error(error);
   }
 };
 
-// This function is called by users after post user's photo
+// This function is called by users on nft photo request cretion
 export const nftPosted = async (
   db,
   data: any,
@@ -257,7 +289,7 @@ export const nftPosted = async (
   }
 };
 
-// This function is called by users after post user's photo
+// This function is called by user when open NFT view
 export const nftSync = async (
   db,
   data: any,
@@ -266,15 +298,6 @@ export const nftSync = async (
   const uid = utils.validate_auth(context);
   console.log("nftSync request from:", uid, data);
   try {
-    const providerViewOnly = new ethers.providers.AlchemyProvider(
-      ContentsContract.network
-    );
-    const contractViewOnly = new ethers.Contract(
-      ContentsContract.address,
-      ContentsContract.wabi.abi,
-      providerViewOnly
-    );
-
     //check latest token count, and already synced count
     let result = await contractViewOnly.functions.totalSupply();
     const limit = result[0].toNumber();
@@ -346,6 +369,52 @@ export const nftSync = async (
       );
     }
     return { success: true, limit };
+  } catch (error) {
+    throw utils.process_error(error);
+  }
+};
+
+// this can be called by only owner
+export const nftDownloadURL = async (
+  db,
+  data: any,
+  context: functions.https.CallableContext | Context
+) => {
+  console.log(data);
+  const { photoId } = data;
+  utils.validate_params({ photoId });
+  const regex = /^[0-9a-zA-Z-]+$/;
+  if (!regex.test(photoId)) {
+    throw utils.process_error(`wrong photoId:${photoId}`);
+  }
+  //check contents owner
+  /*
+  const uid = utils.validate_auth(context);
+  let result = await contractViewOnly.functions.ownerOfContents(photoId);
+  if (uid.toLowerCase() != result[0].toLowerCase()) {
+    throw utils.process_error(
+      `wrong user requested  request uid:${uid} actualOwner:${result[0]} photoId:${photoId}`
+    );
+  }
+  */
+  // check photo is exist
+  const photo = await db.doc(`photos/${photoId}`).get();
+  if (!photo || !photo.exists || !photo.data()) {
+    throw utils.process_error(`fire store data ,notfound  photoId:${photoId}`);
+  }
+  const puid = photo.data().uid;
+  const uphoto = await db.doc(`users/${puid}/public_photos/${photoId}`).get();
+  if (!uphoto || !uphoto.exists || !uphoto.data()) {
+    throw utils.process_error(
+      `fire store data ,notfound user:${puid} photoId:${photoId}`
+    );
+  }
+  try {
+    const url = await imageUtil.downloadLink({
+      name: `images/users/${puid}/public_photos/${photoId}/nft_original.jpg`,
+    });
+    console.log(url);
+    return { success: true, url };
   } catch (error) {
     throw utils.process_error(error);
   }

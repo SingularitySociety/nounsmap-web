@@ -60,6 +60,22 @@ export const downloadFileFromBucket = async (object) => {
   console.log("Image downloaded locally to", tempFilePath);
   return tempFilePath;
 };
+export const downloadLink = async (object) => {
+  const bucket = admin.storage().bucket(object.bucket);
+  const meta = await bucket.file(object.name).getMetadata();
+  //console.log("file meta ", meta);
+  const url =
+    process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST
+      ? `http://localhost:9199/v0/b/${bucket.name}/o/${encodeURIComponent(
+          object.name
+        )}?alt=media&token=${meta[0].metadata.firebaseStorageDownloadTokens}`
+      : `https://firebasestorage.googleapis.com/v0/b/${
+          bucket.name
+        }/o/${encodeURIComponent(object.name)}?alt=media&token=${
+          meta[0].metadata.firebaseStorageDownloadTokens
+        }`;
+  return url;
+};
 export const resizedImage = async (object, toFileFullPath, size) => {
   const bucketObj = admin.storage().bucket(object.bucket);
 

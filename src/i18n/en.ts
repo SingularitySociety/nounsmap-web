@@ -9,6 +9,16 @@ const lang = {
     nftRequest: "NFT Request contents",
     nftMinted: "NFT Minted contents",
   },
+  function: {
+    requestAccount: "Connect MetaMask",
+    fetchNFT: "Refresh!",
+    signinTwitter: "SignIn(Twitter)",
+    signinWallet: "SignIn(Wallet)",
+    signout: "SignOut",
+    trynow: "Start!",
+    tryphoto: "Upload now!",
+    requestNFT: "Request to make NFT!",
+  },
   label: {
     name: "title",
     description: "description",
@@ -16,14 +26,18 @@ const lang = {
     mint: "Mint",
     minting: "Minting,,",
     requestCount: "Rquest count",
-    nftCount: "現在のNFT写真コンテンツ数",
+    nftCount: "NFT Photo count",
+    nftOwnCount: "Your owned NFT Photo count",
+    downloadOriginal: "Get Download Link of Original photo!",
+    downloadLink: "Download Original quality photo!",
   },
   message: {
     hello: "hello world",
     guidesignin: "You can share(Tweet) photo with maps, Try it now!",
     guidephoto:
       "Click on the above button to upload your photos. Or try it with following button now!",
-    pleasesignin: "Please SignIn by",
+    pleasesignin:
+      "Please SignIn. (If you want to convert your photos to NFT, please log in with MetaMask)",
     selectImage: "Select image",
     uploadImage: "Upload Image!",
     spotPrivacyLevel: "SpotPrivacyLevel",
@@ -47,18 +61,14 @@ const lang = {
       "If you have a {tokenName}, the mint button below the photo is enabled and can support NFT conversion of the photo content (it costs gas). We want to directly support those affected by wars and disasters through the distribution of photographs. Please take a closer look at the contents and explanations of the photos and cooperate with the NFT conversion of the photos you want to support.",
     nftMintedTitle: "NFT Photo Contents",
     nftMintedDesc:
-      "You can purchase photos at OpenSea by clicking on the photos below. When you become the owner of a photo, it will be displayed in the Owner Box and you can download and use the original image.",
+      "You can purchase photos at OpenSea by clicking on the photos below. When you become the owner of a photo, it will be displayed in the Owned NFT photo and you can download and use the original image.",
     mintCaution: "(You need to pay gas fee)",
-  },
-  function: {
-    requestAccount: "Connect MetaMask",
-    fetchNFT: "Refresh!",
-    signinTwitter: "SignIn(Twitter)",
-    signinWallet: "SignIn(Wallet)",
-    signout: "SignOut",
-    trynow: "Start!",
-    tryphoto: "Upload now!",
-    requestNFT: "Request to make NFT!",
+    noAccount: "there are no Account",
+    invalidNetwork: "invalid network: we neeed to connect ",
+    switchNetwork: "Switch Network",
+    justMint: "Thank you for minting. Please wait a little bit...",
+    errorAccount:
+      "You haven't loign with valid wallet, Please logout once, and then login with MetaMask",
   },
   languages,
 };
