@@ -406,14 +406,17 @@ export default defineComponent({
         console.info("no user info");
         return;
       }
-      if (0 < Object.keys(pins).length) {
+      const photos = await getDocs(
+        collection(db, `users/${user.value.uid}/public_photos/`)
+      );
+      if (photos.size == Object.keys(pins).length) {
         console.log(pins);
         //Object.keys(pins).forEach((key: string) => pins[key].showPhoto());
         return;
       }
-      const photos = await getDocs(
-        collection(db, `users/${user.value.uid}/public_photos/`)
-      );
+      //delete current pins
+      Object.values(pins).forEach((pin) => {pin.delete();});
+
       if (photos.size) {
         store.commit("setUserPhotoState", "exist");
       } else {

@@ -57,6 +57,7 @@ const lang = {
     nftFileError: "please select original image file",
     nameError: "please input title",
     descError: "please input descriptio",
+    nftRequestButton: "If You can request make NFT this photo.",
     nftRequestTitle: "Photo content that someone wants to be NFT",
     nftRequestDesc:
       "If you have a {tokenName}, the mint button below the photo is enabled and can support NFT conversion of the photo content (it costs gas). We want to directly support those affected by wars and disasters through the distribution of photographs. Please take a closer look at the contents and explanations of the photos and cooperate with the NFT conversion of the photos you want to support.",
