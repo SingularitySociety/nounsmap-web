@@ -75,7 +75,7 @@ const uploadImages = async (
   );
   // watermarked (same as original posted)
   const tmpWater = await imageUtil.blendWaterMarkLocal(
-    tmpFiles[1],
+    tmpFile,
     tmpFiles[2]
   );
 
