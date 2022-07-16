@@ -415,7 +415,9 @@ export default defineComponent({
         return;
       }
       //delete current pins
-      Object.values(pins).forEach((pin) => {pin.delete();});
+      Object.values(pins).forEach((pin) => {
+        pin.delete();
+      });
 
       if (photos.size) {
         store.commit("setUserPhotoState", "exist");

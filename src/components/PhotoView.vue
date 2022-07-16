@@ -49,14 +49,14 @@
       v-if="isWalletUser"
       class="row-start-5 col-start-4 col-span-1 row-span-1 shrink-0 py-2 flex justify-center items-center"
     >
-      <div class="flex flex-column items-center"  @click="nftRequest">
-        <i 
-          class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-           >generating_tokens</i
+      <div class="flex flex-column items-center" @click="nftRequest">
+        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+          >generating_tokens</i
         >
-        <span class="text-white text-large ">{{$t("message.nftRequestButton")}}</span>
-    </div>
-
+        <span class="text-white text-large">{{
+          $t("message.nftRequestButton")
+        }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -64,7 +64,13 @@
 import { useStore } from "vuex";
 import { User } from "firebase/auth";
 import { nounsMapConfig } from "@/config/project";
-import { defineComponent, ref, watch, computed, WritableComputedRef } from "vue";
+import {
+  defineComponent,
+  ref,
+  watch,
+  computed,
+  WritableComputedRef,
+} from "vue";
 import router from "@/router";
 import { PhotoPubData } from "@/models/photo";
 
@@ -73,25 +79,27 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const user = computed<User>(() => store.state.user);
-    watch(user, (cur) => {
+    watch(user, () => {
       checkUser();
     });
     const checkUser = () => {
-      if(store.state.userType == "wallet" && clickedPhoto.value?.uid == user.value?.uid){
-        isWalletUser.value=true;
+      if (
+        store.state.userType == "wallet" &&
+        clickedPhoto.value?.uid == user.value?.uid
+      ) {
+        isWalletUser.value = true;
       } else {
-        isWalletUser.value=false;
+        isWalletUser.value = false;
       }
-    }
+    };
     const isWalletUser = ref(false);
     const clickedPhoto: WritableComputedRef<PhotoPubData> = computed({
       get: () => store.state.clickedPhoto as PhotoPubData,
       set: (val) => store.commit("setClickedPhoto", val),
     });
-    watch(clickedPhoto, (cur) => {
+    watch(clickedPhoto, () => {
       checkUser();
-    }
-
+    });
     const close = () => {
       router.push("../map");
     };

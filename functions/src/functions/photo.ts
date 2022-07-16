@@ -74,10 +74,7 @@ const uploadImages = async (
     tmpFiles[2]
   );
   // watermarked (same as original posted)
-  const tmpWater = await imageUtil.blendWaterMarkLocal(
-    tmpFile,
-    tmpFiles[2]
-  );
+  const tmpWater = await imageUtil.blendWaterMarkLocal(tmpFile, tmpFiles[2]);
 
   const ret = await Promise.all([
     imageUtil.uploadFileToBucket(tmpBlend, toObj),
@@ -89,9 +86,7 @@ const uploadImages = async (
   console.log(ret);
   fs.unlinkSync(tmpBlend as string);
   fs.unlinkSync(tmpWater as string);
-  return [ret[0],ret[1]];
-
-
+  return [ret[0], ret[1]];
 };
 
 // This function is called by users after post user's photo
@@ -161,21 +156,21 @@ export const posted = async (
           ogp: {
             [600]: {
               path: ogpPath,
-              url:urls[0],
+              url: urls[0],
             },
           },
           resizedImages: {
-            "watermark": {
+            watermark: {
               path: waterPath,
-              url:urls[1],
+              url: urls[1],
             },
-          },          
+          },
         },
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
-    return { success: true, urls};
+    return { success: true, urls };
   } catch (error) {
     throw utils.process_error(error);
   }
