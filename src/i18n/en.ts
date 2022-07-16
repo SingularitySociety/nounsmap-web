@@ -25,6 +25,7 @@ const lang = {
     creator: "creator",
     mint: "Mint",
     minting: "Minting,,",
+    syncing: "NFT contents syncing,,",
     requestCount: "Rquest count",
     nftCount: "NFT Photo count",
     nftOwnCount: "Your owned NFT Photo count",

@@ -31,6 +31,13 @@
       >
     </li>
   </ul>
+  <div v-if="nftSyncing" class="text-right">
+    <i class="animate-spin material-icons text-lg text-op-teal mr-2"
+      >schedule</i
+    >
+    {{ $t("label.syncing") }}
+  </div>
+
   <div v-if="isRequestView">
     <div v-if="nftRequestPhotos" class="flex flex-col items-center m-4">
       <span class="my-4 text-2xl text-current">
@@ -127,6 +134,7 @@
       <div v-if="errorAccount" class="text-red-600">
         {{ $t("message.errorAccount") }}
       </div>
+
       <div class="grid grid-cols-2 gap-4">
         <div v-for="(nphoto, key) in nftOwnPhotos" :key="key">
           <a
@@ -214,6 +222,7 @@ export default defineComponent({
     const user = computed<User>(() => store.state.user);
     const errorAccount = ref(false);
     const justMinted = ref(false);
+    const nftSyncing = ref(false);
 
     const nftRequestPhotos = ref([] as Array<NftRequestPhoto>);
     const nftPhotos = ref([] as Array<NftPhoto>);
@@ -329,12 +338,15 @@ export default defineComponent({
         ContentsContract.wabi.abi,
         providerViewOnly
       );
+
+      nftSyncing.value = true;
       let result = await contractViewOnly.functions.totalSupply();
       console.log("limit is ", result[0]);
       const log = await photoNFTSync();
       console.log(log);
       updateNftPhotos();
       updateNftRequestPhotos();
+      nftSyncing.value = false;
     };
     const mint = async (_from: string, _photoId: string) => {
       if (!networkContext.value) return;
@@ -397,6 +409,7 @@ export default defineComponent({
       justMinted,
       tokenGate,
       ContentsContract,
+      nftSyncing,
       mint,
       switchToValidNetwork,
       shortID,
