@@ -56,3 +56,20 @@ export const ethereumConfig = {
   ]
 };
 
+export const ContentsContract = {
+  name: "ContentsToken(testnets)",
+  chainId: "0x4",
+  network: "rinkeby",
+  wabi: require("../abi/ContentsToken.json"), // wrapped abi
+  address: "0xdc21b1FDAb45002AFEB117Ba146683AbB01BD040",
+  group: "photo",
+  category: "",
+  width: 512,
+  height: 512,
+  openseaUrl: "https://testnets.opensea.io/assets/rinkeby/",
+  alchemyUrl: "https://eth-rinkeby.alchemyapi.io/v2/",
+  authorityToken: "0x1602155eB091F863e7e776a83e1c330c828ede19", //nouns love
+  authorityTokenName: "NounsLove(TestNets)", //nouns love
+  authorityTokenFilter: null,
+  authorityTokenIdmask: 0,
+};

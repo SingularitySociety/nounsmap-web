@@ -4,7 +4,7 @@ import * as utils from "../lib/utils";
 import { Context } from "../models/TestType";
 import * as imageUtil from "./image/imageUtil";
 import * as map from "./map/map";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { firebaseConfig, ContentsContract } from "../common/project";
 
 const providerViewOnly = new ethers.providers.AlchemyProvider(
@@ -310,18 +310,20 @@ export const nftSync = async (
     })();
     console.log(start, end);
 
-    for (let i = start; i < end; i++) {
-      const uri = (await contractViewOnly.functions.tokenURI(i))[0];
+    for (let idx = start; idx < end; idx++) {
+      const bigid = (await contractViewOnly.functions.tokenByIndex(idx))[0];
+      const id = (bigid as BigNumber).toNumber();
+      const uri = (await contractViewOnly.functions.tokenURI(id))[0];
       const tokenURI = JSON.parse(
         Buffer.from(
           uri.substr("data:application/json;base64,".length),
           "base64"
         ).toString()
       );
-      const photoId = (await contractViewOnly.functions.getContents(i))[0];
-      const attribute = (await contractViewOnly.functions.getAttributes(i))[0];
-      console.log(photoId, attribute);
-      const owner = (await contractViewOnly.functions.ownerOf(i))[0];
+      const photoId = (await contractViewOnly.functions.getContents(id))[0];
+      const attribute = (await contractViewOnly.functions.getAttributes(id))[0];
+      console.log(id, photoId, attribute);
+      const owner = (await contractViewOnly.functions.ownerOf(id))[0];
       const photo = await db.doc(`nft_photos/${photoId}`).get();
       if (photo && photo.exists && photo.data()) {
         continue;
@@ -333,11 +335,12 @@ export const nftSync = async (
       }
       const FieldValue = require("firebase-admin").firestore.FieldValue;
       const { iconURL, photoURL, lat, lng, zoom } = reqDoc.data();
+      console.log("set nft_photos",photoId);
       db.doc(`nft_photos/${photoId}`).set({
         nounsmapCreated: true,
         photoId,
         tokenURI,
-        tokenId: i,
+        tokenId: id,
         contract: ContentsContract.address,
         iconURL,
         photoURL,
@@ -348,6 +351,7 @@ export const nftSync = async (
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
+      console.log("update nft_request_photos",photoId);
       await db.doc(`nft_request_photos/${photoId}`).update(
         {
           status: "minted",
@@ -355,6 +359,7 @@ export const nftSync = async (
         },
         { merge: true }
       );
+      console.log("update config nft_sync",end);
       await db.doc(`configs/nft_sync`).set(
         {
           checkedAddress: ContentsContract.address,

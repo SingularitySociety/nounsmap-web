@@ -363,17 +363,19 @@ export default defineComponent({
       }
       const pdata: NftRequestPhoto = photo.data() as NftRequestPhoto;
       console.log(pdata);
+      const {group,category,width,height} = ContentsContract;
       const asset: ContentsAttribute = {
-        group: "photo",
-        category: "news",
-        tag: "",
-        width: 512,
-        height: 512,
-        minter: "",
-        metadata: new Uint8Array(),
+        group,
+        category,
+        tag: "", //TBD
+        width,
+        height,
+        minter: "", //TBD
+        metadata: new Uint8Array(), //TBD
         name: pdata.title,
         description: pdata.description,
         soulbound: account.value,
+        creator: _from,
       };
       await networkContext.value.contract.functions.mint(
         _from,

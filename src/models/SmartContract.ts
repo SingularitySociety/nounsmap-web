@@ -53,4 +53,5 @@ export interface ContentsAttribute {
   description: string;
   metadata: Uint8Array;
   soulbound: string;
+  creator: string;
 }
