@@ -335,7 +335,7 @@ export const nftSync = async (
       }
       const FieldValue = require("firebase-admin").firestore.FieldValue;
       const { iconURL, photoURL, lat, lng, zoom } = reqDoc.data();
-      console.log("set nft_photos",photoId);
+      console.log("set nft_photos", photoId);
       db.doc(`nft_photos/${photoId}`).set({
         nounsmapCreated: true,
         photoId,
@@ -351,7 +351,7 @@ export const nftSync = async (
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
-      console.log("update nft_request_photos",photoId);
+      console.log("update nft_request_photos", photoId);
       await db.doc(`nft_request_photos/${photoId}`).update(
         {
           status: "minted",
@@ -359,7 +359,7 @@ export const nftSync = async (
         },
         { merge: true }
       );
-      console.log("update config nft_sync",end);
+      console.log("update config nft_sync", end);
       await db.doc(`configs/nft_sync`).set(
         {
           checkedAddress: ContentsContract.address,
@@ -392,14 +392,14 @@ export const nftDownloadURL = async (
   //check contents owner
   const nftphoto = await db.doc(`nft_photos/${photoId}`).get();
   const tokenId = nftphoto.data().tokenId;
-  console.log("tokenId:",tokenId);
+  console.log("tokenId:", tokenId);
   let result = await contractViewOnly.functions.ownerOf(tokenId);
   if (uid.toLowerCase() != result[0].toLowerCase()) {
     throw utils.process_error(
       `wrong user requested  request uid:${uid} actualOwner:${result[0]} photoId:${photoId}`
     );
   }
-  
+
   // check photo is exist
   const photo = await db.doc(`photos/${photoId}`).get();
   if (!photo || !photo.exists || !photo.data()) {

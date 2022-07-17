@@ -177,7 +177,7 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
           top: 30,
           left: 130,
         },
-     ])
+      ])
       .toFile(tmpFile);
     return tmpFile;
   } catch (e) {
