@@ -29,20 +29,12 @@
           :src="clickedPhoto.iconURL"
           alt="nft icon"
         />
-        <a
-          :href="
-            'https://twitter.com/intent/tweet?url=https://' +
-            nounsMapConfig.hostName +
-            '/p/' +
-            clickedPhoto.photoId
-          "
-          target="_blank"
-          rel="noopener noreferrer"
+        <i
+          class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+          @click="openTweetPopup(clickedPhoto.photoId)"
+          >share</i
         >
-          <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-            >share</i
-          >
-        </a>
+        <!-- </a> -->
       </div>
     </div>
     <div
@@ -106,12 +98,28 @@ export default defineComponent({
     const nftRequest = () => {
       store.commit("setNftRequestPhoto", clickedPhoto.value);
     };
+    const openTweetPopup = (photoId: string) => {
+      const url =
+        "https://twitter.com/intent/tweet?url=https://" +
+        nounsMapConfig.hostName +
+        "/p/" +
+        photoId;
+      const width = 400,
+        height = 300;
+      const params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,
+                      width=${width},height=${height},left=${
+        (window.screen.width - width) / 2
+      },top=${(window.screen.height - height) / 2}`;
+
+      window.open(url, url, params);
+    };
     return {
       nounsMapConfig,
       clickedPhoto,
       isWalletUser,
       close,
       nftRequest,
+      openTweetPopup,
     };
   },
 });
