@@ -149,6 +149,7 @@
             :href="
               ContentsContract.openseaUrl +
               ContentsContract.address +
+              '/' +
               nphoto.tokenId
             "
           >
@@ -182,6 +183,7 @@
             :href="
               ContentsContract.openseaUrl +
               ContentsContract.address +
+              '/' +
               nphoto.tokenId
             "
           >
@@ -363,7 +365,7 @@ export default defineComponent({
       }
       const pdata: NftRequestPhoto = photo.data() as NftRequestPhoto;
       console.log(pdata);
-      const {group,category,width,height} = ContentsContract;
+      const { group, category, width, height } = ContentsContract;
       const asset: ContentsAttribute = {
         group,
         category,
