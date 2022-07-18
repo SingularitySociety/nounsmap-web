@@ -20,3 +20,13 @@ export const shortID = (_id: string) => {
     return _id.slice(0, 4) + ".." + _id.slice(-3);
   }
 };
+
+// Add init status to bool
+export const InitBool = {
+  init: 'init',
+  true: 'true',
+  false: 'false',
+} as const;
+
+export type InitBoolType = typeof InitBool[keyof typeof InitBool];
+export const AllInitBool = Object.values(InitBool);

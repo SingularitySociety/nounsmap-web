@@ -1,6 +1,5 @@
 import { createStore } from "vuex";
 import { User } from "firebase/auth";
-import { startMonitoringMetamask } from "@/utils/MetaMask";
 import { NFT, TokenContract } from "@/models/SmartContract";
 import { PhotoPubData, PhotoInfo } from "@/models/photo";
 
@@ -51,9 +50,6 @@ export default createStore<State>({
     //eslint-disable-next-line  @typescript-eslint/no-explicit-any
     setEthereum(state: State, ethereum: any | null) {
       state.ethereum = ethereum;
-      if (state.ethereum) {
-        startMonitoringMetamask();
-      }
     },
     setUser(state: State, user: User | null) {
       state.user = user;

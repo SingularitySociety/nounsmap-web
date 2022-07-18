@@ -1,13 +1,13 @@
 <template>
   <ul class="flex border-b" v-if="isRequestView">
-    <li class="-mb-px mr-1">
-      <a
+    <li class="-mb-px mr-1 cursor-pointer">
+      <span
         class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold"
         href="#"
-        >{{ $t("menu.nftRequest") }}</a
+        >{{ $t("menu.nftRequest") }}</span
       >
     </li>
-    <li class="mr-1" @click="isRequestView = false">
+    <li class="mr-1 " @click="isRequestView = false">
       <a
         class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
         href="#"
@@ -84,7 +84,7 @@
             <span>{{ $t("label.description") }}:{{ photo.description }}</span>
             <p>
               <button
-                v-if="photo?.status == 'init' && hasAuthorityToken"
+                v-if="photo?.status == 'init' && hasAuthorityToken == InitBool.true"
                 @click="mint(photo.creator, photo.photoId)"
                 class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
               >
@@ -223,14 +223,14 @@ import { nounsMapConfig, ContentsContract } from "@/config/project";
 import { NftPhoto, NftRequestPhoto } from "@/models/photo";
 import { photoNFTSync, photoNFTDownload } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
-import { shortID } from "@/utils/utils";
+import { shortID, InitBool, InitBoolType } from "@/utils/utils";
 import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
 
 export default defineComponent({
   components: {},
   setup() {
     const isRequestView = ref(false);
-    const hasAuthorityToken = ref(false);
+    const hasAuthorityToken = ref<InitBoolType>(InitBool.init);
     const store = useStore();
     const user = computed<User>(() => store.state.user);
     const errorAccount = ref(false);
@@ -278,6 +278,7 @@ export default defineComponent({
         const provider = new ethers.providers.Web3Provider(
           store.state.ethereum
         );
+        console.log("update ContentsContract");
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
           ContentsContract.address,
@@ -321,7 +322,7 @@ export default defineComponent({
       const photos = await getDocs(collection(db, `nft_photos/`));
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
+        // console.log(doc.id, " => ", doc.data());
         const nphoto: NftPhoto = doc.data();
         if (!nphoto.nounsmapCreated || !nphoto.photoId) {
           console.log("not nounsmap created", doc.id);
@@ -345,7 +346,7 @@ export default defineComponent({
       if (networkContext.value) {
         checkAuthorityToken();
       }
-      if (!hasAuthorityToken.value) {
+      if (hasAuthorityToken.value != InitBool.true ) {
         return;
       }
       nftSyncing.value = true;
@@ -407,20 +408,23 @@ export default defineComponent({
       downloadLink.value = ret.data.url;
     };
     const checkAuthorityToken = async () => {
-      const provider = new ethers.providers.Web3Provider(store.state.ethereum);
-      const { name, chainId } = await provider.getNetwork();
-      console.info({ name }, { chainId });
-      const base = ContentsContract.alchemyUrl;
-      const request = {
-        method: "get",
-        url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${account.value}`,
-      };
+      if(hasAuthorityToken.value != InitBool.init ){
+        //already checked once.
+        return;
+      }
       try {
+        const provider = new ethers.providers.Web3Provider(store.state.ethereum);
+        const { name, chainId } = await provider.getNetwork();
+        console.info({ name }, { chainId });
+        const base = ContentsContract.alchemyUrl;
+        const request = {
+          method: "get",
+          url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${account.value}`,
+        };
         const response = await axios(request);
         console.log(response);
         const target = response.data.ownedNfts.filter(
           (nft: AlchemyOwnedTokens) => {
-            console.log(nft.metadata.external_link);
             if (
               Number(nft.contract.address) ==
               Number(ContentsContract.authorityToken)
@@ -442,7 +446,9 @@ export default defineComponent({
         );
         if (target.length > 0) {
           console.log(target);
-          hasAuthorityToken.value = true;
+          hasAuthorityToken.value = InitBool.true;
+        } else {
+          hasAuthorityToken.value = InitBool.false;
         }
       } catch (error) {
         console.log(error);
@@ -461,6 +467,7 @@ export default defineComponent({
       tokenGate,
       ContentsContract,
       nftSyncing,
+      InitBool,
       mint,
       switchToValidNetwork,
       shortID,
