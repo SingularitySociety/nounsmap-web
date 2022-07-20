@@ -88,7 +88,7 @@ export const initializeEthereum = () => {
       store.commit("setEthereum", ethereum);
       if (ethereum) {
         startMonitoringMetamask();
-      }      
+      }
     }
   };
   const ethereum = window.ethereum;
@@ -113,8 +113,7 @@ export const startMonitoringMetamask = () => {
     const provider = new ethers.providers.Web3Provider(store.state.ethereum);
     const { name, chainId } = await provider.getNetwork();
     console.info({ name }, { chainId });
-    store.commit("setChainId", chainId);    
-  
+    store.commit("setChainId", chainId);
   });
   if (store.getters.hasMetaMask) {
     const ethereum = store.state.ethereum;

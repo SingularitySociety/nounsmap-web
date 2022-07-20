@@ -6,8 +6,8 @@ import * as imageUtil from "./image/imageUtil";
 import * as map from "./map/map";
 import { BigNumber, ethers } from "ethers";
 import { firebaseConfig, ContentsContract } from "../common/project";
-import {FieldValue} from "firebase-admin/firestore"
-  
+import { FieldValue } from "firebase-admin/firestore";
+
 const providerViewOnly = new ethers.providers.AlchemyProvider(
   ContentsContract.network
 );
@@ -92,7 +92,7 @@ const uploadImages = async (
 
 // This function is called by users after post user's photo
 export const posted = async (
-  db ,
+  db,
   data: any,
   context: functions.https.CallableContext | Context
 ) => {

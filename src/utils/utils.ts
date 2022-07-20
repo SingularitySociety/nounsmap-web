@@ -23,9 +23,9 @@ export const shortID = (_id: string) => {
 
 // Add init status to bool
 export const InitBool = {
-  init: 'init',
-  true: 'true',
-  false: 'false',
+  init: "init",
+  true: "true",
+  false: "false",
 } as const;
 
 export type InitBoolType = typeof InitBool[keyof typeof InitBool];

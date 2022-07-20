@@ -7,7 +7,7 @@
         >{{ $t("menu.nftRequest") }}</span
       >
     </li>
-    <li class="mr-1 " @click="isRequestView = false">
+    <li class="mr-1" @click="isRequestView = false">
       <a
         class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
         href="#"
@@ -84,7 +84,9 @@
             <span>{{ $t("label.description") }}:{{ photo.description }}</span>
             <p>
               <button
-                v-if="photo?.status == 'init' && hasAuthorityToken == InitBool.true"
+                v-if="
+                  photo?.status == 'init' && hasAuthorityToken == InitBool.true
+                "
                 @click="mint(photo.creator, photo.photoId)"
                 class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
               >
@@ -221,7 +223,7 @@ import axios from "axios";
 
 import { nounsMapConfig, ContentsContract } from "@/config/project";
 import { NftPhoto, NftRequestPhoto } from "@/models/photo";
-import { photoNFTSync, photoNFTDownload } from "@/utils/functions";
+import { photoNFTSync, photoNFTDownload, photoNFTPosted } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
 import { shortID, InitBool, InitBoolType } from "@/utils/utils";
 import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
@@ -346,7 +348,7 @@ export default defineComponent({
       if (networkContext.value) {
         checkAuthorityToken();
       }
-      if (hasAuthorityToken.value != InitBool.true ) {
+      if (hasAuthorityToken.value != InitBool.true) {
         return;
       }
       nftSyncing.value = true;
@@ -408,12 +410,14 @@ export default defineComponent({
       downloadLink.value = ret.data.url;
     };
     const checkAuthorityToken = async () => {
-      if(hasAuthorityToken.value != InitBool.init ){
+      if (hasAuthorityToken.value != InitBool.init) {
         //already checked once.
         return;
       }
       try {
-        const provider = new ethers.providers.Web3Provider(store.state.ethereum);
+        const provider = new ethers.providers.Web3Provider(
+          store.state.ethereum
+        );
         const { name, chainId } = await provider.getNetwork();
         console.info({ name }, { chainId });
         const base = ContentsContract.alchemyUrl;
