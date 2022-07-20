@@ -246,3 +246,10 @@ export const uploadFileToBucket = async (tmpFile, object) => {
   }
   return false;
 };
+
+export const copyFileToBucket = async (fromObj, toPath) => {
+  const bucketObj = admin.storage().bucket(fromObj.bucket);
+  const ret = await bucketObj.file(fromObj.name).copy(toPath);
+  console.log("Image copied", ret);
+  return ;  
+};

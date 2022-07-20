@@ -226,14 +226,16 @@ export const nftPosted = async (
       tmpFiles[1]
     );
     console.log(tmpBlend);
-    const watermarkPath = `images/users/${uid}/public_photos/${photoId}/watermark.jpg`;
+    const watermarkPath = `images/nft_photos/${photoId}/watermark.jpg`;
     const toObj = {
       bucket: firebaseConfig.storageBucket,
       name: watermarkPath,
       context: "image/jpeg",
     };
+    const toNft = `images/nft_photos/${photoId}/nft_original.jpg`;
     const ret = await Promise.all([
       imageUtil.uploadFileToBucket(tmpBlend, toObj),
+      imageUtil.copyFileToBucket(fromObj, toNft),
       fs.unlinkSync(tmpFile),
       fs.unlinkSync(tmpFiles[0]),
       //fs.unlinkSync(tmpFiles[1]),
@@ -389,32 +391,19 @@ export const nftDownloadURL = async (
   if (!regex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
-  //check contents owner
-  const nftphoto = await db.doc(`nft_photos/${photoId}`).get();
-  const tokenId = nftphoto.data().tokenId;
-  console.log("tokenId:", tokenId);
-  let result = await contractViewOnly.functions.ownerOf(tokenId);
-  if (uid.toLowerCase() != result[0].toLowerCase()) {
-    throw utils.process_error(
-      `wrong user requested  request uid:${uid} actualOwner:${result[0]} photoId:${photoId}`
-    );
-  }
-
-  // check photo is exist
-  const photo = await db.doc(`photos/${photoId}`).get();
-  if (!photo || !photo.exists || !photo.data()) {
-    throw utils.process_error(`fire store data ,notfound  photoId:${photoId}`);
-  }
-  const puid = photo.data().uid;
-  const uphoto = await db.doc(`users/${puid}/public_photos/${photoId}`).get();
-  if (!uphoto || !uphoto.exists || !uphoto.data()) {
-    throw utils.process_error(
-      `fire store data ,notfound user:${puid} photoId:${photoId}`
-    );
-  }
   try {
+    //check contents owner
+    const bigId = (await contractViewOnly.functions.getTokenId(photoId))[0];
+    console.log("tokenId:", bigId);
+    const tokenId = (bigId as BigNumber).toNumber();
+    let result = await contractViewOnly.functions.ownerOf(tokenId);
+    if (uid.toLowerCase() != result[0].toLowerCase()) {
+      throw utils.process_error(
+        `wrong user requested  request uid:${uid} actualOwner:${result[0]} photoId:${photoId}`
+      );
+    }
     const url = await imageUtil.downloadLink({
-      name: `images/users/${puid}/public_photos/${photoId}/nft_original.jpg`,
+      name: `images/nft_photos/${photoId}/nft_original.jpg`,
     });
     console.log(url);
     return { success: true, url };
