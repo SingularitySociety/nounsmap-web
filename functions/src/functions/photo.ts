@@ -6,7 +6,8 @@ import * as imageUtil from "./image/imageUtil";
 import * as map from "./map/map";
 import { BigNumber, ethers } from "ethers";
 import { firebaseConfig, ContentsContract } from "../common/project";
-
+import {FieldValue} from "firebase-admin/firestore"
+  
 const providerViewOnly = new ethers.providers.AlchemyProvider(
   ContentsContract.network
 );
@@ -91,7 +92,7 @@ const uploadImages = async (
 
 // This function is called by users after post user's photo
 export const posted = async (
-  db,
+  db ,
   data: any,
   context: functions.https.CallableContext | Context
 ) => {
@@ -116,7 +117,6 @@ export const posted = async (
   }
   const pdata = photo.data();
   console.log(pdata);
-  const FieldValue = require("firebase-admin").firestore.FieldValue;
   try {
     const ogpPath = `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`;
     const waterPath = `images/users/${uid}/public_photos/${photoId}/watermark.jpg`;
@@ -244,7 +244,6 @@ export const nftPosted = async (
     console.log(ret, url);
     fs.unlinkSync(tmpBlend as string);
 
-    const FieldValue = require("firebase-admin").firestore.FieldValue;
     // update image meta for user
     await db.doc(`users/${uid}/public_photos/${photoId}`).update(
       {
@@ -335,7 +334,6 @@ export const nftSync = async (
         console.error("no request doc on photoId:", photoId);
         continue;
       }
-      const FieldValue = require("firebase-admin").firestore.FieldValue;
       const { iconURL, photoURL, lat, lng, zoom } = reqDoc.data();
       console.log("set nft_photos", photoId);
       db.doc(`nft_photos/${photoId}`).set({
