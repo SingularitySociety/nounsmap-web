@@ -395,7 +395,7 @@ export const nftDownloadURL = async (
     console.log("tokenId:", bigId);
     const tokenId = (bigId as BigNumber).toNumber();
     let result = await contractViewOnly.functions.ownerOf(tokenId);
-    if (uid.toLowerCase() != result[0].toLowerCase()) {
+    if (ethers.utils.getAddress(uid) !== ethers.utils.getAddress(result[0])) {
       throw utils.process_error(
         `wrong user requested  request uid:${uid} actualOwner:${result[0]} photoId:${photoId}`
       );

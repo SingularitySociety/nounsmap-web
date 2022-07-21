@@ -76,6 +76,7 @@ import { getLocalePath, getLocaleName } from "@/i18n/utils";
 
 import TwitterLogin from "./TwitterLogin.vue";
 import Wallet from "./Wallet.vue";
+import { ethers } from "ethers";
 export interface UserData {
   user: User | null;
   userType: string | undefined;
@@ -109,7 +110,10 @@ export default defineComponent({
             user.userType = fbuser.providerData?.[0].providerId;
           } else if (!fbuser.displayName) {
             user.userType = "wallet";
-            if (user.user.uid.toLowerCase() != account.value.toLowerCase()) {
+            if (
+              ethers.utils.getAddress(user.user.uid) !==
+              ethers.utils.getAddress(account.value)
+            ) {
               auth.signOut();
               store.commit("setNft", null);
             }
@@ -139,8 +143,11 @@ export default defineComponent({
     );
     watch(account, () => {
       if (store.getters.hasMetaMask) {
-        if (user?.userType == "wallet") {
-          if (user.user?.uid.toLowerCase() != account.value.toLowerCase()) {
+        if (user?.userType == "wallet" && user.user?.uid) {
+          if (
+            ethers.utils.getAddress(user.user.uid) !==
+            ethers.utils.getAddress(account.value)
+          ) {
             auth.signOut();
             store.commit("setNft", null);
           }

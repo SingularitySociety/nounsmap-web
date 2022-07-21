@@ -93,23 +93,21 @@
                 {{ $t("label.mint") }}
               </button>
               <button
-                v-else-if="photo?.status == 'init'"
-                type="button"
-                class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-                disabled
-              >
-                {{ $t("label.mintNotHasAuthority") }}
-              </button>
-              <button
                 v-else
                 type="button"
                 class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
                 disabled
               >
-                <i class="animate-spin material-icons text-lg text-op-teal mr-2"
-                  >schedule</i
-                >
-                {{ $t("label.minting") }}
+                <span v-if="photo?.status == 'init'">
+                  {{ $t("label.mintNotHasAuthority") }}
+                </span>
+                <span v-else>
+                  <i
+                    class="animate-spin material-icons text-lg text-op-teal mr-2"
+                    >schedule</i
+                  >
+                  {{ $t("label.minting") }} </span
+                >>
               </button>
               {{ $t("message.mintCaution") }}
             </p>
@@ -218,12 +216,15 @@ import {
   collection,
   getDocs,
   DocumentData,
+  query,
+  where,
+  Timestamp,
 } from "firebase/firestore";
 import axios from "axios";
 
 import { nounsMapConfig, ContentsContract } from "@/config/project";
 import { NftPhoto, NftRequestPhoto } from "@/models/photo";
-import { photoNFTSync, photoNFTDownload, photoNFTPosted } from "@/utils/functions";
+import { photoNFTSync, photoNFTDownload } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
 import { shortID, InitBool, InitBoolType } from "@/utils/utils";
 import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
@@ -239,9 +240,9 @@ export default defineComponent({
     const justMinted = ref(false);
     const nftSyncing = ref(false);
 
-    const nftRequestPhotos = ref([] as Array<NftRequestPhoto>);
-    const nftPhotos = ref([] as Array<NftPhoto>);
-    const nftOwnPhotos = ref([] as Array<NftPhoto>);
+    const nftRequestPhotos = ref<NftRequestPhoto[]>([]);
+    const nftPhotos = ref<NftPhoto[]>([]);
+    const nftOwnPhotos = ref<NftPhoto[]>([]);
 
     const downloadLink = ref<string>();
 
@@ -262,7 +263,7 @@ export default defineComponent({
     };
     const account = computed(() => {
       if (store.state.account) {
-        return store.state.account.toLowerCase();
+        return ethers.utils.getAddress(store.state.account);
       }
       return null;
     });
@@ -305,41 +306,55 @@ export default defineComponent({
     });
 
     const updateNftRequestPhotos = async () => {
-      const photos = await getDocs(collection(db, `nft_request_photos/`));
-      await photos.forEach((doc: DocumentData) => {
+      const lastUpdate = nftRequestPhotos.value
+        .map((v) => v.updatedAt as Timestamp)
+        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
+      const lastTime = Timestamp.fromMillis(lastUpdate);
+      console.log({ lastUpdate }, { lastTime });
+      const q = query(
+        collection(db, `nft_request_photos`),
+        where("updatedAt", ">", lastTime)
+      );
+      const photos = await getDocs(q);
+      photos.forEach((doc: DocumentData) => {
         const nreqphoto: NftRequestPhoto = doc.data();
-        if (
-          nreqphoto.photoId &&
-          !nftRequestPhotos.value.find(
-            (v) =>
-              v.photoId == nreqphoto.photoId && v.status == nreqphoto.status
-          )
-        ) {
-          console.log("new request found", nreqphoto);
-          nftRequestPhotos.value.push(nreqphoto);
-        }
+        console.log("new request found", nreqphoto);
+        nftRequestPhotos.value.push(nreqphoto);
       });
     };
     const updateNftPhotos = async () => {
-      const photos = await getDocs(collection(db, `nft_photos/`));
-      await photos.forEach((doc: DocumentData) => {
+      const lastOwnUpdate = nftOwnPhotos.value
+        .map((v) => v.updatedAt as Timestamp)
+        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
+      const lastUpdate = nftPhotos.value
+        .map((v) => v.updatedAt as Timestamp)
+        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
+      const lastTime = Timestamp.fromMillis(
+        Math.max(lastOwnUpdate, lastUpdate)
+      );
+      const q = query(
+        collection(db, `nft_photos`),
+        where("updatedAt", ">", lastTime),
+        where("nounsmapCreated", "==", true)
+      );
+      const photos = await getDocs(q);
+      photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         // console.log(doc.id, " => ", doc.data());
         const nphoto: NftPhoto = doc.data();
-        if (!nphoto.nounsmapCreated || !nphoto.photoId) {
+        if (!nphoto.photoId) {
           console.log("not nounsmap created", doc.id);
           return;
         }
-        if (nphoto.owner.toLowerCase() == account.value?.toLowerCase()) {
-          if (!nftOwnPhotos.value.find((v) => v.photoId == nphoto.photoId)) {
-            console.log("new nft own found", nphoto);
-            nftOwnPhotos.value.push(nphoto);
-          }
+        if (
+          account.value &&
+          ethers.utils.getAddress(nphoto.owner) === account.value
+        ) {
+          console.log("new nft own found", nphoto);
+          nftOwnPhotos.value.push(nphoto);
         } else {
-          if (!nftPhotos.value.find((v) => v.photoId == nphoto.photoId)) {
-            console.log("new nft found", nphoto);
-            nftPhotos.value.push(nphoto);
-          }
+          console.log("new nft found", nphoto);
+          nftPhotos.value.push(nphoto);
         }
       });
     };
@@ -359,10 +374,10 @@ export default defineComponent({
       nftSyncing.value = false;
     };
     const mint = async (_from: string, _photoId: string) => {
-      if (!networkContext.value) return;
+      if (!networkContext.value || !account.value) return;
       console.log(_from, _photoId);
       const photo = await getDoc(doc(db, `nft_request_photos/${_photoId}`));
-      if (!photo.exists) {
+      if (!photo.exists()) {
         console.error("invalid photoId", _photoId);
         return;
       }
@@ -398,7 +413,10 @@ export default defineComponent({
     };
     const downloadOriginal = async (_photoId: string) => {
       console.log(user.value);
-      if (!account.value || account.value != user.value.uid) {
+      if (
+        !account.value ||
+        account.value !== ethers.utils.getAddress(user.value.uid)
+      ) {
         console.log("wrong user", account.value, user.value);
         errorAccount.value = true;
         return;
@@ -437,10 +455,10 @@ export default defineComponent({
                 const base = ethers.BigNumber.from(
                   ContentsContract.authorityTokenFilter
                 );
-                const target = ethers.BigNumber.from(nft.id.tokenId);
+                const targetId = ethers.BigNumber.from(nft.id.tokenId);
                 //opensea polygon ERC1155 uses 12 byte mask
                 const shift = ContentsContract.authorityTokenIdmask * 8; //8bit
-                return base.shr(shift).eq(target.shr(shift));
+                return base.shr(shift).eq(targetId.shr(shift));
               } else {
                 return true;
               }
