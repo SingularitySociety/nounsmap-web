@@ -1,34 +1,18 @@
 <template>
-  <ul class="flex border-b" v-if="isRequestView">
+  <ul class="flex border-b">
     <li class="-mb-px mr-1 cursor-pointer">
       <span
         class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold"
-        href="#"
         >{{ $t("menu.nftRequest") }}</span
       >
     </li>
-    <li class="mr-1" @click="isRequestView = false">
-      <a
-        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
-        href="#"
-        >{{ $t("menu.nftMinted") }}</a
-      >
-    </li>
-  </ul>
-  <ul class="flex border-b" v-else>
-    <li class="-mb-px mr-1" @click="isRequestView = true">
-      <a
-        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
-        href="#"
-        >{{ $t("menu.nftRequest") }}</a
-      >
-    </li>
     <li class="mr-1">
-      <a
-        class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold"
-        href="#"
-        >{{ $t("menu.nftMinted") }}</a
+      <router-link :to="localizedUrl('/nft')">
+      <span
+        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
+        >{{ $t("menu.nftMinted") }}</span
       >
+      </router-link>        
     </li>
   </ul>
   <div v-if="nftSyncing" class="text-right">
@@ -38,7 +22,7 @@
     {{ $t("label.syncing") }}
   </div>
 
-  <div v-if="isRequestView">
+  <div>
     <div v-if="nftRequestPhotos" class="flex flex-col items-center m-4">
       <span class="my-4 text-2xl text-current">
         {{ $t("message.nftRequestTitle") }}
@@ -116,99 +100,13 @@
       </div>
     </div>
   </div>
-  <div v-else>
-    <div class="flex flex-col items-center m-4">
-      <span class="my-4 text-2xl text-current">
-        {{ $t("message.nftMintedTitle") }}
-      </span>
-      <span class="my-4 text-xl text-current">
-        {{ $t("message.nftMintedDesc") }}
-      </span>
-      <b>{{ $t("label.nftOwnCount") }} :</b> {{ nftOwnPhotos.length }}
-
-      <div class="max-w-xl mx-auto text-left p-2">
-        <div v-if="tokenGate == 'noAccount'">
-          <p>{{ $t("message.errorAccount") }}</p>
-        </div>
-        <div v-else-if="tokenGate == 'invalidNetwork'">
-          <p>
-            {{ $t("message.invalidNetwork") }} {{ ContentsContract.network }}
-          </p>
-          <button @click="switchToValidNetwork" class="underline">
-            {{ $t("message.switchNetwork") }}
-          </button>
-        </div>
-      </div>
-      <div v-if="errorAccount" class="text-red-600">
-        {{ $t("message.errorAccount") }}
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div v-for="(nphoto, key) in nftOwnPhotos" :key="key">
-          <a
-            :href="
-              ContentsContract.openseaUrl +
-              ContentsContract.address +
-              '/' +
-              nphoto.tokenId
-            "
-          >
-            <div class="flex flex-col">
-              <img :src="nphoto.photoURL" class="mt-4 w-48 rounded-xl" />
-              <span>{{ $t("label.name") }}:{{ nphoto.tokenURI.name }}</span>
-              <span
-                >{{ $t("label.description") }}:{{
-                  nphoto.tokenURI.description
-                }}</span
-              >
-            </div>
-          </a>
-          <button
-            @click="downloadOriginal(nphoto.photoId)"
-            class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
-          >
-            {{ $t("label.downloadOriginal") }}
-          </button>
-        </div>
-      </div>
-      <a v-if="downloadLink" :href="downloadLink" class="underline">
-        {{ $t("label.downloadLink") }}
-      </a>
-
-      <b class="mt-8">{{ $t("label.nftCount") }} :</b> {{ nftPhotos.length }}
-
-      <div class="grid grid-cols-2 gap-4">
-        <div v-for="(nphoto, key) in nftPhotos" :key="key">
-          <a
-            :href="
-              ContentsContract.openseaUrl +
-              ContentsContract.address +
-              '/' +
-              nphoto.tokenId
-            "
-          >
-            <div class="flex flex-col">
-              <img :src="nphoto.photoURL" class="mt-4 w-48 rounded-xl" />
-              <span>{{ $t("label.name") }}:{{ nphoto.tokenURI.name }}</span>
-              <span
-                >{{ $t("label.description") }}:{{
-                  nphoto.tokenURI.description
-                }}</span
-              >
-              <span>{{ $t("label.owner") }}:{{ shortID(nphoto.owner) }}</span>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
-import { User } from "firebase/auth";
 import { db } from "@/utils/firebase";
 import {
   doc,
@@ -223,8 +121,8 @@ import {
 import axios from "axios";
 
 import { nounsMapConfig, ContentsContract } from "@/config/project";
-import { NftPhoto, NftRequestPhoto } from "@/models/photo";
-import { photoNFTSync, photoNFTDownload } from "@/utils/functions";
+import { NftRequestPhoto } from "@/models/photo";
+import { photoNFTSync  } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
 import { shortID, InitBool, InitBoolType } from "@/utils/utils";
 import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
@@ -232,19 +130,13 @@ import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
 export default defineComponent({
   components: {},
   setup() {
-    const isRequestView = ref(false);
     const hasAuthorityToken = ref<InitBoolType>(InitBool.init);
     const store = useStore();
-    const user = computed<User>(() => store.state.user);
     const errorAccount = ref(false);
     const justMinted = ref(false);
     const nftSyncing = ref(false);
 
     const nftRequestPhotos = ref<NftRequestPhoto[]>([]);
-    const nftPhotos = ref<NftPhoto[]>([]);
-    const nftOwnPhotos = ref<NftPhoto[]>([]);
-
-    const downloadLink = ref<string>();
 
     let prevProvider: ethers.providers.Web3Provider | null = null;
     const tokenGate = computed(() => {
@@ -302,7 +194,6 @@ export default defineComponent({
 
     onMounted(async () => {
       updateNftRequestPhotos();
-      updateNftPhotos();
     });
 
     const updateNftRequestPhotos = async () => {
@@ -322,42 +213,6 @@ export default defineComponent({
         nftRequestPhotos.value.push(nreqphoto);
       });
     };
-    const updateNftPhotos = async () => {
-      const lastOwnUpdate = nftOwnPhotos.value
-        .map((v) => v.updatedAt as Timestamp)
-        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
-      const lastUpdate = nftPhotos.value
-        .map((v) => v.updatedAt as Timestamp)
-        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
-      const lastTime = Timestamp.fromMillis(
-        Math.max(lastOwnUpdate, lastUpdate)
-      );
-      const q = query(
-        collection(db, `nft_photos`),
-        where("updatedAt", ">", lastTime),
-        where("nounsmapCreated", "==", true)
-      );
-      const photos = await getDocs(q);
-      photos.forEach((doc: DocumentData) => {
-        // doc.data() is never undefined for query doc snapshots
-        // console.log(doc.id, " => ", doc.data());
-        const nphoto: NftPhoto = doc.data();
-        if (!nphoto.photoId) {
-          console.log("not nounsmap created", doc.id);
-          return;
-        }
-        if (
-          account.value &&
-          ethers.utils.getAddress(nphoto.owner) === account.value
-        ) {
-          console.log("new nft own found", nphoto);
-          nftOwnPhotos.value.push(nphoto);
-        } else {
-          console.log("new nft found", nphoto);
-          nftPhotos.value.push(nphoto);
-        }
-      });
-    };
 
     const fetchContentsTokens = async () => {
       if (networkContext.value) {
@@ -369,7 +224,6 @@ export default defineComponent({
       nftSyncing.value = true;
       const log = await photoNFTSync();
       console.log(log);
-      updateNftPhotos();
       updateNftRequestPhotos();
       nftSyncing.value = false;
     };
@@ -411,22 +265,7 @@ export default defineComponent({
 
       justMinted.value = true;
     };
-    const downloadOriginal = async (_photoId: string) => {
-      console.log(user.value);
-      if (
-        !account.value ||
-        account.value !== ethers.utils.getAddress(user.value.uid)
-      ) {
-        console.log("wrong user", account.value, user.value);
-        errorAccount.value = true;
-        return;
-      }
-      const ret: { data: { success: boolean; url: string } } =
-        (await photoNFTDownload({ photoId: _photoId })) as {
-          data: { success: boolean; url: string };
-        };
-      downloadLink.value = ret.data.url;
-    };
+   
     const checkAuthorityToken = async () => {
       if (hasAuthorityToken.value != InitBool.init) {
         //already checked once.
@@ -477,12 +316,8 @@ export default defineComponent({
       }
     };
     return {
-      isRequestView,
       hasAuthorityToken,
       nftRequestPhotos,
-      nftPhotos,
-      nftOwnPhotos,
-      downloadLink,
       account,
       errorAccount,
       justMinted,
@@ -493,7 +328,6 @@ export default defineComponent({
       mint,
       switchToValidNetwork,
       shortID,
-      downloadOriginal,
     };
   },
 });
