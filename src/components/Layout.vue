@@ -66,6 +66,7 @@ import GuideLogin from "@/components/GuideLogin.vue";
 import GuidePhoto from "@/components/GuidePhoto.vue";
 import PhotoSelect from "@/components/PhotoSelect.vue";
 import PhotoNFTRequest from "@/components/PhotoNFTRequest.vue";
+import { getLocaleName } from "@/i18n/utils";
 
 export default defineComponent({
   name: "AppLayout",
@@ -91,6 +92,7 @@ export default defineComponent({
     const photoSelect = ref();
     onMounted(() => {
       auth.onAuthStateChanged(() => {
+        console.log("authStateChanged", store.state.account);
         routeCheck();
       });
     });
@@ -107,9 +109,10 @@ export default defineComponent({
     const routeCheck = () => {
       if (
         route.path == getLocalePath(router, "/map") ||
-        route.path == getLocalePath(router, "/nft")
+        route.path == getLocalePath(router, "/nft") ||
+        route.path == getLocalePath(router, "/nft_req")
       ) {
-        photoSelect.value.hide();
+        photoSelect.value?.hide();
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if (!user.value && !isShownGuideLogin) {
           guideLogin.value.open();
@@ -130,6 +133,9 @@ export default defineComponent({
       if (photoSelect.value.isShow) {
         photoSelect.value.hide();
       } else {
+        router.push({
+          name: getLocaleName(router, "map"),
+        });
         photoSelect.value.show();
       }
     };
