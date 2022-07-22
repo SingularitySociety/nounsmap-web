@@ -128,12 +128,11 @@ import { ContentsContract } from "@/config/project";
 import { NftPhoto } from "@/models/photo";
 import { photoNFTDownload } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
-import { shortID, InitBool, InitBoolType } from "@/utils/utils";
+import { shortID} from "@/utils/utils";
 
 export default defineComponent({
   components: {},
   setup() {
-    const hasAuthorityToken = ref<InitBoolType>(InitBool.init);
     const store = useStore();
     const user = computed<User>(() => store.state.user);
     const errorAccount = ref(false);
@@ -223,7 +222,6 @@ export default defineComponent({
     };
 
     return {
-      hasAuthorityToken,
       nftPhotos,
       nftOwnPhotos,
       downloadLink,
@@ -233,7 +231,6 @@ export default defineComponent({
       tokenGate,
       ContentsContract,
       nftSyncing,
-      InitBool,
       switchToValidNetwork,
       shortID,
       downloadOriginal,
