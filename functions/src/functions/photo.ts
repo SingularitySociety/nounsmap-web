@@ -6,7 +6,7 @@ import * as imageUtil from "./image/imageUtil";
 import * as map from "./map/map";
 import { BigNumber, ethers } from "ethers";
 import { firebaseConfig, ContentsContract } from "../common/project";
-import { FieldValue } from "firebase-admin/firestore";
+import { firestore } from "firebase-admin";
 
 const providerViewOnly = new ethers.providers.AlchemyProvider(
   ContentsContract.network
@@ -143,7 +143,7 @@ export const posted = async (
         lng: _lng,
         zoom: _zoom,
         createdAt: pdata.createdAt,
-        updatedAt: FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
@@ -166,7 +166,7 @@ export const posted = async (
             },
           },
         },
-        updatedAt: FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
@@ -251,7 +251,7 @@ export const nftPosted = async (
           path: watermarkPath,
           url,
         },
-        updatedAt: FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
@@ -259,7 +259,7 @@ export const nftPosted = async (
     await db.doc(`photos/${photoId}`).update(
       {
         photoURL: url,
-        updatedAt: FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
@@ -276,8 +276,8 @@ export const nftPosted = async (
       lng,
       zoom,
       status: "init",
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
+      createdAt: firestore.FieldValue.serverTimestamp(),
+      updatedAt: firestore.FieldValue.serverTimestamp(),
     });
     return { success: true, url };
   } catch (error) {
@@ -348,14 +348,14 @@ export const nftSync = async (
         lng,
         zoom,
         owner,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
       });
       console.log("update nft_request_photos", photoId);
       await db.doc(`nft_request_photos/${photoId}`).update(
         {
           status: "minted",
-          updatedAt: FieldValue.serverTimestamp(),
+          updatedAt: firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
       );
@@ -364,7 +364,7 @@ export const nftSync = async (
         {
           checkedAddress: ContentsContract.address,
           checkedCount: end,
-          updatedAt: FieldValue.serverTimestamp(),
+          updatedAt: firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
       );
