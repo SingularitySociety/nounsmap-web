@@ -8,11 +8,11 @@
     </li>
     <li class="mr-1">
       <router-link :to="localizedUrl('/nft')">
-      <span
-        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
-        >{{ $t("menu.nftMinted") }}</span
-      >
-      </router-link>        
+        <span
+          class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
+          >{{ $t("menu.nftMinted") }}</span
+        >
+      </router-link>
     </li>
   </ul>
   <div v-if="nftSyncing" class="text-right">
@@ -35,7 +35,7 @@
         }}
       </span>
       <b>{{ $t("label.requestCount") }} :</b>
-      {{ nftRequestPhotos.filter((v) => v.status == "init").length }}
+      {{ nftRequestPhotos.length }}
 
       <div class="max-w-xl mx-auto text-left p-2">
         <div v-if="tokenGate == 'noAccount'">
@@ -100,11 +100,10 @@
       </div>
     </div>
   </div>
-  
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, onMounted } from "vue";
+import { defineComponent, computed, ref, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { ethers } from "ethers";
 import { db } from "@/utils/firebase";
@@ -113,7 +112,6 @@ import {
   getDoc,
   collection,
   getDocs,
-  DocumentData,
   query,
   where,
   Timestamp,
@@ -122,7 +120,7 @@ import axios from "axios";
 
 import { nounsMapConfig, ContentsContract } from "@/config/project";
 import { NftRequestPhoto } from "@/models/photo";
-import { photoNFTSync  } from "@/utils/functions";
+import { photoNFTSync } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
 import { shortID, InitBool, InitBoolType } from "@/utils/utils";
 import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
@@ -146,7 +144,6 @@ export default defineComponent({
       if (parseInt(store.state.chainId) != parseInt(ContentsContract.chainId)) {
         return "invalidNetwork";
       }
-      fetchContentsTokens();
       return "valid";
     });
     const switchToValidNetwork = async () => {
@@ -184,7 +181,7 @@ export default defineComponent({
         provider.on(mintFilter, (log, event) => {
           console.log("**** got mint event", log, event);
           justMinted.value = false;
-          fetchContentsTokens();
+          nftSync();
         });
         prevProvider = provider;
         return { provider, signer, contract };
@@ -194,30 +191,31 @@ export default defineComponent({
 
     onMounted(async () => {
       updateNftRequestPhotos();
+      checkAuthorityToken();
     });
 
     const updateNftRequestPhotos = async () => {
-      const lastUpdate = nftRequestPhotos.value
-        .map((v) => v.updatedAt as Timestamp)
-        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
-      const lastTime = Timestamp.fromMillis(lastUpdate);
-      console.log({ lastUpdate }, { lastTime });
+      const lastTime = Timestamp.fromMillis(
+        nftRequestPhotos.value.reduce(
+          (p, c) => Math.max(p, (c.updatedAt as Timestamp).toMillis()),
+          0
+        )
+      );
+      console.log({ lastTime });
       const q = query(
         collection(db, `nft_request_photos`),
+        where("status", "==", "init"),
         where("updatedAt", ">", lastTime)
       );
       const photos = await getDocs(q);
-      photos.forEach((doc: DocumentData) => {
-        const nreqphoto: NftRequestPhoto = doc.data();
+      for (const doc of photos.docs) {
+        const nreqphoto: NftRequestPhoto = doc.data() as NftRequestPhoto;
         console.log("new request found", nreqphoto);
         nftRequestPhotos.value.push(nreqphoto);
-      });
+      }
     };
 
-    const fetchContentsTokens = async () => {
-      if (networkContext.value) {
-        checkAuthorityToken();
-      }
+    const nftSync = async () => {
       if (hasAuthorityToken.value != InitBool.true) {
         return;
       }
@@ -227,6 +225,13 @@ export default defineComponent({
       updateNftRequestPhotos();
       nftSyncing.value = false;
     };
+    watch(
+      () => hasAuthorityToken.value,
+      () => {
+        nftSync();
+      }
+    );
+
     const mint = async (_from: string, _photoId: string) => {
       if (!networkContext.value || !account.value) return;
       console.log(_from, _photoId);
@@ -265,9 +270,9 @@ export default defineComponent({
 
       justMinted.value = true;
     };
-   
+
     const checkAuthorityToken = async () => {
-      if (hasAuthorityToken.value != InitBool.init) {
+      if (!account.value || hasAuthorityToken.value != InitBool.init) {
         //already checked once.
         return;
       }
@@ -315,6 +320,12 @@ export default defineComponent({
         console.log(error);
       }
     };
+    watch(
+      () => account.value,
+      () => {
+        checkAuthorityToken();
+      }
+    );
     return {
       hasAuthorityToken,
       nftRequestPhotos,

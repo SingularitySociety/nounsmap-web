@@ -58,14 +58,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  reactive,
-  ref,
-  onMounted,
-  watch,
-  computed,
-} from "vue";
+import { defineComponent, reactive, ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import router from "@/router";
 import { useStore } from "vuex";
@@ -90,7 +83,6 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     const user = reactive<UserData>({ user: null, userType: undefined });
-    const account = computed(() => store.state.account);
     const isContentShown = ref(false);
     const selectView = ref(true);
     const twitterView = ref(false);
@@ -112,8 +104,9 @@ export default defineComponent({
             user.userType = "wallet";
             if (
               ethers.utils.getAddress(user.user.uid) !==
-              ethers.utils.getAddress(account.value)
+              ethers.utils.getAddress(store.state.account)
             ) {
+              console.log("auto signout");
               auth.signOut();
               store.commit("setNft", null);
             }
@@ -141,19 +134,24 @@ export default defineComponent({
         }
       }
     );
-    watch(account, () => {
-      if (store.getters.hasMetaMask) {
-        if (user?.userType == "wallet" && user.user?.uid) {
-          if (
-            ethers.utils.getAddress(user.user.uid) !==
-            ethers.utils.getAddress(account.value)
-          ) {
-            auth.signOut();
-            store.commit("setNft", null);
+    watch(
+      () => store.state.account,
+      (cur) => {
+        console.log("watched cur:", cur);
+        if (store.getters.hasMetaMask) {
+          if (user?.userType == "wallet" && user.user?.uid) {
+            if (
+              ethers.utils.getAddress(user.user.uid) !==
+              ethers.utils.getAddress(store.state.account)
+            ) {
+              console.log("signout");
+              auth.signOut();
+              store.commit("setNft", null);
+            }
           }
         }
       }
-    });
+    );
 
     const close = () => {
       router.push({

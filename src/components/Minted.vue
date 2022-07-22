@@ -2,11 +2,11 @@
   <ul class="flex border-b">
     <li class="mr-1">
       <router-link :to="localizedUrl('/nft_req')">
-      <span
-        class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
-        >{{ $t("menu.nftRequest") }}</span
-      >
-    </router-link>        
+        <span
+          class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold"
+          >{{ $t("menu.nftRequest") }}</span
+        >
+      </router-link>
     </li>
     <li class="-mb-px mr-1 cursor-pointer">
       <span
@@ -22,8 +22,7 @@
     {{ $t("label.syncing") }}
   </div>
 
-
-  <div >
+  <div>
     <div class="flex flex-col items-center m-4">
       <span class="my-4 text-2xl text-current">
         {{ $t("message.nftMintedTitle") }}
@@ -120,14 +119,13 @@ import { db } from "@/utils/firebase";
 import {
   collection,
   getDocs,
-  DocumentData,
   query,
   where,
   Timestamp,
 } from "firebase/firestore";
 
-import {  ContentsContract } from "@/config/project";
-import { NftPhoto  } from "@/models/photo";
+import { ContentsContract } from "@/config/project";
+import { NftPhoto } from "@/models/photo";
 import { photoNFTDownload } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
 import { shortID, InitBool, InitBoolType } from "@/utils/utils";
@@ -170,14 +168,15 @@ export default defineComponent({
       updateNftPhotos();
     });
 
-
     const updateNftPhotos = async () => {
-      const lastOwnUpdate = nftOwnPhotos.value
-        .map((v) => v.updatedAt as Timestamp)
-        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
-      const lastUpdate = nftPhotos.value
-        .map((v) => v.updatedAt as Timestamp)
-        .reduce((p, c) => Math.max(p, c.toMillis()), 0);
+      const lastOwnUpdate = nftOwnPhotos.value.reduce(
+        (p, c) => Math.max(p, (c.updatedAt as Timestamp).toMillis()),
+        0
+      );
+      const lastUpdate = nftPhotos.value.reduce(
+        (p, c) => Math.max(p, (c.updatedAt as Timestamp).toMillis()),
+        0
+      );
       const lastTime = Timestamp.fromMillis(
         Math.max(lastOwnUpdate, lastUpdate)
       );
@@ -187,10 +186,8 @@ export default defineComponent({
         where("nounsmapCreated", "==", true)
       );
       const photos = await getDocs(q);
-      photos.forEach((doc: DocumentData) => {
-        // doc.data() is never undefined for query doc snapshots
-        // console.log(doc.id, " => ", doc.data());
-        const nphoto: NftPhoto = doc.data();
+      for (const doc of photos.docs) {
+        const nphoto: NftPhoto = doc.data() as NftPhoto;
         if (!nphoto.photoId) {
           console.log("not nounsmap created", doc.id);
           return;
@@ -205,7 +202,7 @@ export default defineComponent({
           console.log("new nft found", nphoto);
           nftPhotos.value.push(nphoto);
         }
-      });
+      }
     };
 
     const downloadOriginal = async (_photoId: string) => {
