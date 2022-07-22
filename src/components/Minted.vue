@@ -128,7 +128,7 @@ import { ContentsContract } from "@/config/project";
 import { NftPhoto } from "@/models/photo";
 import { photoNFTDownload } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
-import { shortID} from "@/utils/utils";
+import { shortID } from "@/utils/utils";
 
 export default defineComponent({
   components: {},

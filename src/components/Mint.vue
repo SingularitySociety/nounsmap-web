@@ -68,9 +68,7 @@
             <span>{{ $t("label.description") }}:{{ photo.description }}</span>
             <p>
               <button
-                v-if="
-                  photo?.status == 'init' && hasAuthorityToken
-                "
+                v-if="photo?.status == 'init' && hasAuthorityToken"
                 @click="mint(photo.creator, photo.photoId)"
                 class="inline-block px-6 py-2.5 bg-green-600 text-white leading-tight rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out"
               >
@@ -122,7 +120,7 @@ import { nounsMapConfig, ContentsContract } from "@/config/project";
 import { NftRequestPhoto } from "@/models/photo";
 import { photoNFTSync } from "@/utils/functions";
 import { switchNetwork } from "@/utils/MetaMask";
-import { shortID} from "@/utils/utils";
+import { shortID } from "@/utils/utils";
 import { ContentsAttribute, AlchemyOwnedTokens } from "@/models/SmartContract";
 
 export default defineComponent({
