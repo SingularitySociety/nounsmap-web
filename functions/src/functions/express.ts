@@ -190,19 +190,16 @@ const image = async (req: any, res: any) => {
   if (!/^[0-9a-zA-Z]+$/.test(contentsId)) {
     return res.status(404).send("not found");
   }
-  const template_data = fs.readFileSync("./templates/index.html", {
-    encoding: "utf8",
-  });
 
   if (!isId(contentsId)) {
     console.error(`isId ${contentsId} failed`);
-    return res.status(404).send(template_data);
+    return res.status(404).send("not found");
   }
   const photouser = await db.doc(`photos/${contentsId}`).get();
 
   if (!photouser || !photouser.exists) {
     console.error(`photouser ${contentsId} not found`);
-    return res.status(404).send(template_data);
+    return res.status(404).send("not found");
   }
   const photouser_data: any = photouser.data();
 
@@ -211,14 +208,14 @@ const image = async (req: any, res: any) => {
     .get();
   if (!photo || !photo.exists) {
     console.error(`user ${photouser_data.uid}/ photo ${contentsId} not found`);
-    return res.status(404).send(template_data);
+    return res.status(404).send("not found");
   }
   const photo_data: any = photo.data();
   if (photo_data.deletedFlag || !photo_data.publicFlag) {
     console.error(
       `delete or not public user ${photouser_data.uid}/ photo ${contentsId}  ${photo_data.deletedFlag} ${photo_data.publicFlag}`
     );
-    return res.status(404).send(template_data);
+    return res.status(404).send("not found");
   }
   const path = photo_data.images.resizedImages["watermark"].path;
   console.log(path);
