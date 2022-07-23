@@ -53,6 +53,9 @@ export default defineComponent({
       fileInput.value.click();
     };
     const pickFile = async () => {
+      if (!fileInput.value) {
+        return;
+      }
       const files = fileInput.value.files;
 
       if (files && files[0]) {
@@ -133,7 +136,9 @@ export default defineComponent({
     };
     watch(fileInput, () => {
       console.log(fileInput.value);
-      fileInput.value?.click();
+      if (fileInput.value) {
+        fileInput.value.click();
+      }
     });
     const hide = () => {
       isShow.value = false;

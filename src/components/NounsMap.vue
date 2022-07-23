@@ -223,16 +223,13 @@ export default defineComponent({
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       processing.value = false;
       pLevel.value = privacyCircleConfig.pLevel;
-      if (route.params.photoId != null) {
-        loadPhoto(route.params.photoId as string);
-      } else {
         mapObj.value.setCenter(
           new mapInstance.value.maps.LatLng(
             defaultMapConfig.lan,
             defaultMapConfig.lng
           )
         );
-      }
+      routeCheck();
     });
 
     const photoSelected = async (info: PhotoInfo) => {
@@ -409,7 +406,7 @@ export default defineComponent({
       const photos = await getDocs(
         collection(db, `users/${user.value.uid}/public_photos/`)
       );
-      if (photos.size == Object.keys(pins).length) {
+      if (photos.size && photos.size == Object.keys(pins).length) {
         console.log(pins);
         //Object.keys(pins).forEach((key: string) => pins[key].showPhoto());
         return;

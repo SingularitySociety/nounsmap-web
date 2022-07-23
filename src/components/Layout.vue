@@ -108,11 +108,16 @@ export default defineComponent({
     });
     const routeCheck = () => {
       if (
-        route.path == getLocalePath(router, "/map") ||
         route.path == getLocalePath(router, "/nft") ||
         route.path == getLocalePath(router, "/nft_req")
       ) {
         photoSelect.value?.hide();
+      }
+      if (
+        route.path == getLocalePath(router, "/map") ||
+        route.path == getLocalePath(router, "/nft") ||
+        route.path == getLocalePath(router, "/nft_req")
+      ) {
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if (!user.value && !isShownGuideLogin) {
           guideLogin.value.open();
@@ -131,11 +136,13 @@ export default defineComponent({
     };
     const showUpload = () => {
       if (photoSelect.value.isShow) {
+        console.log("hide");
         photoSelect.value.hide();
       } else {
         router.push({
           name: getLocaleName(router, "map"),
         });
+        console.log("show");
         photoSelect.value.show();
       }
     };
