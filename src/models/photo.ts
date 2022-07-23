@@ -1,4 +1,5 @@
 import { serverTimestamp, FieldValue } from "firebase/firestore";
+import { TokenMeta } from "./SmartContract";
 export interface PhotoInfo {
   file: File | null;
   size: { w: number; h: number } | null;
@@ -10,6 +11,8 @@ export interface PhotoPubData {
   photoId: string;
   iconURL: string;
   photoURL: string;
+  title: string | undefined;
+  description: string | undefined;
   lat: number;
   lng: number;
   zoom: number;
@@ -18,7 +21,8 @@ export interface PhotoPubData {
 }
 export interface PhotoOrgData {
   id: string;
-  description: string;
+  title: string | undefined;
+  description: string | undefined;
   original_name: string;
   images: {
     resizedImages: {
@@ -39,6 +43,38 @@ export interface PhotoOrgData {
   createdAt: FieldValue;
   updatedAt: FieldValue;
 }
+export interface NftRequestPhoto {
+  creator: string;
+  photoId: string;
+  photoURL: string;
+  title: string;
+  description: string;
+  iconURL: string | undefined;
+  lat: number | undefined;
+  lng: number | undefined;
+  zoom: number | undefined;
+  status: string | undefined; //'init','mint','minted'
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+}
+export interface NftPhoto {
+  nounsmapCreated: boolean;
+  tokenId: string;
+  tokenURI: TokenMeta;
+  owner: string;
+  photoId: string;
+  photoURL: string;
+  title: string;
+  description: string;
+  uid: string | undefined;
+  iconURL: string | undefined;
+  lat: number | undefined;
+  lng: number | undefined;
+  zoom: number | undefined;
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+}
+
 export const generateNewPhotoData = (
   pid: string,
   photoURL: string,
@@ -52,6 +88,7 @@ export const generateNewPhotoData = (
 ): PhotoOrgData => {
   const photoData = {
     id: pid,
+    title: "",
     description: "",
     original_name: org,
     images: {

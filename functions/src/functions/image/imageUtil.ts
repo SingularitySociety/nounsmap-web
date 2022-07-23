@@ -38,9 +38,15 @@ const runSharp = async (
     });
     // generate public image url see: https://stackoverflow.com/questions/42956250/get-download-url-from-file-uploaded-with-cloud-functions-for-firebase
     const file = ret[0];
-    return `https://firebasestorage.googleapis.com/v0/b/${
-      bucket.name
-    }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    const url =
+      process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST
+        ? `http://localhost:9199/v0/b/${bucket.name}/o/${encodeURIComponent(
+            file.name
+          )}?alt=media&token=${uuid}`
+        : `https://firebasestorage.googleapis.com/v0/b/${
+            bucket.name
+          }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    return url;
   } catch (e) {
     console.log("error", e);
   }
@@ -53,6 +59,22 @@ export const downloadFileFromBucket = async (object) => {
   await bucketObj.file(object.name).download({ destination: tempFilePath });
   console.log("Image downloaded locally to", tempFilePath);
   return tempFilePath;
+};
+export const downloadLink = async (object) => {
+  const bucket = admin.storage().bucket(object.bucket);
+  const meta = await bucket.file(object.name).getMetadata();
+  //console.log("file meta ", meta);
+  const url =
+    process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST
+      ? `http://localhost:9199/v0/b/${bucket.name}/o/${encodeURIComponent(
+          object.name
+        )}?alt=media&token=${meta[0].metadata.firebaseStorageDownloadTokens}`
+      : `https://firebasestorage.googleapis.com/v0/b/${
+          bucket.name
+        }/o/${encodeURIComponent(object.name)}?alt=media&token=${
+          meta[0].metadata.firebaseStorageDownloadTokens
+        }`;
+  return url;
 };
 export const resizedImage = async (object, toFileFullPath, size) => {
   const bucketObj = admin.storage().bucket(object.bucket);
@@ -144,20 +166,50 @@ export const blendLocal = async (mapFilePath, photoPath, iconPath) => {
     await sharp(mapFilePath)
       .composite([
         {
-          input: photoPath,
-          blend: "over",
-          top: 30,
-          left: 130,
-        },
-        {
           input: iconPath,
           blend: "over",
           top: 180,
           left: 270,
         },
+        {
+          input: photoPath,
+          blend: "over",
+          top: 30,
+          left: 130,
+        },
       ])
       .toFile(tmpFile);
     return tmpFile;
+  } catch (e) {
+    console.log("error", e);
+  }
+  return "";
+};
+
+export const blendWaterMarkLocal = async (photoPath, iconPath) => {
+  const tmpFile = path.join(os.tmpdir(), UUID()) + ".jpg";
+  const tmpFile2 = path.join(os.tmpdir(), UUID()) + ".jpg";
+  try {
+    const size = 200; //watermark_size
+    await sharp(iconPath)
+      .greyscale()
+      .resize(size, size, {
+        fit: "inside",
+      })
+      .toFile(tmpFile);
+
+    await sharp(photoPath)
+      .composite([
+        {
+          input: tmpFile,
+          blend: "multiply",
+          top: 10,
+          left: 20,
+        },
+      ])
+      .toFile(tmpFile2);
+    fs.unlinkSync(tmpFile);
+    return tmpFile2;
   } catch (e) {
     console.log("error", e);
   }
@@ -180,11 +232,24 @@ export const uploadFileToBucket = async (tmpFile, object) => {
       },
     });
     const file = ret[0];
-    return `https://firebasestorage.googleapis.com/v0/b/${
-      object.bucket
-    }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    const url =
+      process.env.FUNCTIONS_EMULATOR && process.env.FIRESTORE_EMULATOR_HOST
+        ? `http://localhost:9199/v0/b/${object.bucket}/o/${encodeURIComponent(
+            file.name
+          )}?alt=media&token=${uuid}`
+        : `https://firebasestorage.googleapis.com/v0/b/${
+            object.bucket
+          }/o/${encodeURIComponent(file.name)}?alt=media&token=${uuid}`;
+    return url;
   } catch (e) {
     console.log("error", e);
   }
   return false;
+};
+
+export const copyFileToBucket = async (fromObj, toPath) => {
+  const bucketObj = admin.storage().bucket(fromObj.bucket);
+  const ret = await bucketObj.file(fromObj.name).copy(toPath);
+  console.log("Image copied", ret);
+  return;
 };

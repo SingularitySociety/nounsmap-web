@@ -5,6 +5,13 @@ export interface Token {
   image: string;
 }
 
+export interface TokenMeta {
+  description: string;
+  external_url: string;
+  image: string;
+  name: string;
+}
+
 export interface NFT {
   name: string;
   description: string;
@@ -33,4 +40,18 @@ export interface AlchemyOwnedTokens {
     external_link: string;
     image: string;
   };
+}
+
+export interface ContentsAttribute {
+  group: string;
+  category: string;
+  tag: string;
+  width: number;
+  height: number;
+  minter: string;
+  name: string;
+  description: string;
+  metadata: Uint8Array;
+  soulbound: string;
+  creator: string;
 }

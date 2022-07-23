@@ -1,4 +1,5 @@
 import store from "../store";
+import { ethers } from "ethers";
 
 export const requestAccount = async () => {
   const ethereum = store.state.ethereum;
@@ -33,7 +34,7 @@ export interface ProviderRpcError extends Error {
 
 export const ChainIds = {
   Mainnet: "0x1",
-  RinkebyTestNet: "0x04",
+  RinkebyTestNet: "0x4",
   Polygon: "0x89",
 };
 
@@ -85,6 +86,9 @@ export const initializeEthereum = () => {
     const ethereum = window.ethereum;
     if (store.state.ethereum != ethereum) {
       store.commit("setEthereum", ethereum);
+      if (ethereum) {
+        startMonitoringMetamask();
+      }
     }
   };
   const ethereum = window.ethereum;
@@ -103,9 +107,13 @@ export const initializeEthereum = () => {
 };
 
 export const startMonitoringMetamask = () => {
-  getAccount().then((value) => {
+  getAccount().then(async (value) => {
     store.commit("setAccount", value);
     console.log("Eth gotAccount", store.getters.displayAccount);
+    const provider = new ethers.providers.Web3Provider(store.state.ethereum);
+    const { name, chainId } = await provider.getNetwork();
+    console.info({ name }, { chainId });
+    store.commit("setChainId", chainId);
   });
   if (store.getters.hasMetaMask) {
     const ethereum = store.state.ethereum;

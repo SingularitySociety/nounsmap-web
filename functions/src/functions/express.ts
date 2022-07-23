@@ -3,8 +3,7 @@ import * as admin from "firebase-admin";
 import * as xmlbuilder from "xmlbuilder";
 import * as fs from "fs";
 import moment from "moment";
-
-import { nounsMapConfig } from "../common/project";
+import { nounsMapConfig, firebaseConfig } from "../common/project";
 
 import * as Sentry from "@sentry/node";
 
@@ -184,6 +183,59 @@ const ogpPage = async (req: any, res: any) => {
   }
 };
 
+const image = async (req: any, res: any) => {
+  console.log("hello");
+  const { contentsId } = req.params;
+  console.log(contentsId);
+  if (!/^[0-9a-zA-Z]+$/.test(contentsId)) {
+    return res.status(404).send("not found");
+  }
+
+  if (!isId(contentsId)) {
+    console.error(`isId ${contentsId} failed`);
+    return res.status(404).send("not found");
+  }
+  const photouser = await db.doc(`photos/${contentsId}`).get();
+
+  if (!photouser || !photouser.exists) {
+    console.error(`photouser ${contentsId} not found`);
+    return res.status(404).send("not found");
+  }
+  const photouser_data: any = photouser.data();
+
+  const photo = await db
+    .doc(`users/${photouser_data.uid}/public_photos/${contentsId}`)
+    .get();
+  if (!photo || !photo.exists) {
+    console.error(`user ${photouser_data.uid}/ photo ${contentsId} not found`);
+    return res.status(404).send("not found");
+  }
+  const photo_data: any = photo.data();
+  if (photo_data.deletedFlag || !photo_data.publicFlag) {
+    console.error(
+      `delete or not public user ${photouser_data.uid}/ photo ${contentsId}  ${photo_data.deletedFlag} ${photo_data.publicFlag}`
+    );
+    return res.status(404).send("not found");
+  }
+  const path = photo_data.images.resizedImages["watermark"].path;
+  console.log(path);
+  const imageObj = {
+    bucket: firebaseConfig.storageBucket,
+    name: `${path}`,
+  };
+  const bucketObj = admin.storage().bucket(imageObj.bucket);
+  const image = await bucketObj
+    .file(imageObj.name)
+    .download()
+    .then((contents) => {
+      return Buffer.from(contents[0].buffer);
+    });
+  console.log(image);
+  res.setHeader("Content-Type", "image/jpeg");
+  res.type("jpg");
+  res.send(image);
+};
+
 // eslint-disable-next-line
 const debugError = async (req: any, res: any) => {
   // eslint-disable-line
@@ -196,3 +248,4 @@ app.use(express.json());
 app.get("/p/:photo_id", ogpPage);
 app.get("/sitemap.xml", sitemap_response);
 app.get("/debug/error", debugError);
+app.get("/contents/:contentsId", image);

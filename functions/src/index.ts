@@ -8,6 +8,9 @@ if (!admin.apps.length) {
 exportIfNeeded("api", "api", exports);
 exportIfNeeded("test", "tests/test", exports);
 exportIfNeeded("photoPosted", "photo/photoPosted", exports);
+exportIfNeeded("photoNFTPosted", "photo/photoNFTPosted", exports);
+exportIfNeeded("photoNFTSync", "photo/photoNFTSync", exports);
+exportIfNeeded("photoNFTDownload", "photo/photoNFTDownload", exports);
 exportIfNeeded("verifyNonce", "nonces/verifyNonce", exports);
 exportIfNeeded("generateNonce", "nonces/generateNonce", exports);
 exportIfNeeded("deleteNonce", "nonces/deleteNonce", exports);

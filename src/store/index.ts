@@ -1,6 +1,5 @@
 import { createStore } from "vuex";
 import { User } from "firebase/auth";
-import { startMonitoringMetamask } from "@/utils/MetaMask";
 import { NFT, TokenContract } from "@/models/SmartContract";
 import { PhotoPubData, PhotoInfo } from "@/models/photo";
 
@@ -18,6 +17,7 @@ interface State {
   account: undefined | null | string;
   nft: NFT | null;
   clickedPhoto: PhotoPubData | null;
+  nftRequestPhoto: PhotoPubData | null;
   uploadPhoto: PhotoInfo | null;
 }
 
@@ -33,12 +33,13 @@ export default createStore<State>({
     account: undefined,
     nft: null,
     clickedPhoto: null,
+    nftRequestPhoto: null,
     uploadPhoto: null,
   },
   mutations: {
     load(state: State) {
       const contract = localStorage.getItem("tokenContract");
-      if (contract) {
+      if (contract && contract != "undefined") {
         state.tokenContract = JSON.parse(contract);
       }
       const nft = localStorage.getItem("nft");
@@ -49,9 +50,6 @@ export default createStore<State>({
     //eslint-disable-next-line  @typescript-eslint/no-explicit-any
     setEthereum(state: State, ethereum: any | null) {
       state.ethereum = ethereum;
-      if (state.ethereum) {
-        startMonitoringMetamask();
-      }
     },
     setUser(state: State, user: User | null) {
       state.user = user;
@@ -81,6 +79,9 @@ export default createStore<State>({
     },
     setClickedPhoto(state: State, photo: PhotoPubData | null) {
       state.clickedPhoto = photo;
+    },
+    setNftRequestPhoto(state: State, photo: PhotoPubData | null) {
+      state.nftRequestPhoto = photo;
     },
     setUploadPhoto(state: State, photo: PhotoInfo | null) {
       state.uploadPhoto = photo;

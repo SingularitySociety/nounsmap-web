@@ -4,7 +4,35 @@ const lang = {
   menu: {
     map: "地図",
     upload: "写真投稿",
-    user: "",
+    nft: "写真コンテンツ",
+    nftRequest: "NFT要望写真コンテンツ",
+    nftMinted: "NFT済み写真コンテンツ",
+    user: "ユーザー",
+  },
+  function: {
+    requestAccount: "MetaMaskと接続",
+    fetchNFT: "再取得",
+    signinTwitter: "ログイン(Twitter)",
+    signinWallet: "ログイン(Wallet)",
+    signout: "ログアウト",
+    trynow: "使ってみる",
+    tryphoto: "今すぐ投稿",
+    requestNFT: "NFT化をリクエスト",
+  },
+  label: {
+    name: "タイトル",
+    description: "説明",
+    creator: "作者",
+    owner: "所有者",
+    mint: "ミント",
+    mintNotHasAuthority: "ミントには認証トークンが必要です",
+    minting: "ミント中です,,",
+    syncing: "NFT写真コンテンツを取得中です,,",
+    requestCount: "現在のリクエスト数",
+    nftCount: "現在のNFT写真コンテンツ数",
+    nftOwnCount: "ご自身で保有しているNFT写真コンテンツ数",
+    downloadOriginal: "オリジナル画像のURLを取得",
+    downloadLink: "オリジナル画像をダウンロードする",
   },
   message: {
     hello: "こんにちは、世界",
@@ -12,7 +40,8 @@ const lang = {
       "地図情報付きの写真を簡単にTwitterで共有できます！  今すぐ試してみませんか？",
     guidephoto:
       "写真を投稿するには上記のボタンをクリック！　もしくは下記ボタンですぐに投稿できます！",
-    pleasesignin: "ログイン方法を選んでください",
+    pleasesignin:
+      "ログイン方法を選んでください(写真をNFT化したい場合はMetaMaskでログインしてください)",
     selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
@@ -24,15 +53,30 @@ const lang = {
     youNeedMeta: "MetaMaskをインストールしてください.",
     youNeedNet: "{networkName}に切り替えてください",
     youDonthaveToken: '"{tokenName}"のNFTトークンを持っていると選択できます！',
-  },
-  function: {
-    requestAccount: "MetaMaskと接続",
-    fetchNFT: "再取得",
-    signinTwitter: "ログイン(Twitter)",
-    signinWallet: "ログイン(Wallet)",
-    signout: "ログアウト",
-    trynow: "使ってみる",
-    tryphoto: "今すぐ投稿",
+    NFTuploadTitle: "この写真をNFTトークン化することをリクエストします",
+    NFTuploadDetail:
+      "写真のオリジナルファイルを再度アップロードしますので選択してください（ファイルサイズによりUpload時間がかかります）。NFTトークンとして表示される名前、説明も記入してください。",
+    NFTAlreadyRequested:
+      "すでにこのファイルはNFTコンテンツとしてリクエストされています。詳細は写真コンテンツメニューをクリックしてご確認ください",
+    nftFileError: "オリジナルの画像を選択してください",
+    nameError: "タイトルを入力してください",
+    descError: "説明を入力してください",
+    nftRequestButton:
+      "ここをクリックすると写真のNFTコンテンツ化をリクエストできます",
+    nftRequestTitle: "NFT化を希望する写真コンテンツ",
+    nftRequestDesc:
+      "あなたが{tokenName}を保持している場合、写真の下のミントボタンが有効化されていて、写真コンテンツのNFT化をサポートすることができます（ガス代がかかります）。NFT化された写真はOpenSeaで売買できるようになります。たとえば、戦争や、災害にあわれたみなさんから投稿された写真が流通することで、被災されたみなさんを直接支援することもできます。ご自身で写真の内容、説明をよく見てサポートしたいと思う写真のNFT化にご協力ください。",
+    nftMintedTitle: "NFT 写真コンテンツ",
+    nftMintedDesc:
+      "下記の写真をクリックした先のOpenSeaで写真を購入することができます。写真のOwnerになると所有コンテンツに表示され、MetaMaskでログインすると元画像をDownload、利用することができます。",
+    mintCaution: "（ガス代は発生します）",
+    noAccount: "有効なWalletがありません",
+    invalidNetwork:
+      "ブロックチェーンのネットワークがNFTと異なります NFTネットワーク：",
+    switchNetwork: "ネットワークを切り替える",
+    justMint: "NFT化に協力ありがとうございます。しばらくお待ち下さい",
+    errorAccount:
+      "有効なWalletでログインしていません。一度右上のユーザーメニューから、ログアウトを選択して、MetaMaskでログインしなおしてください。",
   },
   languages,
 };

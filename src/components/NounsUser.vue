@@ -5,7 +5,7 @@
       v-if="isContentShown"
     >
       <div
-        class="bg-white flex-col mx-auto w-auto h-auto shadow-md rounded px-8 pt-6 pb-8 mb-4"
+        class="bg-white flex-col mx-auto w-2/3 h-auto shadow-md rounded px-8 pt-6 pb-8 mb-4"
       >
         <div class="grid-cols-1" v-if="!user?.user && selectView">
           <div class="mb-4">
@@ -69,6 +69,7 @@ import { getLocalePath, getLocaleName } from "@/i18n/utils";
 
 import TwitterLogin from "./TwitterLogin.vue";
 import Wallet from "./Wallet.vue";
+import { ethers } from "ethers";
 export interface UserData {
   user: User | null;
   userType: string | undefined;
@@ -101,6 +102,14 @@ export default defineComponent({
             user.userType = fbuser.providerData?.[0].providerId;
           } else if (!fbuser.displayName) {
             user.userType = "wallet";
+            if (
+              ethers.utils.getAddress(user.user.uid) !==
+              ethers.utils.getAddress(store.state.account)
+            ) {
+              console.log("auto signout");
+              auth.signOut();
+              store.commit("setNft", null);
+            }
           } else {
             user.userType = undefined;
           }
@@ -125,6 +134,25 @@ export default defineComponent({
         }
       }
     );
+    watch(
+      () => store.state.account,
+      (cur) => {
+        console.log("watched cur:", cur);
+        if (store.getters.hasMetaMask) {
+          if (user?.userType == "wallet" && user.user?.uid) {
+            if (
+              ethers.utils.getAddress(user.user.uid) !==
+              ethers.utils.getAddress(store.state.account)
+            ) {
+              console.log("signout");
+              auth.signOut();
+              store.commit("setNft", null);
+            }
+          }
+        }
+      }
+    );
+
     const close = () => {
       router.push({
         name: getLocaleName(router, "map"),

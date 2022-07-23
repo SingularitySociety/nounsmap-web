@@ -16,14 +16,24 @@
     "target": "es2018",
     "forceConsistentCasingInFileNames": false,
     "esModuleInterop": true,
+    "importHelpers": true,
+    "moduleResolution": "node",  
+    "allowSyntheticDefaultImports": true,      
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowJs": true,
     "skipLibCheck": true,
+    "baseUrl": ".",    
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
   },
   "compileOnSave": true,
   "include": [
-    "src",
+    "src/**/*.ts",
+    "src/**/*.json",
   ],
   "exclude": [
     "node_modules",

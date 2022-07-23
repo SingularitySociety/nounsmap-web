@@ -14,6 +14,14 @@ service cloud.firestore {
     	allow create, update, delete: if false;
       allow read: if true;
     }
+    match /nft_photos/{photoId} {
+    	allow create, update, delete: if false;
+      allow read: if true;
+    }
+    match /nft_request_photos/{photoId} {
+    	allow create, update, delete: if false;
+      allow read: if true;
+    }
     match /{document=**} {
       allow read, write: if false;
     }

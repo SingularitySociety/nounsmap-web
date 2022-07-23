@@ -54,5 +54,30 @@ export const ethereumConfig = {
       filter: "0x4e4cd175f812f1ba784a69c1f8ac8daa52ad7e2b000000000000010000000001",
       idmask: 12,
     },
-  ]
+    {
+      name: "HappyToken(testnets)",
+      chainId: "0x4",
+      contractAddress: "0x4F700D279b7046BE3B31DcFD9D94166bF4E6FBb1",
+      openseaUrl: "https://testnets.opensea.io/assets/rinkeby",
+      filter: null,
+      idmask: 0,
+    },  ]
+};
+
+export const ContentsContract = {
+  name: "ContentsToken(testnets)",
+  chainId: "0x4",
+  network: "rinkeby",
+  wabi: require("../abi/ContentsToken.json"), // wrapped abi
+  address: "0xdc21b1FDAb45002AFEB117Ba146683AbB01BD040",
+  group: "photo",
+  category: "",
+  width: 512,
+  height: 512,
+  openseaUrl: "https://testnets.opensea.io/assets/rinkeby/",
+  alchemyUrl: "https://eth-rinkeby.alchemyapi.io/v2/",
+  authorityToken: "0x1602155eB091F863e7e776a83e1c330c828ede19", //nouns love
+  authorityTokenName: "NounsLove(TestNets)", //nouns love
+  authorityTokenFilter: null,
+  authorityTokenIdmask: 0,
 };

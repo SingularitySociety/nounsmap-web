@@ -1,4 +1,3 @@
-
 import * as functions from "firebase-functions";
 import * as util from "ethereumjs-util";
 import * as admin from "firebase-admin";
@@ -9,7 +8,7 @@ const db = admin.firestore();
 // to the user.
 const readableMessage =
   "Welcome to nounsfes.com!\n\n" +
-  "Please click \"Sign\" to sign in to unleash the power of your NFTs.\n\n" +
+  'Please click "Sign" to sign in to unleash the power of your NFTs.\n\n' +
   "Nonce:\n";
 
 export const generateNonce = async (

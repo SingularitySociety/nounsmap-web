@@ -57,7 +57,7 @@ import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
-
+import { shortID } from "@/utils/utils";
 interface PinData {
   pid: string | null;
   icon?: google.maps.Icon;
@@ -223,16 +223,13 @@ export default defineComponent({
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       processing.value = false;
       pLevel.value = privacyCircleConfig.pLevel;
-      if (route.params.photoId != null) {
-        loadPhoto(route.params.photoId as string);
-      } else {
         mapObj.value.setCenter(
           new mapInstance.value.maps.LatLng(
             defaultMapConfig.lan,
             defaultMapConfig.lng
           )
         );
-      }
+      routeCheck();
     });
 
     const photoSelected = async (info: PhotoInfo) => {
@@ -296,10 +293,13 @@ export default defineComponent({
         );
       }
     };
+
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
       if (nft.value) {
         const _id =
-          nft.value.token.tokenID + nft.value.name + nft.value.contractAddress;
+          shortID(nft.value.token.tokenID) +
+          nft.value.name.trim() +
+          shortID(nft.value.contractAddress);
         const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
         const downloadURL = await getFileDownloadURL(storage_path);
         if (downloadURL) {
@@ -403,14 +403,19 @@ export default defineComponent({
         console.info("no user info");
         return;
       }
-      if (0 < Object.keys(pins).length) {
+      const photos = await getDocs(
+        collection(db, `users/${user.value.uid}/public_photos/`)
+      );
+      if (photos.size && photos.size == Object.keys(pins).length) {
         console.log(pins);
         //Object.keys(pins).forEach((key: string) => pins[key].showPhoto());
         return;
       }
-      const photos = await getDocs(
-        collection(db, `users/${user.value.uid}/public_photos/`)
-      );
+      //delete current pins
+      Object.values(pins).forEach((pin) => {
+        pin.delete();
+      });
+
       if (photos.size) {
         store.commit("setUserPhotoState", "exist");
       } else {

@@ -1,0 +1,21 @@
+{
+  "name": "images/users/0xa9faf095619e8a1d8873f6a940ec5906513ee079/public_photos/YQqU9TERDEOpuvcWd37P/ogp/600.jpg",
+  "bucket": "nounsmap-web-dev.appspot.com",
+  "contentType": "image/jpeg",
+  "metageneration": 1,
+  "generation": 1657335565065,
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "cacheControl": "public, max-age=3600",
+  "contentEncoding": "identity",
+  "customMetadata": {},
+  "downloadTokens": [
+    "d07b34cd-b3a4-40e8-82a4-52c1f5376b05"
+  ],
+  "etag": "G8seZkpFu3+92d+A7nLNO1tPo6Y",
+  "timeCreated": "2022-07-09T02:59:25.064Z",
+  "updated": "2022-07-09T02:59:25.064Z",
+  "size": 42888,
+  "md5Hash": "Key0z5CoBNqdS3h7p3dk8A==",
+  "crc32c": "650118715"
+}

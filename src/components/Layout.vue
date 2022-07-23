@@ -2,17 +2,27 @@
   <div class="layout">
     <NounsUser />
     <PhotoView />
+    <PhotoNFTRequest />
     <GuideLogin ref="guideLogin" />
     <GuidePhoto ref="guidePhoto" :photoSelect="photoSelect" />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
-    <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
+    <ul class="grid grid-cols-4 gap-0 justify-items-stretch">
       <li class="mr-3">
         <router-link :to="localizedUrl('/map')">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
           >
             {{ $t("menu.map") }}
+          </div>
+        </router-link>
+      </li>
+      <li class="mr-3">
+        <router-link :to="localizedUrl('/nft')">
+          <div
+            class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
+          >
+            {{ $t("menu.nft") }}
           </div>
         </router-link>
       </li>
@@ -55,6 +65,8 @@ import PhotoView from "@/components/PhotoView.vue";
 import GuideLogin from "@/components/GuideLogin.vue";
 import GuidePhoto from "@/components/GuidePhoto.vue";
 import PhotoSelect from "@/components/PhotoSelect.vue";
+import PhotoNFTRequest from "@/components/PhotoNFTRequest.vue";
+import { getLocaleName } from "@/i18n/utils";
 
 export default defineComponent({
   name: "AppLayout",
@@ -63,6 +75,7 @@ export default defineComponent({
     NounsUser,
     PhotoView,
     PhotoSelect,
+    PhotoNFTRequest,
     GuideLogin,
     GuidePhoto,
   },
@@ -79,6 +92,7 @@ export default defineComponent({
     const photoSelect = ref();
     onMounted(() => {
       auth.onAuthStateChanged(() => {
+        console.log("authStateChanged", store.state.account);
         routeCheck();
       });
     });
@@ -93,8 +107,17 @@ export default defineComponent({
       routeCheck();
     });
     const routeCheck = () => {
-      if (route.path == getLocalePath(router, "/map")) {
-        photoSelect.value.hide();
+      if (
+        route.path == getLocalePath(router, "/nft") ||
+        route.path == getLocalePath(router, "/nft_req")
+      ) {
+        photoSelect.value?.hide();
+      }
+      if (
+        route.path == getLocalePath(router, "/map") ||
+        route.path == getLocalePath(router, "/nft") ||
+        route.path == getLocalePath(router, "/nft_req")
+      ) {
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if (!user.value && !isShownGuideLogin) {
           guideLogin.value.open();
@@ -113,8 +136,13 @@ export default defineComponent({
     };
     const showUpload = () => {
       if (photoSelect.value.isShow) {
+        console.log("hide");
         photoSelect.value.hide();
       } else {
+        router.push({
+          name: getLocaleName(router, "map"),
+        });
+        console.log("show");
         photoSelect.value.show();
       }
     };
