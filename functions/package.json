@@ -8,6 +8,7 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "use-dev": "firebase use dev",
+    "use-prod": "firebase use prod",
     "deploy": "firebase deploy --only functions",
     "local-predeploy": " cp ../dist/index.html templates/index.html && cp ../src/config/project.ts ./src/common/project.ts",
     "logs": "firebase functions:log"
