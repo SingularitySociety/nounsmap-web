@@ -13,8 +13,9 @@ export const nounsMapConfig = {
   pageTitle: "NounsMap",
   siteDescription: "find world with Nouns",
   region: "JP",
-  hostName: "dev.nounsmap.com",
+  hostName: "nounsmap.com",
   introduction: "Comming soon. NOOOOOOOOOOOOOUNS map!!",
+  useEmulator: false,
   alchemy: "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T",
 };
 
@@ -22,7 +23,7 @@ export const defaultMapConfig = {
   lan: 35.6762, //tokyo
   lng: 139.6503, //tokyo
   zoom: 10, //for kanto area
-  mapkey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
+  mapkey: "AIzaSyC-AIzaSyBmHcCaWNs095d-jz7iiCSOmNRCOFFYs4E",
 };
 
 export const privacyCircleConfig = {
