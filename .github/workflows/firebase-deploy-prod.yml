@@ -32,8 +32,6 @@ jobs:
         working-directory: ./functions
         run: |
           yarn
-          yarn local-predeploy
-          yarn build
       - name: functions deploy to Firebase 
         working-directory: ./functions
         run: |

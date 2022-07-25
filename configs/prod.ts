@@ -23,7 +23,7 @@ export const defaultMapConfig = {
   lan: 35.6762, //tokyo
   lng: 139.6503, //tokyo
   zoom: 10, //for kanto area
-  mapkey: "AIzaSyC-AIzaSyBmHcCaWNs095d-jz7iiCSOmNRCOFFYs4E",
+  mapkey: "AIzaSyBmHcCaWNs095d-jz7iiCSOmNRCOFFYs4E",
 };
 
 export const privacyCircleConfig = {
