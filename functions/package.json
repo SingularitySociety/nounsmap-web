@@ -27,7 +27,7 @@
     "moment-timezone": "^0.5.34",
     "osm-static-maps": "^3.10.3",
     "puppeteer": "^14.1.0",
-    "sharp": "^0.30.4",
+    "sharp": "^0.30.5",
     "uuid-v4": "^0.1.0",
     "xmlbuilder": "^15.1.1"
   },
