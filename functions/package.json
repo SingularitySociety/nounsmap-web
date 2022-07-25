@@ -7,8 +7,8 @@
     "serve": "npm run local-predeploy && npm run build && firebase emulators:start --import=exportedlocal",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "use-dev": "firebase use dev && cp ../configs/dev.ts ./src/common/project.ts",
-    "use-prod": "firebase use prod && cp ../configs/prod.ts ./src/common/project.ts",
+    "use-dev": "cp ../configs/dev.ts ./src/common/project.ts && firebase use dev",
+    "use-prod": "cp ../configs/prod.ts ./src/common/project.ts && firebase use prod",
     "deploy": "firebase deploy --only functions",
     "local-predeploy": " cp ../dist/index.html templates/index.html && cp ../src/config/project.ts ./src/common/project.ts",
     "logs": "firebase functions:log"
