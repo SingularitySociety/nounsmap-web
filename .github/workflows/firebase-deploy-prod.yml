@@ -4,8 +4,9 @@
 
 name: Deploy to Prod Env
 'on':
-  release:
-    types: [published]
+  push:
+    branches:
+      - release/prod
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
