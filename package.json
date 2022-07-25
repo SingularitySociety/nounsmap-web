@@ -7,7 +7,8 @@
     "build": "vue-cli-service build && cp dist/index.html functions/templates/index.html",
     "lint": "vue-cli-service lint",
     "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build; firebase deploy --project=dev --only hosting",
-    "deploy-prod": "cp configs/prod.ts src/config/project.ts; yarn build; firebase deploy --project=prod --only hosting; cp configs/dev.ts src/config/project.ts",
+    "deploy-dev-all": "cp configs/dev.ts src/config/project.ts; yarn build; firebase deploy --project=dev",
+    "deploy-prod-all": "cp configs/prod.ts src/config/project.ts; yarn build; firebase deploy --project=prod",
     "format": "prettier --write 'src/**/*.{js,ts,vue}'"
   },
   "dependencies": {

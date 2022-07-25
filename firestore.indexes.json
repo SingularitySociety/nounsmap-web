@@ -1,4 +1,21 @@
 {
-  "indexes": [],
+  "indexes": [
+    { 
+      "collectionGroup": "nft_photos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "nounsmapCreated", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "ASCENDING" }
+      ]
+    },
+    { 
+      "collectionGroup": "nft_request_photos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "ASCENDING" }
+      ]
+    }    
+  ],
   "fieldOverrides": []
 }
