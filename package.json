@@ -6,8 +6,9 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build && cp dist/index.html functions/templates/index.html",
     "lint": "vue-cli-service lint",
-    "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build; firebase deploy --project=dev --only hosting",
-    "deploy-prod": "cp configs/prod.ts src/config/project.ts; yarn build; firebase deploy --project=prod --only hosting; cp configs/dev.ts src/config/project.ts",
+    "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev --only hosting",
+    "deploy-dev-all": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev",
+    "deploy-prod-all": "cp configs/prod.ts src/config/project.ts; yarn build;npx firebase deploy --project=prod",
     "format": "prettier --write 'src/**/*.{js,ts,vue}'"
   },
   "dependencies": {
@@ -43,6 +44,7 @@
     "@vue/cli-service": "^5.0.4",
     "@vue/compiler-sfc": "^3.2.33",
     "@vue/eslint-config-typescript": "^10.0.0",
+    "firebase-tools": "^10.9.2",
     "autoprefixer": "^10.4.4",
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
