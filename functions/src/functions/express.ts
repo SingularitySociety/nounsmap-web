@@ -6,9 +6,21 @@ import moment from "moment";
 import { nounsMapConfig, firebaseConfig } from "../common/project";
 
 import * as Sentry from "@sentry/node";
+// set up rate limiter: maximum of five requests per minute
+import  rateLimit  from 'express-rate-limit';
 
 export const app = express();
 export const router = express.Router();
+
+var limiter = rateLimit({
+	windowMs: 1 * 60 * 1000, // 1 minutes
+	max: 10, // Limit each IP to 10 requests per `window` 1 min
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// apply rate limiter to all requests
+app.use(limiter);
 
 // for test, db is not immutable
 if (!admin.apps.length) {
