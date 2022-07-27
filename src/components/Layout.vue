@@ -17,7 +17,7 @@
           </div>
         </router-link>
       </li>
-      <li class="mr-3">
+      <li class="mr-3"  v-if="featureConfig.enableNFTReq">
         <router-link :to="localizedUrl('/nft')">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
@@ -58,6 +58,7 @@ import router from "@/router";
 import { useStore } from "vuex";
 import { getLocalePath, useI18nParam } from "@/i18n/utils";
 import { auth } from "@/utils/firebase";
+import { featureConfig } from "@/config/project";
 
 import Languages from "@/components/Languages.vue";
 import NounsUser from "@/components/NounsUser.vue";
@@ -148,6 +149,7 @@ export default defineComponent({
     };
     useI18nParam();
     return {
+      featureConfig,
       guideLogin,
       guidePhoto,
       photoSelect,

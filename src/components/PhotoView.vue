@@ -38,7 +38,7 @@
       </div>
     </div>
     <div
-      v-if="isWalletUser"
+      v-if="isWalletUser && featureConfig.enableNFTReq"
       class="row-start-5 col-start-4 col-span-1 row-span-1 shrink-0 py-2 flex justify-center items-center"
     >
       <div class="flex flex-column items-center" @click="nftRequest">
@@ -55,7 +55,7 @@
 <script lang="ts">
 import { useStore } from "vuex";
 import { User } from "firebase/auth";
-import { nounsMapConfig } from "@/config/project";
+import { nounsMapConfig,featureConfig } from "@/config/project";
 import {
   defineComponent,
   ref,
@@ -115,6 +115,7 @@ export default defineComponent({
     };
     return {
       nounsMapConfig,
+      featureConfig,
       clickedPhoto,
       isWalletUser,
       close,
