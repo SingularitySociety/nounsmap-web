@@ -77,6 +77,8 @@ export interface NftPhoto {
 
 export const generateNewPhotoData = (
   pid: string,
+  title: string,
+  description: string,
   photoURL: string,
   org: string,
   path: string,
@@ -88,8 +90,8 @@ export const generateNewPhotoData = (
 ): PhotoOrgData => {
   const photoData = {
     id: pid,
-    title: "",
-    description: "",
+    title,
+    description,
     original_name: org,
     images: {
       resizedImages: {

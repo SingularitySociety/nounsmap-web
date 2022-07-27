@@ -1,6 +1,30 @@
 <template>
-  <div class="p-6" align="center">
+  <div class="flex flex-col p-6" align="center">
     <div align="center" v-if="photoLocal">
+      <div>
+      <div class="flex flex-row justify-center items-center m-4">
+        <span class="block text-gray-700 text-sm font-bold m-2"> {{ $t("label.name") }}: </span>
+        <input
+          type="text"
+          ref="nameRef"
+          maxlength="128"
+          minlength="1"
+          class="shadow appearance-none border rounded w-auto py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+      <div class="flex flex-row justify-center items-center m-4">
+        <span class="block text-gray-700 text-sm font-bold m-2">
+          {{ $t("label.description") }}:
+        </span>
+        <input
+          type="text"
+          ref="descRef"
+          maxlength="512"
+          minlength="1"
+          class="shadow appearance-none border rounded w-auto py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>    
+      </div>
       <div>
         {{ $t("message.selectPhotoLocation") }}<br />
         <label>{{ $t("message.spotPrivacyLevel") }} : </label>
@@ -173,8 +197,9 @@ export default defineComponent({
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
-
     const processing = ref();
+    const nameRef = ref();
+    const descRef = ref();
 
     let locationCircle: google.maps.Circle | null;
 
@@ -223,12 +248,12 @@ export default defineComponent({
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       processing.value = false;
       pLevel.value = privacyCircleConfig.pLevel;
-        mapObj.value.setCenter(
-          new mapInstance.value.maps.LatLng(
-            defaultMapConfig.lan,
-            defaultMapConfig.lng
-          )
-        );
+      mapObj.value.setCenter(
+        new mapInstance.value.maps.LatLng(
+          defaultMapConfig.lan,
+          defaultMapConfig.lng
+        )
+      );
       routeCheck();
     });
 
@@ -343,6 +368,8 @@ export default defineComponent({
       pins["upload"]?.showPhoto();
       const pdata = generateNewPhotoData(
         _pid,
+        nameRef.value.value,
+        descRef.value.value,
         photoURL,
         photoLocal.value.file.name,
         storage_path,
@@ -521,6 +548,8 @@ export default defineComponent({
       pictureURL,
       photoLocal,
       processing,
+      nameRef,
+      descRef,      
       photoSelected,
       uploadPhoto,
       locationUpdated,
@@ -534,6 +563,6 @@ export default defineComponent({
 /* マップを画面幅に合わせる*/
 .nouns-map {
   width: 100vw;
-  height: 100vh;
+  height: 90vh;
 }
 </style>
