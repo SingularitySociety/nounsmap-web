@@ -14,7 +14,7 @@
     >
       <img
         ref="imageRef"
-        class="rounded-md"
+        class="bg-cover rounded-md"
         :src="clickedPhoto.photoURL"
         alt="selected photo"
       />
