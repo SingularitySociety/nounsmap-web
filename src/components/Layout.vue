@@ -7,7 +7,7 @@
     <GuidePhoto ref="guidePhoto" :photoSelect="photoSelect" />
     <!-- Saved for future changes. Currently causes error. -->
     <!-- <template v-if="user.user"> {{ user.user.displayName }}!! </template> -->
-    <ul class="grid grid-cols-4 gap-0 justify-items-stretch">
+    <ul class="grid grid-cols-3 gap-0 justify-items-stretch">
       <li class="mr-3">
         <router-link :to="localizedUrl('/map')">
           <div
@@ -17,7 +17,7 @@
           </div>
         </router-link>
       </li>
-      <li class="mr-3">
+      <li class="mr-3" v-if="featureConfig.enableNFTReq">
         <router-link :to="localizedUrl('/nft')">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
@@ -58,6 +58,7 @@ import router from "@/router";
 import { useStore } from "vuex";
 import { getLocalePath, useI18nParam } from "@/i18n/utils";
 import { auth } from "@/utils/firebase";
+import { featureConfig } from "@/config/project";
 
 import Languages from "@/components/Languages.vue";
 import NounsUser from "@/components/NounsUser.vue";
@@ -108,16 +109,11 @@ export default defineComponent({
     });
     const routeCheck = () => {
       if (
-        route.path == getLocalePath(router, "/nft") ||
-        route.path == getLocalePath(router, "/nft_req")
-      ) {
-        photoSelect.value?.hide();
-      }
-      if (
         route.path == getLocalePath(router, "/map") ||
         route.path == getLocalePath(router, "/nft") ||
         route.path == getLocalePath(router, "/nft_req")
       ) {
+        photoSelect.value?.hide();
         //for not sign in user (isShown stored to memory, so if reloaded show again.)
         if (!user.value && !isShownGuideLogin) {
           guideLogin.value.open();
@@ -148,6 +144,7 @@ export default defineComponent({
     };
     useI18nParam();
     return {
+      featureConfig,
       guideLogin,
       guidePhoto,
       photoSelect,

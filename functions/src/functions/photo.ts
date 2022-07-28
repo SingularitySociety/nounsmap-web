@@ -137,6 +137,9 @@ export const posted = async (
       {
         uid,
         photoId,
+        title: pdata.title,
+        description: pdata.description,
+        eventId: pdata.eventId,
         iconURL: _iconURL,
         photoURL: _photoURL,
         lat: _lat,
@@ -149,9 +152,6 @@ export const posted = async (
     );
     await db.doc(`users/${uid}/public_photos/${photoId}`).set(
       {
-        title: "NounsMap Photo & News share!",
-        description:
-          "We are planning to release easy photo and map share service",
         images: {
           ogp: {
             [600]: {

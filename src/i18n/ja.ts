@@ -22,6 +22,7 @@ const lang = {
   label: {
     name: "タイトル",
     description: "説明",
+    event: "イベント",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",

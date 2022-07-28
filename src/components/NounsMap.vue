@@ -1,6 +1,34 @@
 <template>
-  <div class="p-6" align="center">
+  <div class="flex flex-col p-6" align="center">
     <div align="center" v-if="photoLocal">
+      <div>
+        <div class="flex flex-row justify-center items-center m-4">
+          <span class="block text-gray-700 text-sm font-bold m-2">
+            {{ $t("label.name") }}:
+          </span>
+          <input
+            type="text"
+            ref="nameRef"
+            maxlength="128"
+            minlength="1"
+            class="shadow appearance-none border rounded w-auto py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div class="flex flex-row justify-center items-center m-4">
+          <span class="block text-gray-700 text-sm font-bold m-2">
+            {{ $t("label.event") }}:
+          </span>
+          <select v-model="eventId">
+            <option
+              v-for="event in supportingEvents"
+              :value="event.eventId"
+              :key="event.eventId"
+            >
+              {{ eventName(event.eventId) }}
+            </option>
+          </select>
+        </div>
+      </div>
       <div>
         {{ $t("message.selectPhotoLocation") }}<br />
         <label>{{ $t("message.spotPrivacyLevel") }} : </label>
@@ -50,8 +78,13 @@ import {
 } from "firebase/firestore";
 import { User } from "firebase/auth";
 import { Loader } from "@googlemaps/js-api-loader";
-import { defaultMapConfig, privacyCircleConfig } from "@/config/project";
+import {
+  defaultMapConfig,
+  privacyCircleConfig,
+  supportingEvents,
+} from "@/config/project";
 import { NFT } from "@/models/SmartContract";
+import { useI18n } from "vue-i18n";
 import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
@@ -173,9 +206,17 @@ export default defineComponent({
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
-
     const processing = ref();
-
+    const nameRef = ref();
+    const descRef = ref();
+    const eventId = ref();
+    const i18n = useI18n();
+    const eventName = (eventId: number) => {
+      const event = supportingEvents.filter((v) => v.eventId == eventId)[0];
+      const locl: keyof typeof event.name = i18n.locale
+        .value as keyof typeof event.name;
+      return event?.name[locl] ? event.name[locl] : "";
+    };
     let locationCircle: google.maps.Circle | null;
 
     const user = computed<User>(() => store.state.user);
@@ -223,12 +264,12 @@ export default defineComponent({
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
       processing.value = false;
       pLevel.value = privacyCircleConfig.pLevel;
-        mapObj.value.setCenter(
-          new mapInstance.value.maps.LatLng(
-            defaultMapConfig.lan,
-            defaultMapConfig.lng
-          )
-        );
+      mapObj.value.setCenter(
+        new mapInstance.value.maps.LatLng(
+          defaultMapConfig.lan,
+          defaultMapConfig.lng
+        )
+      );
       routeCheck();
     });
 
@@ -341,8 +382,14 @@ export default defineComponent({
       )) as string;
       pins["upload"]?.update({ photoURL });
       pins["upload"]?.showPhoto();
+      const _title = nameRef.value?.value ? nameRef.value.value : "";
+      const _desc = descRef.value?.value ? descRef.value.value : "";
+      const _eventid = eventId.value ? eventId.value : 0;
       const pdata = generateNewPhotoData(
         _pid,
+        _title,
+        _desc,
+        _eventid,
         photoURL,
         photoLocal.value.file.name,
         storage_path,
@@ -521,6 +568,11 @@ export default defineComponent({
       pictureURL,
       photoLocal,
       processing,
+      nameRef,
+      descRef,
+      eventId,
+      supportingEvents,
+      eventName,
       photoSelected,
       uploadPhoto,
       locationUpdated,
@@ -534,6 +586,6 @@ export default defineComponent({
 /* マップを画面幅に合わせる*/
 .nouns-map {
   width: 100vw;
-  height: 100vh;
+  height: 90vh;
 }
 </style>

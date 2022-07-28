@@ -5,7 +5,7 @@ export const firebaseConfig = {
   storageBucket: "nounsmap-web-dev.appspot.com",
   messagingSenderId: "921564152867",
   appId: "1:921564152867:web:f52be744b25a8648059d96",
-  measurementId: "G-8HBS0HJ881"
+  measurementId: "G-8HBS0HJ881",
 };
 
 export const nounsMapConfig = {
@@ -37,31 +37,25 @@ export const privacyCircleConfig = {
 };
 
 export const ethereumConfig = {
-  validTokenContracts:[
+  validTokenContracts: [
     {
-      name:"NounsLove(testnets)",
-      chainId: "0x4", 
+      name: "NounsLove(testnets)",
+      chainId: "0x4",
       contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
       openseaUrl: "https://testnets.opensea.io/assets/rinkeby",
       filter: null,
       idmask: 0,
     },
     {
-      name:"NamedNoun(polygon)",
-      chainId: "0x89", 
+      name: "NamedNoun(polygon)",
+      chainId: "0x89",
       contractAddress: "0x2953399124F0cBB46d2CbACD8A89cF0599974963",
       openseaUrl: "https://opensea.io/assets/matic",
-      filter: "0x4e4cd175f812f1ba784a69c1f8ac8daa52ad7e2b000000000000010000000001",
+      filter:
+        "0x4e4cd175f812f1ba784a69c1f8ac8daa52ad7e2b000000000000010000000001",
       idmask: 12,
     },
-    {
-      name: "HappyToken(testnets)",
-      chainId: "0x4",
-      contractAddress: "0x4F700D279b7046BE3B31DcFD9D94166bF4E6FBb1",
-      openseaUrl: "https://testnets.opensea.io/assets/rinkeby",
-      filter: null,
-      idmask: 0,
-    },  ]
+  ],
 };
 
 export const ContentsContract = {
@@ -81,3 +75,24 @@ export const ContentsContract = {
   authorityTokenFilter: null,
   authorityTokenIdmask: 0,
 };
+
+export const featureConfig = {
+  enableNFTReq: false,
+};
+
+export const supportingEvents = [
+  {
+    eventId: 0,
+    name: {
+      ja: "日常の一コマ",
+      en: "DailyPhotos",
+    },
+  },
+  {
+    eventId: 1,
+    name: {
+      ja: "nouns全国バトンリレー",
+      en: "nousns All Japan baton relay",
+    },
+  },
+];
