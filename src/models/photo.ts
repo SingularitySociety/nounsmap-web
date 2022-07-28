@@ -13,6 +13,7 @@ export interface PhotoPubData {
   photoURL: string;
   title: string | undefined;
   description: string | undefined;
+  eventId: number;
   lat: number;
   lng: number;
   zoom: number;
@@ -23,6 +24,7 @@ export interface PhotoOrgData {
   id: string;
   title: string | undefined;
   description: string | undefined;
+  eventId: number;
   original_name: string;
   images: {
     resizedImages: {
@@ -79,6 +81,7 @@ export const generateNewPhotoData = (
   pid: string,
   title: string,
   description: string,
+  eventId: number,
   photoURL: string,
   org: string,
   path: string,
@@ -92,6 +95,7 @@ export const generateNewPhotoData = (
     id: pid,
     title,
     description,
+    eventId,
     original_name: org,
     images: {
       resizedImages: {

@@ -22,6 +22,7 @@ const lang = {
   label: {
     name: "title",
     description: "description",
+    event: "event",
     creator: "creator",
     mint: "Mint",
     mintNotHasAuthority: "Mint(AuthorityToken needed)",

@@ -79,3 +79,20 @@ export const ContentsContract = {
 export const featureConfig = {
   enableNFTReq: false,
 };
+
+export const supportingEvents = [
+  {
+    eventId: 0,
+    name: {
+      ja: "日常の一コマ",
+      en: "DailyPhotos",
+    },
+  },
+  {
+    eventId: 1,
+    name: {
+      ja: "nouns全国バトンリレー",
+      en: "nousns All Japan baton relay",
+    },
+  },
+];

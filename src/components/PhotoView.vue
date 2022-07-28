@@ -4,7 +4,7 @@
     v-if="clickedPhoto"
   >
     <div
-      class="col-start-4 row-span-1 col-span-1 flex justify-center items-center"
+      class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
       @click="close"
     >
       <i class="text-6xl material-icons text-white mr-2">cancel</i>
@@ -55,7 +55,7 @@
 <script lang="ts">
 import { useStore } from "vuex";
 import { User } from "firebase/auth";
-import { nounsMapConfig,featureConfig } from "@/config/project";
+import { nounsMapConfig, featureConfig } from "@/config/project";
 import {
   defineComponent,
   ref,

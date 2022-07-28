@@ -137,6 +137,9 @@ export const posted = async (
       {
         uid,
         photoId,
+        title: pdata.title,
+        description: pdata.description,
+        eventId: pdata.eventId,
         iconURL: _iconURL,
         photoURL: _photoURL,
         lat: _lat,
