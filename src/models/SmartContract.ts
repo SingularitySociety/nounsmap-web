@@ -4,6 +4,7 @@ export interface Token {
   tokenName: string;
   image: string;
   imageType: string;
+  buff: ArrayBuffer | undefined;
 }
 
 export interface TokenMeta {

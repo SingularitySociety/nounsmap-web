@@ -4,6 +4,7 @@ import * as os from "os";
 import * as fs from "fs";
 import sharp from "sharp";
 import UUID from "uuid-v4";
+import axios, { AxiosRequestConfig } from "axios";
 
 import * as constant from "./constant";
 
@@ -252,4 +253,17 @@ export const copyFileToBucket = async (fromObj, toPath) => {
   const ret = await bucketObj.file(fromObj.name).copy(toPath);
   console.log("Image copied", ret);
   return;
+};
+
+export const downloadFile = async (url) => {
+  try {
+    const tmpFile = path.join(os.tmpdir(), UUID()) + ".jpg";
+    const config = { responseType: "arraybuffer" };
+    const ret = await axios.get(url, config as AxiosRequestConfig);
+    await fs.promises.writeFile(tmpFile, ret.data);
+    return tmpFile;
+  } catch (e) {
+    console.log("error", e);
+  }
+  return null;
 };

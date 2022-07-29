@@ -277,10 +277,11 @@ export default defineComponent({
             ? nft.media[0].gateway
             : nft.metadata.image;
           const _type = nft.media[0].format
-            ? nft.media[0].format 
-            : nft.metadata.image.endsWith("svg") || nft.metadata.image.startsWith("data:image/svg")
-            ? "svg+xml" 
-            : undefined
+            ? nft.media[0].format
+            : nft.metadata.image.endsWith("svg") ||
+              nft.metadata.image.startsWith("data:image/svg")
+            ? "svg+xml"
+            : undefined;
           return {
             tokenID: nft.id.tokenId,
             displayID: shortID(nft.id.tokenId),
@@ -381,6 +382,7 @@ export default defineComponent({
             //const data = Buffer.from(ret.data , "base64").toString("ascii");
             const data = Buffer.from(ret.data).toString("base64");
             token.image = `data:image/${token.imageType};base64,` + data;
+            token.buff = Buffer.from(ret.data);
           }
           nft.value = {
             name: contract.value.name,

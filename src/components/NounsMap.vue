@@ -341,7 +341,10 @@ export default defineComponent({
           shortID(nft.value.token.tokenID) +
           nft.value.name.trim() +
           shortID(nft.value.contractAddress);
-        const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.svg`;
+        const post = nft.value.token.imageType
+          ? nft.value.token.imageType.slice(0, 3)
+          : "";
+        const storage_path = `images/users/${_uid}/public_icons/${_id}/icon.${post}`;
         const downloadURL = await getFileDownloadURL(storage_path);
         if (downloadURL) {
           //already icon exists
@@ -349,7 +352,16 @@ export default defineComponent({
           return [_id, downloadURL];
         } else {
           //new icon
-          const newURL = await uploadSVG(nft.value.token.image, storage_path);
+          const newURL = nft.value.token.buff
+            ? ((await uploadFile(
+                nft.value.token.buff,
+                storage_path,
+                nft.value.token.imageType
+              )) as string)
+            : ((await uploadSVG(
+                nft.value.token.image,
+                storage_path
+              )) as string);
           console.log("new icon", { newURL });
           return [_id, newURL];
         }
@@ -378,7 +390,8 @@ export default defineComponent({
       const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
       const photoURL = (await uploadFile(
         photoLocal.value.resizedBlob,
-        storage_path
+        storage_path,
+        "jpeg"
       )) as string;
       pins["upload"]?.update({ photoURL });
       pins["upload"]?.showPhoto();
