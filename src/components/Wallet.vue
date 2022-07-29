@@ -196,7 +196,7 @@ export default defineComponent({
     const isBusy = ref("");
     const isContentShown = ref(false);
     const debugRef = ref();
-    const isDebugTest = ref(true);
+    const isDebugTest = ref(false);
     const open = () => (isContentShown.value = true);
     onMounted(async () => {
       if (store.getters.hasMetaMask) {
