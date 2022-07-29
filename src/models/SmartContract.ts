@@ -3,6 +3,7 @@ export interface Token {
   dispalyID: string;
   tokenName: string;
   image: string;
+  imageType: string;
 }
 
 export interface TokenMeta {
@@ -36,6 +37,14 @@ export interface AlchemyOwnedTokens {
   contract: {
     address: string;
   };
+  media: [
+    {
+      format: string;
+      gateway: string;
+      raw: string;
+      thumbnail: string;
+    }
+  ];
   metadata: {
     external_link: string;
     image: string;
