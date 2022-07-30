@@ -100,9 +100,10 @@ export const supportingEvents = [
   {
     eventId: 0,
     name: {
-      ja: "日常の一コマ",
-      en: "DailyPhotos",
+      ja: "自分履歴",
+      en: "self history",
     },
+    expired: 0,
   },
   {
     eventId: 1,
@@ -110,5 +111,14 @@ export const supportingEvents = [
       ja: "nouns全国バトンリレー",
       en: "nousns All Japan baton relay",
     },
+    expired: 90,
+  },
+  {
+    eventId: 2,
+    name: {
+      ja: "今日のNouns",
+      en: "Daily Nouns",
+    },
+    expired: 1,
   },
 ];

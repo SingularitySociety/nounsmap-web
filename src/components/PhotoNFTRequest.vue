@@ -211,7 +211,8 @@ export default defineComponent({
         const storage_path = `images/users/${user.value.uid}/public_photos/${photoId}/nft_original.jpg`;
         const photoURL = (await uploadFile(
           fileInput.value.files[0],
-          storage_path
+          storage_path,
+          "jpeg"
         )) as string;
         console.log({ photoURL });
         //photo meta data 更新

@@ -23,6 +23,8 @@ const lang = {
     name: "title",
     description: "description",
     event: "event",
+    viewEvent: "viewing",
+    showPhoto: "photos",
     creator: "creator",
     mint: "Mint",
     mintNotHasAuthority: "Mint(AuthorityToken needed)",

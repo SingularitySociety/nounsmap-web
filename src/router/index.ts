@@ -26,6 +26,11 @@ const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
       component: NounsMap,
     },
     {
+      path: "map/:eventId",
+      name: prefix + "eventmap",
+      component: NounsMap,
+    },
+    {
       path: "nft_req",
       name: prefix + "nft_req",
       component: Mint,

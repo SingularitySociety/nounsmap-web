@@ -23,6 +23,8 @@ const lang = {
     name: "タイトル",
     description: "説明",
     event: "イベント",
+    viewEvent: "表示イベント",
+    showPhoto: "写真表示",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",
