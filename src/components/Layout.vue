@@ -119,6 +119,9 @@ export default defineComponent({
           guideLogin.value.open();
           isShownGuideLogin = true;
         }
+        if (user.value) {
+          guideLogin.value.close();
+        }        
         if (
           user.value &&
           userPhotoState.value == "empty" &&

@@ -38,6 +38,9 @@ export default defineComponent({
     const open = () => {
       isShow.value = true;
     };
+    const close = () => {
+      isShow.value = false;
+    };
     const gotoLogin = () => {
       isShow.value = false;
       router.push({
@@ -47,6 +50,7 @@ export default defineComponent({
     return {
       isShow,
       open,
+      close,
       gotoLogin,
     };
   },
