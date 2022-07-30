@@ -10,11 +10,11 @@
       <i class="text-6xl material-icons text-white mr-2">cancel</i>
     </div>
     <div
-      class="row-start-2 col-start-2 col-span-3 row-span-3 col-end-5 justify-center items-center"
+      class="row-start-2 col-start-2 col-span-3 row-span-3 justify-center items-center"
     >
       <img
         ref="imageRef"
-        class="bg-cover rounded-md"
+        class="max-h-full rounded-md"
         :src="clickedPhoto.photoURL"
         alt="selected photo"
       />
@@ -93,7 +93,13 @@ export default defineComponent({
       checkUser();
     });
     const close = () => {
-      router.push("../map");
+      console.log(router);
+      store.commit("setClickedPhoto", undefined);
+      if (store.state.canGoBack) {
+        router.back();
+      } else {
+        router.push("../map");
+      }
     };
     const nftRequest = () => {
       store.commit("setNftRequestPhoto", clickedPhoto.value);
