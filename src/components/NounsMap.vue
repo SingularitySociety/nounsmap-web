@@ -142,7 +142,8 @@ class Pin {
   constructor(
     mapInstance: Ref<typeof google>,
     mapObj: Ref<google.maps.Map>,
-    data: PinData
+    data: PinData,
+    eventId: number
   ) {
     this._mapInstance = mapInstance;
     this._mapObj = mapObj;
@@ -164,10 +165,17 @@ class Pin {
         shouldFocus: false,
       });
       if (data.pid) {
-        router.push({
-          name: getLocaleName(router, "photo"),
-          params: { photoId: data.pid },
-        });
+        if(eventId > 0) {
+          router.push({
+            name: getLocaleName(router, "eventphoto"),
+            params: { eventId, photoId: data.pid },
+          });
+        } else {
+          router.push({
+            name: getLocaleName(router, "photo"),
+            params: { photoId: data.pid },
+          });
+        }
       }
     });
     this._data = data;
@@ -338,7 +346,7 @@ export default defineComponent({
         lat: location.lat,
         lng: location.lng,
         visibility: true,
-      });
+      }, 0);
       pins["upload"].hidePhoto();
     };
     const locationUpdated = () => {
@@ -550,7 +558,7 @@ export default defineComponent({
           lat,
           lng,
           visibility: true,
-        });
+        },0);
       });
       const latarray = photos.docs.map((doc) => {
         return doc.data().lat;
@@ -605,7 +613,7 @@ export default defineComponent({
               lat,
               lng,
               visibility: true,
-            });
+            },0);
             if (lat != null && lng != null) {
               mapObj.value.setCenter(
                 new mapInstance.value.maps.LatLng(lat, lng)
@@ -665,7 +673,7 @@ export default defineComponent({
             lat,
             lng,
             visibility: true,
-          });
+          },_id);
         }
         const latarray = photos.docs.map((doc) => {
           return doc.data().lat;

@@ -54,6 +54,7 @@
 </template>
 <script lang="ts">
 import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 import { User } from "firebase/auth";
 import { nounsMapConfig, featureConfig } from "@/config/project";
 import {
@@ -65,11 +66,13 @@ import {
 } from "vue";
 import router from "@/router";
 import { PhotoPubData } from "@/models/photo";
+import { getLocaleName } from "@/i18n/utils";
 
 export default defineComponent({
   emits: {},
   setup() {
     const store = useStore();
+    const route = useRoute();
     const user = computed<User>(() => store.state.user);
     watch(user, () => {
       checkUser();
@@ -95,8 +98,11 @@ export default defineComponent({
     const close = () => {
       console.log(router);
       store.commit("setClickedPhoto", undefined);
-      if (store.state.canGoBack) {
-        router.back();
+      if (route.params.eventId) {
+        router.push({
+            name: getLocaleName(router, "eventmap"),
+            params: { eventId:route.params.eventId},
+          });
       } else {
         router.push("../map");
       }

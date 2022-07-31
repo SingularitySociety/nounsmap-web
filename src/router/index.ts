@@ -46,6 +46,11 @@ const routeChildren = (prefix: string): Array<RouteRecordRaw> => {
       component: NounsMap,
     },
     {
+      path: "map/:eventId/p/:photoId",
+      name: prefix + "eventphoto",
+      component: NounsMap,
+    },
+    {
       path: "about",
       component: About,
     },
