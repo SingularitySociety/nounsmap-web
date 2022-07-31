@@ -49,7 +49,8 @@ const lang = {
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
     processing: "送信中です...",
-    selectPhotoLocation: "写真の場所が中心になるように地図を移動してください。写真は公開、共有されますので、権利、プライバシーを確認の上投稿してください。",
+    selectPhotoLocation:
+      "写真の場所が中心になるように地図を移動してください。写真は公開、共有されますので、権利、プライバシーを確認の上投稿してください。",
     spotPrivacyLevel: "場所のプライバシーレベル",
     selectContract: "あなたのNFTの種類を選んでください",
     selectToken: "あなたのTokenを選んでください",

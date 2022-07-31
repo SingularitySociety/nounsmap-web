@@ -121,7 +121,7 @@ export default defineComponent({
         }
         if (user.value) {
           guideLogin.value.close();
-        }        
+        }
         if (
           user.value &&
           userPhotoState.value == "empty" &&

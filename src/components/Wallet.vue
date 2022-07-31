@@ -276,14 +276,16 @@ export default defineComponent({
           const _image = nft.metadata.image.startsWith("ipfs")
             ? nft.media[0].gateway
             : nft.metadata.image;
-          const _type = (()=>{
-            if(nft.media[0].format){
+          const _type = (() => {
+            if (nft.media[0].format) {
               return nft.media[0].format;
             } else {
-              if(nft.metadata.image.endsWith("svg") ||
-              nft.metadata.image.startsWith("data:image/svg")){
+              if (
+                nft.metadata.image.endsWith("svg") ||
+                nft.metadata.image.startsWith("data:image/svg")
+              ) {
                 return "svg+xml";
-              }else {
+              } else {
                 return undefined;
               }
             }
@@ -300,18 +302,18 @@ export default defineComponent({
         console.log(error);
       }
       console.log(tokens.value);
-      ownedTokenId.value = (()=>{
+      ownedTokenId.value = (() => {
         if (nftstore?.value?.token?.tokenID) {
           const selected = tokens.value.filter(
             (token) => token.tokenID == nftstore?.value?.token?.tokenID
           );
-          if(selected[0]){
+          if (selected[0]) {
             return parseInt(selected[0].tokenID);
-          } 
-        } 
-        if(tokens.value[0]){
-          return parseInt(tokens.value[0].tokenID)
-        }else{
+          }
+        }
+        if (tokens.value[0]) {
+          return parseInt(tokens.value[0].tokenID);
+        } else {
           return undefined;
         }
       })();
