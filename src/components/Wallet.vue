@@ -276,12 +276,18 @@ export default defineComponent({
           const _image = nft.metadata.image.startsWith("ipfs")
             ? nft.media[0].gateway
             : nft.metadata.image;
-          const _type = nft.media[0].format
-            ? nft.media[0].format
-            : nft.metadata.image.endsWith("svg") ||
-              nft.metadata.image.startsWith("data:image/svg")
-            ? "svg+xml"
-            : undefined;
+          const _type = (()=>{
+            if(nft.media[0].format){
+              return nft.media[0].format;
+            } else {
+              if(nft.metadata.image.endsWith("svg") ||
+              nft.metadata.image.startsWith("data:image/svg")){
+                return "svg+xml";
+              }else {
+                return undefined;
+              }
+            }
+          })();
           return {
             tokenID: nft.id.tokenId,
             displayID: shortID(nft.id.tokenId),
@@ -294,18 +300,21 @@ export default defineComponent({
         console.log(error);
       }
       console.log(tokens.value);
-      if (nftstore?.value?.token?.tokenID) {
-        const selected = tokens.value.filter(
-          (token) => token.tokenID == nftstore?.value?.token?.tokenID
-        );
-        ownedTokenId.value = selected[0]
-          ? parseInt(selected[0].tokenID)
-          : tokens.value[0]
-          ? parseInt(tokens.value[0].tokenID)
-          : undefined;
-      } else if (tokens.value[0]) {
-        ownedTokenId.value = parseInt(tokens.value[0].tokenID);
-      }
+      ownedTokenId.value = (()=>{
+        if (nftstore?.value?.token?.tokenID) {
+          const selected = tokens.value.filter(
+            (token) => token.tokenID == nftstore?.value?.token?.tokenID
+          );
+          if(selected[0]){
+            return parseInt(selected[0].tokenID);
+          } 
+        } 
+        if(tokens.value[0]){
+          return parseInt(tokens.value[0].tokenID)
+        }else{
+          return undefined;
+        }
+      })();
     };
     const connect = async () => {
       isBusy.value = "Connecting Metamask...";
@@ -373,11 +382,8 @@ export default defineComponent({
         )[0];
         if (token) {
           if (token.image.indexOf("http") == 0) {
-            const config = { responseType: "arraybuffer" };
-            const ret = await axios.get(
-              token.image,
-              config as AxiosRequestConfig
-            );
+            const config: AxiosRequestConfig = { responseType: "arraybuffer" };
+            const ret = await axios.get(token.image, config);
             console.log(token.imageType);
             //const data = Buffer.from(ret.data , "base64").toString("ascii");
             const data = Buffer.from(ret.data).toString("base64");
