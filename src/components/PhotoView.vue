@@ -100,9 +100,9 @@ export default defineComponent({
       store.commit("setClickedPhoto", undefined);
       if (route.params.eventId) {
         router.push({
-            name: getLocaleName(router, "eventmap"),
-            params: { eventId:route.params.eventId},
-          });
+          name: getLocaleName(router, "eventmap"),
+          params: { eventId: route.params.eventId },
+        });
       } else {
         router.push("../map");
       }

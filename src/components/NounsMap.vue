@@ -165,7 +165,7 @@ class Pin {
         shouldFocus: false,
       });
       if (data.pid) {
-        if(eventId > 0) {
+        if (eventId > 0) {
           router.push({
             name: getLocaleName(router, "eventphoto"),
             params: { eventId, photoId: data.pid },
@@ -339,14 +339,19 @@ export default defineComponent({
       const location = info.location ? info.location : mapObj.value.getCenter();
       mapObj.value.setCenter(location);
       mapObj.value.setZoom(12);
-      pins["upload"] = new Pin(mapInstance, mapObj, {
-        pid: null,
-        icon: defaultIcon(),
-        photoURL: "",
-        lat: location.lat,
-        lng: location.lng,
-        visibility: true,
-      }, 0);
+      pins["upload"] = new Pin(
+        mapInstance,
+        mapObj,
+        {
+          pid: null,
+          icon: defaultIcon(),
+          photoURL: "",
+          lat: location.lat,
+          lng: location.lng,
+          visibility: true,
+        },
+        0
+      );
       pins["upload"].hidePhoto();
     };
     const locationUpdated = () => {
@@ -548,17 +553,22 @@ export default defineComponent({
         //for default icon care
         const _iconurl = iconURL ? iconURL : require("@/assets/red160px.png");
         const _hsize = iconURL ? 80 : 30;
-        pins[doc.id] = new Pin(mapInstance, mapObj, {
-          pid: doc.id,
-          icon: {
-            url: _iconurl,
-            scaledSize: new mapInstance.value.maps.Size(80, _hsize),
+        pins[doc.id] = new Pin(
+          mapInstance,
+          mapObj,
+          {
+            pid: doc.id,
+            icon: {
+              url: _iconurl,
+              scaledSize: new mapInstance.value.maps.Size(80, _hsize),
+            },
+            photoURL: imageUrl,
+            lat,
+            lng,
+            visibility: true,
           },
-          photoURL: imageUrl,
-          lat,
-          lng,
-          visibility: true,
-        },0);
+          0
+        );
       });
       const latarray = photos.docs.map((doc) => {
         return doc.data().lat;
@@ -603,17 +613,22 @@ export default defineComponent({
             const size = iconURL.match(/red160px/)
               ? new mapInstance.value.maps.Size(80, 30)
               : new mapInstance.value.maps.Size(80, 80);
-            pins[doc.id] = new Pin(mapInstance, mapObj, {
-              pid: doc.id,
-              icon: {
-                url: iconURL,
-                scaledSize: size,
+            pins[doc.id] = new Pin(
+              mapInstance,
+              mapObj,
+              {
+                pid: doc.id,
+                icon: {
+                  url: iconURL,
+                  scaledSize: size,
+                },
+                photoURL,
+                lat,
+                lng,
+                visibility: true,
               },
-              photoURL,
-              lat,
-              lng,
-              visibility: true,
-            },0);
+              0
+            );
             if (lat != null && lng != null) {
               mapObj.value.setCenter(
                 new mapInstance.value.maps.LatLng(lat, lng)
@@ -663,17 +678,22 @@ export default defineComponent({
             pins[doc.id].delete();
             delete pins[doc.id];
           }
-          pins[doc.id] = new Pin(mapInstance, mapObj, {
-            pid: doc.id,
-            icon: {
-              url: _iconurl,
-              scaledSize: size,
+          pins[doc.id] = new Pin(
+            mapInstance,
+            mapObj,
+            {
+              pid: doc.id,
+              icon: {
+                url: _iconurl,
+                scaledSize: size,
+              },
+              photoURL,
+              lat,
+              lng,
+              visibility: true,
             },
-            photoURL,
-            lat,
-            lng,
-            visibility: true,
-          },_id);
+            _id
+          );
         }
         const latarray = photos.docs.map((doc) => {
           return doc.data().lat;
