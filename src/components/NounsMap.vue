@@ -232,8 +232,8 @@ export default defineComponent({
     const nameRef = ref();
     const descRef = ref();
     const i18n = useI18n();
-    const eventId = ref();
-    const viewEventId = ref();
+    const eventId = ref<number>(0);
+    const viewEventId = ref<number>(0);
     watch(viewEventId, () => {
       router.push({
         name: getLocaleName(router, "eventmap"),
