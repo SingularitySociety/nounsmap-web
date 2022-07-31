@@ -74,7 +74,7 @@
       </select>
     </div>
     <div>
-      <label class="m-2" for="sshowPicture">{{ $t("label.showPhoto") }}:</label>
+      <label class="m-2">{{ $t("label.showPhoto") }}:</label>
       <input type="checkbox" id="showPicture" v-model="isShowPicture" />
     </div>
   </div>

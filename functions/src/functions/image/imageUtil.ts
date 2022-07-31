@@ -258,8 +258,8 @@ export const copyFileToBucket = async (fromObj, toPath) => {
 export const downloadFile = async (url) => {
   try {
     const tmpFile = path.join(os.tmpdir(), UUID()) + ".jpg";
-    const config = { responseType: "arraybuffer" };
-    const ret = await axios.get(url, config as AxiosRequestConfig);
+    const config: AxiosRequestConfig = { responseType: "arraybuffer" };
+    const ret = await axios.get(url, config);
     await fs.promises.writeFile(tmpFile, ret.data);
     return tmpFile;
   } catch (e) {
