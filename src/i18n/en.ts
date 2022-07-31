@@ -23,6 +23,8 @@ const lang = {
     name: "title",
     description: "description",
     event: "event",
+    viewEvent: "viewing",
+    showPhoto: "photos",
     creator: "creator",
     mint: "Mint",
     mintNotHasAuthority: "Mint(AuthorityToken needed)",
@@ -38,7 +40,7 @@ const lang = {
     hello: "hello world",
     guidesignin: "You can share(Tweet) photo with maps, Try it now!",
     guidephoto:
-      "Click on the above button to upload your photos. Or try it with following button now!",
+      "Click on the above button to upload your photos. Or try it with following button now! Photos are public and shared, so please check the rights and privacy before posting.",
     pleasesignin:
       "Please SignIn. (If you want to convert your photos to NFT, please log in with MetaMask)",
     selectImage: "Select image",
@@ -47,7 +49,7 @@ const lang = {
     shareTwitter: "Share(Twitter)!!",
     processing: "Processing...",
     selectPhotoLocation:
-      "Please move the map so that the location of the photo is in the center.",
+      "Please move the map so that the location of the photo is in the center. Photos are public and shared, so please check the rights and privacy before posting.",
     selectContract: "Please select your NFT token contract",
     selectToken: "Please select your Token",
     youNeedMeta: "Please install MetaMask.",

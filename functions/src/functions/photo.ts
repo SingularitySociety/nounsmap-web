@@ -20,13 +20,9 @@ const contractViewOnly = new ethers.Contract(
 const defaultIconURL =
   "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
 
-const getIconPath = async (uid, pdata) => {
+const getIconPath = async (pdata) => {
   if (pdata.iconURL.length > 1) {
-    const iconObj = {
-      bucket: firebaseConfig.storageBucket,
-      name: `images/users/${uid}/public_icons/${pdata.iconId}/icon.svg`,
-    };
-    const tmpIcon = await imageUtil.downloadFileFromBucket(iconObj);
+    const tmpIcon = await imageUtil.downloadFile(pdata.iconURL);
     return await imageUtil.resizeLocal(tmpIcon, 96);
   } else {
     //const tempFilePath = path.join(os.tmpdir(), UUID());
@@ -67,7 +63,7 @@ const uploadImages = async (
       tmpFile = tmpPhoto;
       return imageUtil.resizeLocal(tmpPhoto, 220);
     }),
-    getIconPath(uid, pdata),
+    getIconPath(pdata),
   ]);
   const tmpBlend = await imageUtil.blendLocal(
     tmpFiles[0],
@@ -218,7 +214,7 @@ export const nftPosted = async (
         tmpFile = tmpPhoto;
         return imageUtil.resizeLocal(tmpPhoto, 600);
       }),
-      getIconPath(uid, pdata),
+      getIconPath(pdata),
     ]);
     // watermarked (same as original posted)
     const tmpBlend = await imageUtil.blendWaterMarkLocal(
