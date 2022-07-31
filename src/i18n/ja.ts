@@ -23,6 +23,8 @@ const lang = {
     name: "タイトル",
     description: "説明",
     event: "イベント",
+    viewEvent: "表示イベント",
+    showPhoto: "写真表示",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",
@@ -40,14 +42,15 @@ const lang = {
     guidesignin:
       "地図情報付きの写真を簡単にTwitterで共有できます！  今すぐ試してみませんか？",
     guidephoto:
-      "写真を投稿するには上記のボタンをクリック！　もしくは下記ボタンですぐに投稿できます！",
+      "写真を投稿するには上記のボタンをクリック！　もしくは下記ボタンですぐに投稿できます！(写真は公開、共有されますのでご注意ください)",
     pleasesignin:
       "ログイン方法を選んでください(写真をNFT化したい場合はMetaMaskでログインしてください)",
     selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
     processing: "送信中です...",
-    selectPhotoLocation: "写真の場所が中心になるように地図を移動してください",
+    selectPhotoLocation:
+      "写真の場所が中心になるように地図を移動してください。写真は公開、共有されますので、権利、プライバシーを確認の上投稿してください。",
     spotPrivacyLevel: "場所のプライバシーレベル",
     selectContract: "あなたのNFTの種類を選んでください",
     selectToken: "あなたのTokenを選んでください",

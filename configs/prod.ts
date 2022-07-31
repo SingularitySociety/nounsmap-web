@@ -39,6 +39,22 @@ export const privacyCircleConfig = {
 export const ethereumConfig = {
   validTokenContracts: [
     {
+      name: "NounsDaoJapan",
+      chainId: "0x1",
+      contractAddress: "0x898a7dbfddf13962df089fbc8f069fa7ce92cdbb",
+      openseaUrl: "https://opensea.io/assets/ethereum",
+      filter: null,
+      idmask: 0,
+    },
+    {
+      name: "NounsBatonRelay",
+      chainId: "0x1",
+      contractAddress: "0x34758B0D303608B05B0BF6A35714162ac8797DC2",
+      openseaUrl: "https://opensea.io/assets/ethereum",
+      filter: null,
+      idmask: 0,
+    },
+    {
       name: "NounsLove(testnets)",
       chainId: "0x4",
       contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
@@ -84,9 +100,10 @@ export const supportingEvents = [
   {
     eventId: 0,
     name: {
-      ja: "日常の一コマ",
-      en: "DailyPhotos",
+      ja: "自分履歴",
+      en: "self history",
     },
+    expired: 0,
   },
   {
     eventId: 1,
@@ -94,5 +111,14 @@ export const supportingEvents = [
       ja: "nouns全国バトンリレー",
       en: "nousns All Japan baton relay",
     },
+    expired: 90,
+  },
+  {
+    eventId: 2,
+    name: {
+      ja: "今日のNouns",
+      en: "Daily Nouns",
+    },
+    expired: 1,
   },
 ];

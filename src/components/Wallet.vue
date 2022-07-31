@@ -25,6 +25,17 @@
                 <br />
               </p>
             </div>
+            <div v-if="isDebugTest">
+              <div class="flex flex-row justify-center items-center m-4">
+                <input
+                  type="text"
+                  ref="debugRef"
+                  maxlength="128"
+                  minlength="1"
+                  class="shadow appearance-none border rounded w-auto py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            </div>
             <div v-if="tokens && tokens.length > 0">
               {{ $t("message.selectToken") }}:
               <select v-model="ownedTokenId">
@@ -144,6 +155,7 @@ import { nounsMapConfig, ethereumConfig } from "@/config/project";
 import { auth } from "@/utils/firebase";
 import { signInWithCustomToken } from "firebase/auth";
 import { generateNonce, verifyNonce, deleteNonce } from "../utils/functions";
+import { shortID } from "@/utils/utils";
 import { UserData } from "@/components/NounsUser.vue";
 import { requestAccount, switchNetwork, ChainIds } from "@/utils/MetaMask";
 import { Token, NFT, AlchemyOwnedTokens } from "@/models/SmartContract";
@@ -183,6 +195,8 @@ export default defineComponent({
     const tokens = ref<Array<Token>>([]);
     const isBusy = ref("");
     const isContentShown = ref(false);
+    const debugRef = ref();
+    const isDebugTest = ref(false);
     const open = () => (isContentShown.value = true);
     onMounted(async () => {
       if (store.getters.hasMetaMask) {
@@ -223,9 +237,10 @@ export default defineComponent({
             return "invalid";
         }
       })(contract.value.chainId);
+      const _account = isDebugTest.value ? debugRef.value.value : account.value;
       const request = {
         method: "get",
-        url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${account.value}`,
+        url: `${base}${nounsMapConfig.alchemy}/getNFTs/?owner=${_account}`,
       };
       try {
         const response = await axios(request);
@@ -258,33 +273,50 @@ export default defineComponent({
           }
         );
         tokens.value = target.map((nft: AlchemyOwnedTokens) => {
-          const displayID =
-            nft.id.tokenId.length > 18
-              ? nft.id.tokenId.slice(0, 6) + "..." + nft.id.tokenId.slice(-12)
-              : nft.id.tokenId;
+          const _image = nft.metadata.image.startsWith("ipfs")
+            ? nft.media[0].gateway
+            : nft.metadata.image;
+          const _type = (() => {
+            if (nft.media[0].format) {
+              return nft.media[0].format;
+            } else {
+              if (
+                nft.metadata.image.endsWith("svg") ||
+                nft.metadata.image.startsWith("data:image/svg")
+              ) {
+                return "svg+xml";
+              } else {
+                return undefined;
+              }
+            }
+          })();
           return {
             tokenID: nft.id.tokenId,
-            displayID: displayID,
+            displayID: shortID(nft.id.tokenId),
             tokenName: nft.title,
-            image: nft.metadata.image,
+            image: _image,
+            imageType: _type,
           };
         });
       } catch (error) {
         console.log(error);
       }
       console.log(tokens.value);
-      if (nftstore?.value?.token?.tokenID) {
-        const selected = tokens.value.filter(
-          (token) => token.tokenID == nftstore?.value?.token?.tokenID
-        );
-        ownedTokenId.value = selected[0]
-          ? selected[0].tokenID
-          : tokens.value[0]
-          ? tokens.value[0].tokenID
-          : undefined;
-      } else if (tokens.value[0]) {
-        ownedTokenId.value = tokens.value[0].tokenID;
-      }
+      ownedTokenId.value = (() => {
+        if (nftstore?.value?.token?.tokenID) {
+          const selected = tokens.value.filter(
+            (token) => token.tokenID == nftstore?.value?.token?.tokenID
+          );
+          if (selected[0]) {
+            return parseInt(selected[0].tokenID);
+          }
+        }
+        if (tokens.value[0]) {
+          return parseInt(tokens.value[0].tokenID);
+        } else {
+          return undefined;
+        }
+      })();
     };
     const connect = async () => {
       isBusy.value = "Connecting Metamask...";
@@ -352,14 +384,13 @@ export default defineComponent({
         )[0];
         if (token) {
           if (token.image.indexOf("http") == 0) {
-            const config = { responseType: "arraybuffer" };
-            const ret = await axios.get(
-              token.image,
-              config as AxiosRequestConfig
-            );
+            const config: AxiosRequestConfig = { responseType: "arraybuffer" };
+            const ret = await axios.get(token.image, config);
+            console.log(token.imageType);
             //const data = Buffer.from(ret.data , "base64").toString("ascii");
             const data = Buffer.from(ret.data).toString("base64");
-            token.image = "data:image/svg+xml;base64," + data;
+            token.image = `data:image/${token.imageType};base64,` + data;
+            token.buff = Buffer.from(ret.data);
           }
           nft.value = {
             name: contract.value.name,
@@ -409,6 +440,8 @@ export default defineComponent({
       isContentShown,
       isBusy,
       isSignedIn,
+      debugRef,
+      isDebugTest,
       open,
       connect,
       signIn,

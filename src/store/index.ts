@@ -19,6 +19,7 @@ interface State {
   clickedPhoto: PhotoPubData | null;
   nftRequestPhoto: PhotoPubData | null;
   uploadPhoto: PhotoInfo | null;
+  canGoBack: boolean;
 }
 
 export default createStore<State>({
@@ -35,6 +36,7 @@ export default createStore<State>({
     clickedPhoto: null,
     nftRequestPhoto: null,
     uploadPhoto: null,
+    canGoBack: false,
   },
   mutations: {
     load(state: State) {
@@ -85,6 +87,9 @@ export default createStore<State>({
     },
     setUploadPhoto(state: State, photo: PhotoInfo | null) {
       state.uploadPhoto = photo;
+    },
+    setCanGoBack(state: State, goback: boolean) {
+      state.canGoBack = goback;
     },
   },
   getters: {

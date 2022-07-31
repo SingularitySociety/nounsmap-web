@@ -6,11 +6,19 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-export const uploadFile = (file: File, path: string) => {
+export const uploadFile = (
+  file: ArrayBuffer | File,
+  path: string,
+  meta: string | undefined
+) => {
   return new Promise((resolve, rejected) => {
     const storage = getStorage();
     const storageRef = ref(storage, path);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const uploadTask = meta
+      ? uploadBytesResumable(storageRef, file, {
+          contentType: `image/${meta}`,
+        })
+      : uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
       "state_changed",

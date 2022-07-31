@@ -7,7 +7,6 @@ const db = admin.firestore();
 // The user will see this message when MetaMask makes a "Signature Request"
 // to the user.
 const readableMessage =
-  "Welcome to nounsfes.com!\n\n" +
   'Please click "Sign" to sign in to unleash the power of your NFTs.\n\n' +
   "Nonce:\n";
 
