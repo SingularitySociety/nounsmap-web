@@ -24,6 +24,8 @@ export const defaultMapConfig = {
   lng: 139.6503, //tokyo
   zoom: 10, //for kanto area
   mapkey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
+  icon_size: 40,
+  nouns_icon_h: 15,
 };
 
 export const privacyCircleConfig = {
@@ -100,7 +102,7 @@ export const supportingEvents = [
   {
     eventId: 0,
     name: {
-      ja: "自分履歴",
+      ja: "自分の記録",
       en: "self history",
     },
     expired: 0,
