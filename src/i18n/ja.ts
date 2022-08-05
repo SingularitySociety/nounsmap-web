@@ -7,7 +7,7 @@ const lang = {
     nft: "写真コンテンツ",
     nftRequest: "NFT要望写真コンテンツ",
     nftMinted: "NFT済み写真コンテンツ",
-    user: "ユーザー",
+    user: "ユーザ",
   },
   function: {
     requestAccount: "MetaMaskと接続",

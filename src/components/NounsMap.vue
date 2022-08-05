@@ -59,13 +59,13 @@
     </button>
   </div>
   <div class="fixed z-20 inset-x-0 .text-justify" v-else>
-    <div class="flex flex-row mt-2">
+    <div class="flex flex-row justify-left mt-2">
       <span class="block text-gray-700 text-sm m-2">
         {{ $t("label.viewEvent") }}:
       </span>
       <select
         v-model="viewEventId"
-        class="text-sm rounded-full border-1 font-semibold text-gray-800 text-center"
+        class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
       >
         <option
           v-for="event in supportingEvents"
@@ -76,7 +76,7 @@
         </option>
       </select>
     </div>
-    <div>
+    <div class="flex flex-row justify-left">
       <label class="text-gray-700 text-sm m-2"
         >{{ $t("label.showPhoto") }}:</label
       >
