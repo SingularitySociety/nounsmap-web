@@ -44,7 +44,7 @@ const lang = {
     guidephoto:
       "写真を投稿するには上記のボタンをクリック！　もしくは下記ボタンですぐに投稿できます！(写真は公開、共有されますのでご注意ください)",
     pleasesignin:
-      "ログイン方法を選んでください(写真をNFT化したい場合はMetaMaskでログインしてください)",
+      "ログイン方法を選んでください(投稿時のNounsアイコンを変更したい場合はMetaMaskでログインしてください)",
     selectImage: "画像を選んでください",
     uploadImage: "画像をアップロードしましょう!",
     shareTwitter: "Twitterにリンクを共有！",
