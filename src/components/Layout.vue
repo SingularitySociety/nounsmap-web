@@ -17,7 +17,7 @@
           </div>
         </router-link>
       </li>
-      <li class="mr-3" v-if="featureConfig.enableNFTReq">
+      <li class="m-0" v-if="featureConfig.enableNFTReq">
         <router-link :to="localizedUrl('/nft')">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
@@ -26,7 +26,7 @@
           </div>
         </router-link>
       </li>
-      <li class="mr-3">
+      <li class="m-0">
         <a
           class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
           @click="showUpload"
@@ -34,7 +34,7 @@
           {{ $t("menu.upload") }}</a
         >
       </li>
-      <li class="mr-3">
+      <li class="m-0">
         <router-link :to="localizedUrl(`/user`)">
           <div
             class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"

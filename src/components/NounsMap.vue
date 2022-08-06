@@ -58,12 +58,15 @@
       {{ $t("message.processing") }}
     </button>
   </div>
-  <div class="fixed z-20 right-0">
-    <div class="flex flex-row justify-center items-center mr-20">
-      <span class="block text-gray-700 text-sm font-bold m-2">
+  <div class="fixed z-20 inset-x-0 .text-justify" v-else>
+    <div class="flex flex-row justify-left mt-2">
+      <span class="block text-gray-700 text-sm m-2">
         {{ $t("label.viewEvent") }}:
       </span>
-      <select v-model="viewEventId">
+      <select
+        v-model="viewEventId"
+        class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
+      >
         <option
           v-for="event in supportingEvents"
           :value="event.eventId"
@@ -73,8 +76,10 @@
         </option>
       </select>
     </div>
-    <div>
-      <label class="m-2">{{ $t("label.showPhoto") }}:</label>
+    <div class="flex flex-row justify-left">
+      <label class="text-gray-700 text-sm m-2"
+        >{{ $t("label.showPhoto") }}:</label
+      >
       <input type="checkbox" id="showPicture" v-model="isShowPicture" />
     </div>
   </div>
@@ -105,7 +110,7 @@ import {
 } from "@/config/project";
 import { NFT } from "@/models/SmartContract";
 import { useI18n } from "vue-i18n";
-import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
+import { uploadFile, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
@@ -131,7 +136,7 @@ class Pin {
     return (
       '<div id="content">' +
       '<div  id="siteNotice">' +
-      '<img  class="w-32" src="' +
+      '<img  class="w-16 lg:w-32 xl:w-32" src="' +
       photoURL +
       '" />' +
       "</div>" +
@@ -295,12 +300,14 @@ export default defineComponent({
       if (route.params.photoId != null) {
         loadPhoto(route.params.photoId as string);
       } else if (route.params.eventId != null) {
-        store.commit("setCanGoBack", true);
-        loadEventPhotos(parseInt(route.params.eventId as string));
+        const _event = parseInt(route.params.eventId as string);
+        viewEventId.value = _event;
+        isShowPicture.value = true;
+        loadEventPhotos(_event);
       } else if (route.path == getLocalePath(router, "/map")) {
-        store.commit("setCanGoBack", true);
         store.commit("setClickedPhoto", null);
         viewEventId.value = supportingEvents[0].eventId;
+        isShowPicture.value = true;
         loadUserPhotos();
       }
     };
@@ -312,6 +319,9 @@ export default defineComponent({
       });
       const mapOptions = {
         zoom: defaultMapConfig.zoom,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false,
       };
       mapInstance.value = await loader.load();
       mapObj.value = new mapInstance.value.maps.Map(mapRef.value, mapOptions);
@@ -410,16 +420,15 @@ export default defineComponent({
           return [_id, downloadURL];
         } else {
           //new icon
-          const newURL = nft.value.token.buff
-            ? ((await uploadFile(
-                nft.value.token.buff,
-                storage_path,
-                nft.value.token.imageType
-              )) as string)
-            : ((await uploadSVG(
-                nft.value.token.image,
-                storage_path
-              )) as string);
+          const binary = Buffer.from(
+            nft.value.token.image.split(",")[1],
+            "base64"
+          );
+          const newURL = await uploadFile(
+            binary.buffer,
+            storage_path,
+            nft.value.token.imageType
+          );
           console.log("new icon", { newURL });
           return [_id, newURL];
         }
@@ -503,16 +512,18 @@ export default defineComponent({
     };
 
     const defaultIcon = () => {
+      const _size = defaultMapConfig.icon_size;
+      const _nouns_h = defaultMapConfig.nouns_icon_h;
       if (nft.value && nft.value.token.image) {
         return {
           url: nft.value.token.image,
-          scaledSize: new mapInstance.value.maps.Size(80, 80),
+          scaledSize: new mapInstance.value.maps.Size(_size, _size),
         };
       } else {
         //Nouns Default red grass
         return {
           url: require("@/assets/red160px.png"),
-          scaledSize: new mapInstance.value.maps.Size(80, 30),
+          scaledSize: new mapInstance.value.maps.Size(_size, _nouns_h),
         };
       }
     };
@@ -551,8 +562,10 @@ export default defineComponent({
           return;
         }
         //for default icon care
+        const _size = defaultMapConfig.icon_size;
+        const _nouns_h = defaultMapConfig.nouns_icon_h;
         const _iconurl = iconURL ? iconURL : require("@/assets/red160px.png");
-        const _hsize = iconURL ? 80 : 30;
+        const _hsize = iconURL ? _size : _nouns_h;
         pins[doc.id] = new Pin(
           mapInstance,
           mapObj,
@@ -560,7 +573,7 @@ export default defineComponent({
             pid: doc.id,
             icon: {
               url: _iconurl,
-              scaledSize: new mapInstance.value.maps.Size(80, _hsize),
+              scaledSize: new mapInstance.value.maps.Size(_size, _hsize),
             },
             photoURL: imageUrl,
             lat,
@@ -609,10 +622,11 @@ export default defineComponent({
           if (doc.exists()) {
             store.commit("setClickedPhoto", doc.data());
             const { iconURL, photoURL, lat, lng, zoom } = doc.data();
-            //default icon size is 80, 30
+            const _size = defaultMapConfig.icon_size;
+            const _nouns_h = defaultMapConfig.nouns_icon_h;
             const size = iconURL.match(/red160px/)
-              ? new mapInstance.value.maps.Size(80, 30)
-              : new mapInstance.value.maps.Size(80, 80);
+              ? new mapInstance.value.maps.Size(_size, _nouns_h)
+              : new mapInstance.value.maps.Size(_size, _size);
             pins[doc.id] = new Pin(
               mapInstance,
               mapObj,
@@ -669,10 +683,11 @@ export default defineComponent({
           // doc.data() is never undefined for query doc snapshots
           console.log(doc.id, " => ", doc.data());
           const { iconURL, photoURL, lat, lng } = doc.data();
-          //default icon size is 80, 30
+          const _size = defaultMapConfig.icon_size;
+          const _nouns_h = defaultMapConfig.nouns_icon_h;
           const size = iconURL.match(/red160px/)
-            ? new mapInstance.value.maps.Size(80, 30)
-            : new mapInstance.value.maps.Size(80, 80);
+            ? new mapInstance.value.maps.Size(_size, _nouns_h)
+            : new mapInstance.value.maps.Size(_size, _size);
           const _iconurl = iconURL ? iconURL : require("@/assets/red160px.png");
           if (pins[doc.id]) {
             pins[doc.id].delete();

@@ -11,7 +11,7 @@ export const uploadFile = (
   path: string,
   meta: string | undefined
 ) => {
-  return new Promise((resolve, rejected) => {
+  return new Promise<string>((resolve, rejected) => {
     const storage = getStorage();
     const storageRef = ref(storage, path);
     const uploadTask = meta

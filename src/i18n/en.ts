@@ -42,7 +42,7 @@ const lang = {
     guidephoto:
       "Click on the above button to upload your photos. Or try it with following button now! Photos are public and shared, so please check the rights and privacy before posting.",
     pleasesignin:
-      "Please SignIn. (If you want to convert your photos to NFT, please log in with MetaMask)",
+      "Please SignIn. (If you want to select your own Nouns icon, please log in with MetaMask)",
     selectImage: "Select image",
     uploadImage: "Upload Image!",
     spotPrivacyLevel: "SpotPrivacyLevel",
