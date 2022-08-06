@@ -110,7 +110,7 @@ import {
 } from "@/config/project";
 import { NFT } from "@/models/SmartContract";
 import { useI18n } from "vue-i18n";
-import { uploadFile, uploadSVG, getFileDownloadURL } from "@/utils/storage";
+import { uploadFile, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
@@ -300,12 +300,14 @@ export default defineComponent({
       if (route.params.photoId != null) {
         loadPhoto(route.params.photoId as string);
       } else if (route.params.eventId != null) {
-        store.commit("setCanGoBack", true);
-        loadEventPhotos(parseInt(route.params.eventId as string));
+        const _event = parseInt(route.params.eventId as string);
+        viewEventId.value = _event;
+        isShowPicture.value = true;
+        loadEventPhotos(_event);
       } else if (route.path == getLocalePath(router, "/map")) {
-        store.commit("setCanGoBack", true);
         store.commit("setClickedPhoto", null);
         viewEventId.value = supportingEvents[0].eventId;
+        isShowPicture.value = true;
         loadUserPhotos();
       }
     };
@@ -418,16 +420,15 @@ export default defineComponent({
           return [_id, downloadURL];
         } else {
           //new icon
-          const newURL = nft.value.token.buff
-            ? ((await uploadFile(
-                nft.value.token.buff,
-                storage_path,
-                nft.value.token.imageType
-              )) as string)
-            : ((await uploadSVG(
-                nft.value.token.image,
-                storage_path
-              )) as string);
+          const binary = Buffer.from(
+            nft.value.token.image.split(",")[1],
+            "base64"
+          );
+          const newURL = await uploadFile(
+            binary.buffer,
+            storage_path,
+            nft.value.token.imageType
+          );
           console.log("new icon", { newURL });
           return [_id, newURL];
         }
