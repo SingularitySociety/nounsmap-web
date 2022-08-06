@@ -3,7 +3,7 @@
   <div v-else class="ml-0">
     <div v-if="user?.userType == 'wallet' && account">
       <div
-        class="max-w-xs max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl border-r border-b border-l border-gray-400 border-t bg-white rounded-b lg:rounded-r p-8 my-4 mx-4"
+        class="max-w-xs max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl border border-gray-400 bg-white rounded-b lg:rounded-r p-2 my-1 mx-1"
       >
         <div class="bg-white">
           <div class="">
@@ -390,7 +390,6 @@ export default defineComponent({
             //const data = Buffer.from(ret.data , "base64").toString("ascii");
             const data = Buffer.from(ret.data).toString("base64");
             token.image = `data:image/${token.imageType};base64,` + data;
-            token.buff = Buffer.from(ret.data);
           }
           nft.value = {
             name: contract.value.name,
