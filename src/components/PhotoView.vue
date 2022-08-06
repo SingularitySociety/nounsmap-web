@@ -4,6 +4,14 @@
     v-if="clickedPhoto"
   >
     <div
+      class="col-start-2 row-span-1 col-span-3 flex justify-center items-center mt-16 text-white"
+    >
+      <span class="block text-white text-sm font-bold m-2">
+        {{ $t("label.name") }}:
+      </span>
+      {{ clickedPhoto.title }}
+    </div>
+    <div
       class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
       @click="close"
     >
