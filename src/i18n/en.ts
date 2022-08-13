@@ -25,6 +25,8 @@ const lang = {
     event: "event",
     viewEvent: "viewing",
     showPhoto: "photos",
+    editPhoto: "edit photo info",
+    deletePhoto: "delete photo",
     creator: "creator",
     mint: "Mint",
     mintNotHasAuthority: "Mint(AuthorityToken needed)",

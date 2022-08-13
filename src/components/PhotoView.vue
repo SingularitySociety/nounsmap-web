@@ -48,6 +48,28 @@
       </div>
     </div>
     <div
+      v-if="isOwner"
+      class="row-start-5 col-start-3 col-span-1 row-span-1 shrink-0 py-2 flex justify-center items-center"
+    >
+      <div class="flex flex-column items-center" @click="editPhoto">
+        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+          >edit</i
+        >
+        <span class="text-white text-large">{{
+          $t("label.editPhotoInfo")
+        }}</span>
+      </div>
+      <div class="flex flex-column items-center" @click="deletePhoto">
+        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+          >delete</i
+        >
+        <span class="text-white text-large">{{
+          $t("label.deletePhotoInfo")
+        }}</span>
+      </div>
+    </div>
+
+    <div
       v-if="isWalletUser && featureConfig.enableNFTReq"
       class="row-start-5 col-start-4 col-span-1 row-span-1 shrink-0 py-2 flex justify-center items-center"
     >
@@ -88,15 +110,14 @@ export default defineComponent({
       checkUser();
     });
     const checkUser = () => {
-      if (
+      isWalletUser.value =
         store.state.userType == "wallet" &&
         clickedPhoto.value?.uid == user.value?.uid
-      ) {
-        isWalletUser.value = true;
-      } else {
-        isWalletUser.value = false;
-      }
+          ? true
+          : false;
+      isOwner.value = clickedPhoto.value?.uid == user.value?.uid ? true : false;
     };
+    const isOwner = ref(false);
     const isWalletUser = ref(false);
     const clickedPhoto: WritableComputedRef<PhotoPubData> = computed({
       get: () => store.state.clickedPhoto as PhotoPubData,
@@ -139,6 +160,7 @@ export default defineComponent({
       nounsMapConfig,
       featureConfig,
       clickedPhoto,
+      isOwner,
       isWalletUser,
       close,
       nftRequest,

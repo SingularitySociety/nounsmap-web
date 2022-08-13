@@ -25,6 +25,8 @@ const lang = {
     event: "イベント",
     viewEvent: "表示イベント",
     showPhoto: "写真表示",
+    editPhoto: "写真編集",
+    deletePhoto: "写真削除",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",
