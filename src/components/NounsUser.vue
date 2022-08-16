@@ -43,6 +43,7 @@
         <div class="flex justify-end pt-4">
           <button
             @click="close"
+            id="Close"
             class="inline-block bg-gray-200 hover:bg-white rounded-full text-sm font-semibold text-gray-700 px-3 py-1"
             type="button"
           >

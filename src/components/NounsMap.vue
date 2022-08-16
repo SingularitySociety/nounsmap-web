@@ -7,6 +7,7 @@
         </span>
         <input
           type="text"
+          id="photo_title"
           ref="nameRef"
           maxlength="128"
           minlength="1"
@@ -17,7 +18,7 @@
         <span class="block text-gray-700 text-sm font-bold m-2">
           {{ $t("label.event") }}:
         </span>
-        <select v-model="eventId">
+        <select v-model="eventId" id="event">
           <option
             v-for="event in supportingEvents"
             :value="event.eventId"
@@ -42,6 +43,7 @@
     <button
       v-if="!processing"
       @click="uploadPhoto"
+      id="UploadImage"
       class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
     >
       {{ $t("message.uploadImage") }}
@@ -65,6 +67,7 @@
       </span>
       <select
         v-model="viewEventId"
+        id="viewEventSelect"
         class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
       >
         <option

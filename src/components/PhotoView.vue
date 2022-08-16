@@ -1,6 +1,7 @@
 <template>
   <div
     class="fixed grid grid-rows-5 grid-cols-5 grid-flow-col items-stretch h-screen w-screen z-40 justify-items-center bg-black bg-opacity-50"
+    id="photoView"
     v-if="clickedPhoto"
   >
     <div
@@ -14,6 +15,7 @@
     <div
       class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
       @click="close"
+      id="ClosePhotoView"
     >
       <i class="text-6xl material-icons text-white mr-2">cancel</i>
     </div>
