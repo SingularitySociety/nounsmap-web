@@ -18,6 +18,7 @@
         </span>
         <button
           @click="gotoLogin"
+          id="tryNow"
           class="bg-green-800 hover:bg-green-100 text-white md:w-2/3 justify-center font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         >
           {{ $t("function.trynow") }}

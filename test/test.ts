@@ -28,8 +28,8 @@ describe("Nounsmap-no-log-in", () => {
   });
 
   it('should be show log-in guide"', async () => {
-    await page.waitForXPath('//button[contains(text(),"Start")]');
-    const _start = await page.$x('//button[contains(text(),"Start")]');
+    await page.waitForXPath('//button[@id="tryNow"]');
+    const _start = await page.$x('//button[@id="tryNow"]');
     await pause(2);
     await _start[0].click();
     await pause(2);
@@ -79,41 +79,39 @@ describe("Nounsmap-user", () => {
 
   it("login with metamask", async () => {
     await page.goto("http://localhost:8080/user");
-    await page.waitForXPath('//button[contains(text(),"Connect")]');
-    const _connect = await page.$x('//button[contains(text(),"Connect")]');
+    await page.waitForXPath('//button[@id="ConnectMetamask"]');
+    const _connect = await page.$x('//button[@id="ConnectMetamask"]');
     await _connect[0].click();
     await pause(2);
     await metamask.approve({ allAccounts: false });
     page.bringToFront();
-    await page.waitForXPath('//button[contains(text(),"Wallet")]');
-    const _sign = await page.$x('//button[contains(text(),"Wallet")]');
+    await page.waitForXPath('//button[@id="SignInWallet"]');
+    const _sign = await page.$x('//button[@id="SignInWallet"]');
     await _sign[0].click();
     await pause(5);
     await metamask.sign();
     page.bringToFront();
     await pause(4);
-    await page.waitForXPath('//button[contains(text(),"SignOut")]');
-    await page.waitForXPath('//button[contains(text(),"Close")]');
-    const _close = await page.$x('//button[contains(text(),"Close")]');
+    await page.waitForXPath('//button[@id="SignOut"]');
+    await page.waitForXPath('//button[@id="SignOut"]');
+    const _close = await page.$x('//button[@id="Close"]');
     await _close[0].click();
   });
 
   it('login upload photo"', async () => {
     await pause(2);
-    await page.waitForXPath('//a[contains(text(),"Upload")]');
-    const _upload = await page.$x('//a[contains(text(),"Upload")]');
+    await page.waitForXPath('//a[@id="UploadMenu"]');
+    const _uploadM = await page.$x('//a[@id="UploadMenu"]');
     const [fileChooser] = await Promise.all([
       page.waitForFileChooser(),
-      _upload[0].click(),
+      _uploadM[0].click(),
     ]);
     //console.log("clicked upload", fileChooser);
     await fileChooser.accept(["./src/assets/sample/pexels-11518762.jpg"]);
-    await page.waitForXPath('//button[contains(text(),"Upload Image")]');
+    await page.waitForXPath('//button[@id="UploadImage"]');
     await page.type("#photo_title", "testTitle");
-    const _uploadImage = await page.$x(
-      '//button[contains(text(),"Upload Image")]'
-    );
-    _uploadImage[0].click();
+    const _upload = await page.$x('//button[@id="UploadImage"]');
+    _upload[0].click();
     await page.waitForXPath('//div[@id="photoView"]');
     const urls = page.url().split("/");
     photoId = urls.slice(-1)[0];
