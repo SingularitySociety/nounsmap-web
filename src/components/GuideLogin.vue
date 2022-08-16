@@ -6,6 +6,7 @@
     <div
       class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
       @click="isShow = false"
+      id="CloseGuideLogin"
     >
       <i class="text-6xl material-icons text-white mr-2">cancel</i>
     </div>
