@@ -1,6 +1,7 @@
 <template>
   <div
     class="fixed grid grid-rows-5 grid-cols-5 grid-flow-col items-stretch h-screen w-screen z-40 justify-items-center bg-black bg-opacity-50"
+    id="photoView"
     v-if="clickedPhoto"
   >
     <div

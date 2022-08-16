@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build && cp dist/index.html functions/templates/index.html",
     "lint": "vue-cli-service lint",
-    "test": "jest",
+    "test": "jest test/test.ts",
     "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev --only hosting",
     "deploy-dev-all": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev",
     "deploy-prod-all": "cp configs/prod.ts src/config/project.ts; yarn build;npx firebase deploy --project=prod",
