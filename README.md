@@ -60,8 +60,9 @@ to Run browser automated test with puppeteer and @chainsafe/dappeteer. for login
 1. run `yarn serve` on /functions/ (this will run firebase-emulator on local, to test with same-condition )
 2. edit src/config/project.ts `emulator: false => true`
 3. run  `yarn serve` on /(top directory). (this will serve nouns-map web with localhost:8080)
+4. run  you can run `yarn test` on /. 
 
-then,  you can run `yarn test` on /.
+you can re-try, re-test step 4 only.(On 1st time to test it fails randomly,because firebase emulator took much time to preplare backend,, so please retry `yarn test` again, on that case.)
 
 ## Firebase Hosting GitHub Action
 
