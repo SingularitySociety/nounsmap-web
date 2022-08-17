@@ -172,6 +172,48 @@ export const posted = async (
   }
 };
 
+// This function is called by users after post user's photo
+export const infoUpdated = async (
+  db,
+  data: any,
+  context: functions.https.CallableContext | Context
+) => {
+  const uid = utils.validate_auth(context);
+  const { photoId, title, eventId } = data;
+  const regex = /^[0-9a-zA-Z-]+$/;  
+  if (!regex.test(photoId)) {
+    throw utils.process_error(`wrong photoId:${photoId}`);
+  }
+  console.log(
+    `user:${uid} photo:${photoId} title:${title} eventId${eventId}`
+  );
+  const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
+  if (!photo || !photo.exists || !photo.data()) {
+    throw utils.process_error(
+      `fire store data ,notfound user:${uid} photoId:${photoId}`
+    );
+  }
+  const pdata = photo.data();
+  console.log(pdata);
+  if ( pdata.title != title || pdata.eventId != eventId) {
+    throw utils.process_error(`wrong call:${photoId},${title},${eventId}`);
+  }  
+  try {    
+    await db.doc(`photos/${photoId}`).set(
+      {
+        title: pdata.title,
+        description: pdata.description,
+        eventId: pdata.eventId,
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return { success: true };
+  } catch (error) {
+    throw utils.process_error(error);
+  }
+};
+
 // This function is called by users on nft photo request cretion
 export const nftPosted = async (
   db,

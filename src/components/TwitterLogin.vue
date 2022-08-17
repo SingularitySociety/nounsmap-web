@@ -17,6 +17,7 @@
       <button
         class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         @click="signout"
+        id="SignOutTwitter"
       >
         {{ $t("function.signout") }}
       </button>
@@ -26,6 +27,7 @@
     <button
       class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
       @click="signin"
+      id="SignInTwitter"
     >
       {{ $t("function.signinTwitter") }}
     </button>

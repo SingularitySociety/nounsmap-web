@@ -18,7 +18,7 @@
         <span class="block text-gray-700 text-sm font-bold m-2">
           {{ $t("label.event") }}:
         </span>
-        <select v-model="eventId" id="event">
+        <select v-model="eventId" id="postEvent">
           <option
             v-for="event in supportingEvents"
             :value="event.eventId"
@@ -112,13 +112,12 @@ import {
   supportingEvents,
 } from "@/config/project";
 import { NFT } from "@/models/SmartContract";
-import { useI18n } from "vue-i18n";
 import { uploadFile, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
-import { shortID } from "@/utils/utils";
+import { shortID, eventName } from "@/utils/utils";
 interface PinData {
   pid: string | null;
   icon?: google.maps.Icon;
@@ -247,7 +246,6 @@ export default defineComponent({
     const processing = ref();
     const nameRef = ref();
     const descRef = ref();
-    const i18n = useI18n();
     const eventId = ref<number>(0);
     const viewEventId = ref<number>(0);
     watch(viewEventId, () => {
@@ -256,12 +254,6 @@ export default defineComponent({
         params: { eventId: viewEventId.value },
       });
     });
-    const eventName = (eventId: number) => {
-      const event = supportingEvents.filter((v) => v.eventId == eventId)[0];
-      const locl: keyof typeof event.name = i18n.locale
-        .value as keyof typeof event.name;
-      return event?.name[locl] ? event.name[locl] : "";
-    };
     const isShowPicture = ref(true);
     watch(isShowPicture, (cur) => {
       console.log(cur);

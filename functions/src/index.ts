@@ -7,6 +7,7 @@ if (!admin.apps.length) {
 
 exportIfNeeded("api", "api", exports);
 exportIfNeeded("photoPosted", "photo/photoPosted", exports);
+exportIfNeeded("photoInfoUpdated", "photo/photoInfoUpdated", exports);
 exportIfNeeded("photoNFTPosted", "photo/photoNFTPosted", exports);
 exportIfNeeded("photoNFTSync", "photo/photoNFTSync", exports);
 exportIfNeeded("photoNFTDownload", "photo/photoNFTDownload", exports);
