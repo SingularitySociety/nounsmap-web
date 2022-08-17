@@ -185,7 +185,7 @@ export const infoUpdated = async (
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   console.log(
-    `user:${uid} photo:${photoId} title:${title} eventId${eventId}`
+    `user:${uid} photo:${photoId} title:${title} eventId:${eventId}`
   );
   const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
   if (!photo || !photo.exists || !photo.data()) {

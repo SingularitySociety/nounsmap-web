@@ -202,7 +202,7 @@ export default defineComponent({
     });
     watch(clickedPhoto, () => {
       checkUser();
-      eventIdRef.value = clickedPhoto.value.eventId;
+      eventIdRef.value = clickedPhoto.value?.eventId;
     });
     const close = () => {
       console.log(router);
@@ -266,6 +266,7 @@ export default defineComponent({
       isOwner,
       isWalletUser,
       isEditInfo,
+      titleRef,
       eventIdRef,
       supportingEvents,
       close,
