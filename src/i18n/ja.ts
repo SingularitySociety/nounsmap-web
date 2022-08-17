@@ -18,6 +18,10 @@ const lang = {
     trynow: "使ってみる",
     tryphoto: "今すぐ投稿",
     requestNFT: "NFT化をリクエスト",
+    sharePhoto: "写真を共有",
+    editPhotoInfo: "写真の情報を編集",
+    deletePhoto: "写真を削除",
+    save: "保存",
   },
   label: {
     name: "タイトル",

@@ -11,11 +11,98 @@ jest.setTimeout(30000);
 let browser;
 let metamask;
 let page;
-let photoId;
+let photoId1,photoId2;
 function pause(seconds) {
   return new Promise((res) => setTimeout(res, 1000 * seconds));
 }
+describe("Nounsmap-twitter-user", () => {
+  beforeAll(async () => {
+    //browser = await dappeteer.launch(puppeteer, { metamaskVersion: 'v10.15.0', defaultViewport: null });
+    browser = await puppeteer.launch({ headless: false });
+    page = await browser.newPage();
+  });
 
+  it("login with metamask", async () => {
+    await page.goto("http://localhost:8080/user");
+    await page.waitForXPath('//button[@id="SignInTwitter"]');
+    const _sign = await page.$x('//button[@id="SignInTwitter"]');
+    await _sign[0].click();
+
+    const newPagePromise = new Promise(x => browser.once('targetcreated', target => x(target.page()))); 
+    await newPagePromise;
+    //following pause is important to wait twitter login page loaded
+    await pause(3);
+
+    //twitter popupウィンドウを取得する
+    var pages = await browser.pages();
+    //console.log("browser pages",pages);
+    var popupwin = pages[pages.length - 1];    
+    await popupwin.waitForXPath('//input[@id="username_or_email"]');
+
+    //console.log("pop",popupwin);
+    await popupwin.type("#username_or_email", "test_nounsmap");
+    await popupwin.type("#password", "hogehogehoge1234");
+    const _allow = await popupwin.$x('//input[@id="allow"]');
+    await _allow[0].click();
+    await popupwin.waitForNavigation();
+    //console.log("closed popup");
+    await page.waitForXPath('//button[@id="SignOutTwitter"]');
+    const _close = await page.$x('//button[@id="Close"]');
+    await _close[0].click();
+  });
+
+  it('upload photo"', async () => {
+    await pause(2);
+    await page.waitForXPath('//a[@id="UploadMenu"]');
+    console.log("uploadPhoto start");    
+    const _guide = await page.$x('//button[@id="GuidePhoto"]');
+    const _uploadM = _guide.length ? _guide :  await page.$x('//a[@id="UploadMenu"]');
+    console.log("_uploadM", _uploadM);    
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser(),
+      _uploadM[0].click(),
+    ]);
+    console.log("clicked upload", fileChooser);    
+    await fileChooser.accept(["./test/resource/test1.jpg"]);
+    await page.waitForXPath('//button[@id="UploadImage"]');
+    await page.type("#photo_title", "testTitle1");
+    await page.select("#postEvent", "1");
+    const _upload = await page.$x('//button[@id="UploadImage"]');
+    _upload[0].click();
+    await page.waitForXPath('//div[@id="photoView"]');
+    const urls = page.url().split("/");
+    photoId1 = urls.slice(-1)[0];
+    console.log(urls, photoId1);
+    expect(page.url()).toEqual(expect.stringContaining("/p/"));
+  });
+  it('self upload photo can edit"', async () => {  
+    await page.goto(`http://localhost:8080/p/${photoId1}`);
+    await page.waitForXPath('//div[@id="photoView"]');
+    const _titleView = await page.$x('//span[@id="PhotoTitleView"]');
+    const _title1 = await (await _titleView[0].getProperty("textContent")).jsonValue();
+    expect(_title1).toMatch('testTitle1');
+    const _edit = await page.$x('//div[@id="EditInfo"]');
+    expect(_edit[0]).not.toBeFalsy();
+    _edit[0].click();
+    await page.waitForXPath('//input[@id="PhotoTitleEdit"]');
+    await page.type("#PhotoTitleEdit", "testTitle2");
+    await page.select("#postEvent", "2");
+    const _save = await page.$x('//div[@id="PhotoInfoSave"]');
+    _save[0].click();
+    pause(1);
+    await page.goto(`http://localhost:8080/p/${photoId1}`);
+    await page.waitForXPath('//div[@id="photoView"]');
+    const _titleView2 = await page.$x('//span[@id="PhotoTitleView"]');
+    const _title2 = await (await _titleView2[0].getProperty("textContent")).jsonValue();
+    expect(_title2).toMatch('testTitle2');
+  });
+  it('self upload photo can delete"', async () => {  
+    expect(false).not.toBeFalsy();
+  });
+  afterAll(async () => {
+    browser.close();
+  });
+});  
 describe("Nounsmap-user", () => {
   beforeAll(async () => {
     //browser = await dappeteer.launch(puppeteer, { metamaskVersion: 'v10.15.0', defaultViewport: null });
@@ -44,7 +131,6 @@ describe("Nounsmap-user", () => {
     page.bringToFront();
     await pause(4);
     await page.waitForXPath('//button[@id="SignOut"]');
-    await page.waitForXPath('//button[@id="SignOut"]');
     const _close = await page.$x('//button[@id="Close"]');
     await _close[0].click();
   });
@@ -61,20 +147,20 @@ describe("Nounsmap-user", () => {
       _uploadM[0].click(),
     ]);
     console.log("clicked upload", fileChooser);    
-    await fileChooser.accept(["./test/resource/test1.jpg"]);
+    await fileChooser.accept(["./test/resource/test2.jpg"]);
     await page.waitForXPath('//button[@id="UploadImage"]');
     await page.type("#photo_title", "testTitle");
     const _upload = await page.$x('//button[@id="UploadImage"]');
     _upload[0].click();
     await page.waitForXPath('//div[@id="photoView"]');
     const urls = page.url().split("/");
-    photoId = urls.slice(-1)[0];
-    console.log(urls, photoId);
+    photoId2 = urls.slice(-1)[0];
+    console.log(urls, photoId2);
     expect(page.url()).toEqual(expect.stringContaining("/p/"));
   });
 
   it('should be change to my-photo view after log-in"', async () => {
-    await page.goto(`http://localhost:8080/p/${photoId}`);
+    await page.goto(`http://localhost:8080/p/${photoId2}`);
     await page.waitForXPath('//div[@id="photoView"]');
   });
 
@@ -104,7 +190,7 @@ describe("Nounsmap-no-log-in", () => {
   });
 
   it('can go to photo view before log-in"', async () => {
-    await page.goto(`http://localhost:8080/p/${photoId}`);
+    await page.goto(`http://localhost:8080/p/${photoId2}`);
     await page.waitForXPath('//div[@id="photoView"]');
   });
   it('After close photo view, should show log-in guide"', async () => {

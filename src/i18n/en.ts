@@ -18,6 +18,10 @@ const lang = {
     trynow: "Start!",
     tryphoto: "Upload now!",
     requestNFT: "Request to make NFT!",
+    sharePhoto: "Tweet photo",
+    editPhotoInfo: "Edit photoInfo",
+    deletePhoto: "Delete  photo",
+    save: "Save",
   },
   label: {
     name: "title",
