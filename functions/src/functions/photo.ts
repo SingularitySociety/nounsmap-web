@@ -172,7 +172,7 @@ export const posted = async (
   }
 };
 
-// This function is called by users after post user's photo
+// This function is called by users after edit user's photo info
 export const infoUpdated = async (
   db,
   data: any,
@@ -180,13 +180,11 @@ export const infoUpdated = async (
 ) => {
   const uid = utils.validate_auth(context);
   const { photoId, title, eventId } = data;
-  const regex = /^[0-9a-zA-Z-]+$/;  
+  const regex = /^[0-9a-zA-Z-]+$/;
   if (!regex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
-  console.log(
-    `user:${uid} photo:${photoId} title:${title} eventId:${eventId}`
-  );
+  console.log(`user:${uid} photo:${photoId} title:${title} eventId:${eventId}`);
   const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
   if (!photo || !photo.exists || !photo.data()) {
     throw utils.process_error(
@@ -195,10 +193,10 @@ export const infoUpdated = async (
   }
   const pdata = photo.data();
   console.log(pdata);
-  if ( pdata.title != title || pdata.eventId != eventId) {
+  if (pdata.title != title || pdata.eventId != eventId) {
     throw utils.process_error(`wrong call:${photoId},${title},${eventId}`);
-  }  
-  try {    
+  }
+  try {
     await db.doc(`photos/${photoId}`).set(
       {
         title: pdata.title,
@@ -208,6 +206,38 @@ export const infoUpdated = async (
       },
       { merge: true }
     );
+    return { success: true };
+  } catch (error) {
+    throw utils.process_error(error);
+  }
+};
+
+// This function is called by users after edit user's photo deleted
+export const deleted = async (
+  db,
+  data: any,
+  context: functions.https.CallableContext | Context
+) => {
+  const uid = utils.validate_auth(context);
+  const { photoId } = data;
+  const regex = /^[0-9a-zA-Z-]+$/;
+  if (!regex.test(photoId)) {
+    throw utils.process_error(`wrong photoId:${photoId}`);
+  }
+  console.log(`user:${uid} photo:${photoId} `);
+  const photo = await db.doc(`users/${uid}/public_photos/${photoId}`).get();
+  if (!photo || !photo.exists || !photo.data()) {
+    throw utils.process_error(
+      `fire store data ,notfound user:${uid} photoId:${photoId}`
+    );
+  }
+  const pdata = photo.data();
+  console.log(pdata);
+  if (pdata.deletedFlag != true) {
+    throw utils.process_error(`wrong call:${photoId}`);
+  }
+  try {
+    await db.doc(`photos/${photoId}`).delete();
     return { success: true };
   } catch (error) {
     throw utils.process_error(error);

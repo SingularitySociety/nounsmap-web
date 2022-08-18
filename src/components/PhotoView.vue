@@ -125,7 +125,11 @@
           $t("function.editPhotoInfo")
         }}</span>
       </div>
-      <div class="flex flex-row items-center" @click="delPhoto" id="DelPhoto">
+      <div
+        class="flex flex-row items-center"
+        @click="isDelete = true"
+        id="DelPhoto"
+      >
         <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
           >delete</i
         >
@@ -146,6 +150,41 @@
         <span class="text-white text-large">{{
           $t("message.nftRequestButton")
         }}</span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="fixed grid grid-rows-5 grid-cols-5 grid-flow-col items-stretch h-screen w-screen z-50 justify-items-center bg-black bg-opacity-50"
+    id="delPhotoConfirm"
+    v-if="isDelete"
+  >
+    <div
+      class="bg-white row-start-3 col-start-2 col-span-3 row-span-1 mx-auto w-auto h-auto shadow-md rounded px-8 pt-8 pb-4 mb-2"
+    >
+      <div class="grid-cols-1">
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2">
+            {{ $t("message.deletePhotoConfirm") }}
+          </label>
+        </div>
+        <div class="flex justify-between mt-8">
+          <button
+            @click="deletePhoto()"
+            id="DelPhotoDo"
+            class="inline-block bg-gray-200 hover:bg-gray-400 rounded-full text-sm font-semibold text-gray-700 mx-4 p-3 py-1"
+            type="button"
+          >
+            {{ $t("function.delete") }}
+          </button>
+          <button
+            @click="isDelete = false"
+            id="DelPhotoCancel"
+            class="inline-block bg-gray-200 hover:bg-gray-400 rounded-full text-sm font-semibold text-gray-700 mx-4 px-3 py-1"
+            type="button"
+          >
+            {{ $t("function.cancel") }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -172,7 +211,7 @@ import router from "@/router";
 import { PhotoPubData } from "@/models/photo";
 import { getLocaleName } from "@/i18n/utils";
 import { eventName } from "@/utils/utils";
-import { photoInfoUpdated } from "@/utils/functions";
+import { photoInfoUpdated, photoDeleted } from "@/utils/functions";
 
 export default defineComponent({
   emits: {},
@@ -194,6 +233,7 @@ export default defineComponent({
     const isOwner = ref(false);
     const isWalletUser = ref(false);
     const isEditInfo = ref(false);
+    const isDelete = ref(false);
     const titleRef = ref();
     const eventIdRef = ref<number>(0);
     const clickedPhoto: WritableComputedRef<PhotoPubData> = computed({
@@ -207,6 +247,7 @@ export default defineComponent({
     const close = () => {
       console.log(router);
       isEditInfo.value = false;
+      isDelete.value = false;
       store.commit("setClickedPhoto", undefined);
       if (route.params.eventId) {
         router.push({
@@ -221,7 +262,7 @@ export default defineComponent({
       const photoId = clickedPhoto.value.photoId;
       const title = titleRef.value?.value ? titleRef.value.value : "";
       const eventId = eventIdRef.value;
-      console.log({title,eventId});
+      console.log({ title, eventId });
 
       try {
         //photo meta data 更新
@@ -235,6 +276,27 @@ export default defineComponent({
         );
         // backend へ nft reqest送信
         const ret = await photoInfoUpdated({ photoId, title, eventId });
+        console.log(ret);
+        close();
+      } catch (e: unknown) {
+        console.error(e);
+      }
+    };
+    const deletePhoto = async () => {
+      const photoId = clickedPhoto.value.photoId;
+      console.log({ photoId }, "delete");
+
+      try {
+        //photo meta data 更新
+        await updateDoc(
+          doc(db, `users/${user.value.uid}/public_photos/${photoId}`),
+          {
+            deletedFlag: true,
+            updatedAt: serverTimestamp(),
+          }
+        );
+        // backend へ nft reqest送信
+        const ret = await photoDeleted({ photoId });
         console.log(ret);
         close();
       } catch (e: unknown) {
@@ -266,11 +328,13 @@ export default defineComponent({
       isOwner,
       isWalletUser,
       isEditInfo,
+      isDelete,
       titleRef,
       eventIdRef,
       supportingEvents,
       close,
       savePhotoInfo,
+      deletePhoto,
       nftRequest,
       openTweetPopup,
       eventName,

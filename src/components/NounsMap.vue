@@ -527,9 +527,12 @@ export default defineComponent({
         console.info("no user info");
         return;
       }
-      const photos = await getDocs(
-        collection(db, `users/${user.value.uid}/public_photos/`)
+
+      const q = query(
+        collection(db, `users/${user.value.uid}/public_photos`),
+        where("deletedFlag", "==", false)
       );
+      const photos = await getDocs(q);
       if (photos.size && photos.size == Object.keys(pins).length) {
         console.log("already loaded so skipped,,", photos.size);
         //Object.keys(pins).forEach((key: string) => pins[key].showPhoto());
@@ -678,6 +681,9 @@ export default defineComponent({
           // doc.data() is never undefined for query doc snapshots
           console.log(doc.id, " => ", doc.data());
           const { iconURL, photoURL, lat, lng } = doc.data();
+          if (!iconURL || !photoURL) {
+            continue;
+          }
           const _size = defaultMapConfig.icon_size;
           const _nouns_h = defaultMapConfig.nouns_icon_h;
           const size = iconURL.match(/red160px/)

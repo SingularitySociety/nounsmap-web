@@ -22,6 +22,8 @@ const lang = {
     editPhotoInfo: "Edit photoInfo",
     deletePhoto: "Delete  photo",
     save: "Save",
+    delete: "Delete",
+    cancel: "Cancel",
   },
   label: {
     name: "title",
@@ -29,8 +31,6 @@ const lang = {
     event: "event",
     viewEvent: "viewing",
     showPhoto: "photos",
-    editPhoto: "edit photo info",
-    deletePhoto: "delete photo",
     creator: "creator",
     mint: "Mint",
     mintNotHasAuthority: "Mint(AuthorityToken needed)",
@@ -83,6 +83,7 @@ const lang = {
     justMint: "Thank you for minting. Please wait a little bit...",
     errorAccount:
       "You haven't loign with valid wallet, Please  Click top-right User menu, and logout once, and then login with MetaMask",
+    deletePhotoConfirm: "Are you sure you want to delete this photo?",
   },
   languages,
 };

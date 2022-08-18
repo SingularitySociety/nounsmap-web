@@ -22,6 +22,8 @@ const lang = {
     editPhotoInfo: "写真の情報を編集",
     deletePhoto: "写真を削除",
     save: "保存",
+    delete: "削除",
+    cancel: "キャンセル",
   },
   label: {
     name: "タイトル",
@@ -29,8 +31,6 @@ const lang = {
     event: "イベント",
     viewEvent: "表示イベント",
     showPhoto: "写真表示",
-    editPhoto: "写真編集",
-    deletePhoto: "写真削除",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",
@@ -87,6 +87,7 @@ const lang = {
     justMint: "NFT化に協力ありがとうございます。しばらくお待ち下さい",
     errorAccount:
       "有効なWalletでログインしていません。一度右上のユーザーメニューから、ログアウトを選択して、MetaMaskでログインしなおしてください。",
+    deletePhotoConfirm: "この写真を削除してもよろしいでしょうか？",
   },
   languages,
 };
