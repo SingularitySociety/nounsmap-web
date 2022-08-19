@@ -225,10 +225,8 @@ export default defineComponent({
     const checkUser = () => {
       isWalletUser.value =
         store.state.userType == "wallet" &&
-        clickedPhoto.value?.uid == user.value?.uid
-          ? true
-          : false;
-      isOwner.value = clickedPhoto.value?.uid == user.value?.uid ? true : false;
+        clickedPhoto.value?.uid == user.value?.uid;
+      isOwner.value = clickedPhoto.value?.uid == user.value?.uid;
     };
     const isOwner = ref(false);
     const isWalletUser = ref(false);
@@ -236,19 +234,21 @@ export default defineComponent({
     const isDelete = ref(false);
     const titleRef = ref();
     const eventIdRef = ref<number>(0);
-    const clickedPhoto: WritableComputedRef<PhotoPubData> = computed({
+    const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> = computed({
       get: () => store.state.clickedPhoto as PhotoPubData,
       set: (val) => store.commit("setClickedPhoto", val),
     });
     watch(clickedPhoto, () => {
       checkUser();
-      eventIdRef.value = clickedPhoto.value?.eventId;
+      if(clickedPhoto.value){
+        eventIdRef.value = clickedPhoto.value.eventId;
+      }
     });
     const close = () => {
       console.log(router);
       isEditInfo.value = false;
       isDelete.value = false;
-      store.commit("setClickedPhoto", undefined);
+      clickedPhoto.value = undefined;
       if (route.params.eventId) {
         router.push({
           name: getLocaleName(router, "eventmap"),
@@ -259,6 +259,10 @@ export default defineComponent({
       }
     };
     const savePhotoInfo = async () => {
+      if(!clickedPhoto.value){
+        console.error("wrong sequence");
+        return;
+      } 
       const photoId = clickedPhoto.value.photoId;
       const title = titleRef.value?.value ? titleRef.value.value : "";
       const eventId = eventIdRef.value;
@@ -283,6 +287,10 @@ export default defineComponent({
       }
     };
     const deletePhoto = async () => {
+      if(!clickedPhoto.value){
+        console.error("wrong sequence");
+        return;
+      } 
       const photoId = clickedPhoto.value.photoId;
       console.log({ photoId }, "delete");
 

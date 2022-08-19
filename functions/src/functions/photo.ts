@@ -20,9 +20,9 @@ const contractViewOnly = new ethers.Contract(
 const defaultIconURL =
   "https://firebasestorage.googleapis.com/v0/b/nounsmap-web-dev.appspot.com/o/images%2Fconfigs%2Ficons%2Fred160px.png?alt=media&token=a05a89db-013e-4361-a035-181829c31d56";
 
-const getIconPath = async (pdata) => {
-  if (pdata.iconURL.length > 1) {
-    const tmpIcon = await imageUtil.downloadFile(pdata.iconURL);
+const getIconPath = async (photoData) => {
+  if (photoData.iconURL.length > 1) {
+    const tmpIcon = await imageUtil.downloadFile(photoData.iconURL);
     return await imageUtil.resizeLocal(tmpIcon, 96);
   } else {
     //const tempFilePath = path.join(os.tmpdir(), UUID());
@@ -35,7 +35,7 @@ const getIconPath = async (pdata) => {
 const uploadImages = async (
   uid,
   photoId,
-  pdata,
+  photoData,
   _lat,
   _lng,
   _zoom,
@@ -63,7 +63,7 @@ const uploadImages = async (
       tmpFile = tmpPhoto;
       return imageUtil.resizeLocal(tmpPhoto, 220);
     }),
-    getIconPath(pdata),
+    getIconPath(photoData),
   ]);
   const tmpBlend = await imageUtil.blendLocal(
     tmpFiles[0],
@@ -97,8 +97,7 @@ export const posted = async (
   const _lat = Number(lat) || 0;
   const _lng = Number(lng) || 0;
   const _zoom = Number(zoom) || 10;
-  const regex = /^[0-9a-zA-Z-]+$/;
-  if (!regex.test(photoId)) {
+  if (!utils.idRegex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   utils.validate_params({ photoId }); // tip, sendSMS and lng are optinoal
@@ -111,37 +110,37 @@ export const posted = async (
       `fire store data ,notfound user:${uid} photoId:${photoId}`
     );
   }
-  const pdata = photo.data();
-  console.log(pdata);
+  const photoData = photo.data();
+  console.log(photoData);
   try {
     const ogpPath = `images/users/${uid}/public_photos/${photoId}/ogp/600.jpg`;
     const waterPath = `images/users/${uid}/public_photos/${photoId}/watermark.jpg`;
     const urls = await uploadImages(
       uid,
       photoId,
-      pdata,
+      photoData,
       _lat,
       _lng,
       _zoom,
       ogpPath,
       waterPath
     );
-    const _iconURL = pdata.iconURL.length > 1 ? pdata.iconURL : defaultIconURL;
+    const _iconURL = photoData.iconURL.length > 1 ? photoData.iconURL : defaultIconURL;
     const _photoURL = urls[1];
     console.log(urls, _iconURL, _photoURL);
     await db.doc(`photos/${photoId}`).set(
       {
         uid,
         photoId,
-        title: pdata.title,
-        description: pdata.description,
-        eventId: pdata.eventId,
+        title: photoData.title,
+        description: photoData.description,
+        eventId: photoData.eventId,
         iconURL: _iconURL,
         photoURL: _photoURL,
         lat: _lat,
         lng: _lng,
         zoom: _zoom,
-        createdAt: pdata.createdAt,
+        createdAt: photoData.createdAt,
         updatedAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
@@ -180,8 +179,7 @@ export const infoUpdated = async (
 ) => {
   const uid = utils.validate_auth(context);
   const { photoId, title, eventId } = data;
-  const regex = /^[0-9a-zA-Z-]+$/;
-  if (!regex.test(photoId)) {
+  if (!utils.idRegex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   console.log(`user:${uid} photo:${photoId} title:${title} eventId:${eventId}`);
@@ -191,17 +189,17 @@ export const infoUpdated = async (
       `fire store data ,notfound user:${uid} photoId:${photoId}`
     );
   }
-  const pdata = photo.data();
-  console.log(pdata);
-  if (pdata.title != title || pdata.eventId != eventId) {
+  const photoData = photo.data();
+  console.log(photoData);
+  if (photoData.title != title || photoData.eventId != eventId) {
     throw utils.process_error(`wrong call:${photoId},${title},${eventId}`);
   }
   try {
     await db.doc(`photos/${photoId}`).set(
       {
-        title: pdata.title,
-        description: pdata.description,
-        eventId: pdata.eventId,
+        title: photoData.title,
+        description: photoData.description,
+        eventId: photoData.eventId,
         updatedAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
@@ -220,8 +218,7 @@ export const deleted = async (
 ) => {
   const uid = utils.validate_auth(context);
   const { photoId } = data;
-  const regex = /^[0-9a-zA-Z-]+$/;
-  if (!regex.test(photoId)) {
+  if (!utils.idRegex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   console.log(`user:${uid} photo:${photoId} `);
@@ -231,9 +228,9 @@ export const deleted = async (
       `fire store data ,notfound user:${uid} photoId:${photoId}`
     );
   }
-  const pdata = photo.data();
-  console.log(pdata);
-  if (pdata.deletedFlag != true) {
+  const photoData = photo.data();
+  console.log(photoData);
+  if (!photoData.deletedFlag) {
     throw utils.process_error(`wrong call:${photoId}`);
   }
   try {
@@ -253,8 +250,7 @@ export const nftPosted = async (
   const { photoId } = data;
   console.log(data);
   const uid = utils.validate_auth(context);
-  const regex = /^[0-9a-zA-Z-]+$/;
-  if (!regex.test(photoId)) {
+  if (!utils.idRegex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   utils.validate_params({ photoId }); // tip, sendSMS and lng are optinoal
@@ -264,9 +260,9 @@ export const nftPosted = async (
       `fire store data ,notfound user:${uid} photoId:${photoId}`
     );
   }
-  const pdata = photo.data();
-  console.log(pdata);
-  const { lat, lng, zoom, iconURL } = pdata;
+  const photoData = photo.data();
+  console.log(photoData);
+  const { lat, lng, zoom, iconURL } = photoData;
   const _lat = Number(lat) || 0;
   const _lng = Number(lng) || 0;
   const _zoom = Number(zoom) || 10;
@@ -286,7 +282,7 @@ export const nftPosted = async (
         tmpFile = tmpPhoto;
         return imageUtil.resizeLocal(tmpPhoto, 600);
       }),
-      getIconPath(pdata),
+      getIconPath(photoData),
     ]);
     // watermarked (same as original posted)
     const tmpBlend = await imageUtil.blendWaterMarkLocal(
@@ -337,8 +333,8 @@ export const nftPosted = async (
       creator: uid,
       photoId,
       photoURL: url,
-      title: pdata.title,
-      description: pdata.description,
+      title: photoData.title,
+      description: photoData.description,
       iconURL,
       lat,
       lng,
@@ -453,8 +449,7 @@ export const nftDownloadURL = async (
   const uid = utils.validate_auth(context);
   const { photoId } = data;
   utils.validate_params({ photoId });
-  const regex = /^[0-9a-zA-Z-]+$/;
-  if (!regex.test(photoId)) {
+  if (!utils.idRegex.test(photoId)) {
     throw utils.process_error(`wrong photoId:${photoId}`);
   }
   try {

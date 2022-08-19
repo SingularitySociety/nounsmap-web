@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import * as Sentry from "@sentry/node";
 import { Context } from "../models/TestType";
 
+export const idRegex = /^[0-9a-zA-Z-]+$/;
 export const getRegion = () => {
   const locale = functions.config().locale;
   return (locale && locale.region) || "US";

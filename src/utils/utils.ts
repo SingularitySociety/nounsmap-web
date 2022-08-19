@@ -24,7 +24,8 @@ export const shortID = (_id: string) => {
 };
 
 export const eventName = (eventId: number) => {
-  const event = supportingEvents.filter((v) => v.eventId == eventId)[0];
+  const event = supportingEvents.find((v) => v.eventId == eventId);
+  if(!event) return "";
   const i18n = useI18n();
   const locl: keyof typeof event.name = i18n.locale
     .value as keyof typeof event.name;
