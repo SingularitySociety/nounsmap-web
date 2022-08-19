@@ -52,8 +52,8 @@ describe("Nounsmap-actual-twitter-user", () => {
     await popupwin.waitForXPath('//input[@id="username_or_email"]');
 
     //console.log("pop",popupwin);
-    await popupwin.type("#username_or_email", "test_nounsmap");
-    await popupwin.type("#password", "hogehogehoge1234");
+    await popupwin.type("#username_or_email", "");
+    await popupwin.type("#password", "");
     const _allow = await popupwin.$x('//input[@id="allow"]');
     await _allow[0].click();
     await popupwin.waitForNavigation();
