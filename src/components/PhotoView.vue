@@ -265,7 +265,7 @@ export default defineComponent({
       console.log({ title, eventId });
 
       try {
-        //photo meta data 更新
+        //user data master  photo meta data 更新
         await updateDoc(
           doc(db, `users/${user.value.uid}/public_photos/${photoId}`),
           {
@@ -274,7 +274,7 @@ export default defineComponent({
             updatedAt: serverTimestamp(),
           }
         );
-        // backend へ nft reqest送信
+        // backend へ 全体共有情報更新依頼
         const ret = await photoInfoUpdated({ photoId, title, eventId });
         console.log(ret);
         close();
@@ -287,7 +287,7 @@ export default defineComponent({
       console.log({ photoId }, "delete");
 
       try {
-        //photo meta data 更新
+        //user data master photo meta data 更新
         await updateDoc(
           doc(db, `users/${user.value.uid}/public_photos/${photoId}`),
           {
@@ -295,7 +295,7 @@ export default defineComponent({
             updatedAt: serverTimestamp(),
           }
         );
-        // backend へ nft reqest送信
+        // backend へ 全体共有情削除依頼
         const ret = await photoDeleted({ photoId });
         console.log(ret);
         close();
