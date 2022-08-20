@@ -10,10 +10,7 @@ import {
   expect,
 } from "@jest/globals";
 import { catchConsoleError } from "./puppeteerUtil";
-/*
-dappeteer depends on LANG=en  (to wait some button, using englisht text matcher)
-On mac OS,  you need to change system language setting to change locale to en.
-*/
+
 jest.setTimeout(30000);
 let browser;
 let page;

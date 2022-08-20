@@ -1,12 +1,5 @@
 import puppeteer from "puppeteer";
-import {
-  jest,
-  describe,
-  beforeAll,
-  afterAll,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeAll, afterAll, it, expect } from "@jest/globals";
 import { RECOMMENDED_METAMASK_VERSION } from "@chainsafe/dappeteer";
 import * as dappeteer from "@chainsafe/dappeteer";
 import { catchConsoleError } from "./puppeteerUtil";
