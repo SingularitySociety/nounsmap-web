@@ -234,13 +234,14 @@ export default defineComponent({
     const isDelete = ref(false);
     const titleRef = ref();
     const eventIdRef = ref<number>(0);
-    const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> = computed({
-      get: () => store.state.clickedPhoto as PhotoPubData,
-      set: (val) => store.commit("setClickedPhoto", val),
-    });
+    const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
+      computed({
+        get: () => store.state.clickedPhoto as PhotoPubData,
+        set: (val) => store.commit("setClickedPhoto", val),
+      });
     watch(clickedPhoto, () => {
       checkUser();
-      if(clickedPhoto.value){
+      if (clickedPhoto.value) {
         eventIdRef.value = clickedPhoto.value.eventId;
       }
     });
@@ -259,10 +260,10 @@ export default defineComponent({
       }
     };
     const savePhotoInfo = async () => {
-      if(!clickedPhoto.value){
+      if (!clickedPhoto.value) {
         console.error("wrong sequence");
         return;
-      } 
+      }
       const photoId = clickedPhoto.value.photoId;
       const title = titleRef.value?.value ? titleRef.value.value : "";
       const eventId = eventIdRef.value;
@@ -287,10 +288,10 @@ export default defineComponent({
       }
     };
     const deletePhoto = async () => {
-      if(!clickedPhoto.value){
+      if (!clickedPhoto.value) {
         console.error("wrong sequence");
         return;
-      } 
+      }
       const photoId = clickedPhoto.value.photoId;
       console.log({ photoId }, "delete");
 

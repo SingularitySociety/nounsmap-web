@@ -125,7 +125,8 @@ export const posted = async (
       ogpPath,
       waterPath
     );
-    const _iconURL = photoData.iconURL.length > 1 ? photoData.iconURL : defaultIconURL;
+    const _iconURL =
+      photoData.iconURL.length > 1 ? photoData.iconURL : defaultIconURL;
     const _photoURL = urls[1];
     console.log(urls, _iconURL, _photoURL);
     await db.doc(`photos/${photoId}`).set(
