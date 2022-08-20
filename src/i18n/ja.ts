@@ -18,6 +18,12 @@ const lang = {
     trynow: "使ってみる",
     tryphoto: "今すぐ投稿",
     requestNFT: "NFT化をリクエスト",
+    sharePhoto: "写真を共有",
+    editPhotoInfo: "写真の情報を編集",
+    deletePhoto: "写真を削除",
+    save: "保存",
+    delete: "削除",
+    cancel: "キャンセル",
   },
   label: {
     name: "タイトル",
@@ -81,6 +87,7 @@ const lang = {
     justMint: "NFT化に協力ありがとうございます。しばらくお待ち下さい",
     errorAccount:
       "有効なWalletでログインしていません。一度右上のユーザーメニューから、ログアウトを選択して、MetaMaskでログインしなおしてください。",
+    deletePhotoConfirm: "この写真を削除してもよろしいでしょうか？",
   },
   languages,
 };

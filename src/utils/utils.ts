@@ -1,5 +1,7 @@
 import { computed } from "vue";
 import { useStore } from "vuex";
+import { useI18n } from "vue-i18n";
+import { supportingEvents } from "@/config/project";
 
 export const useUser = () => {
   const store = useStore();
@@ -19,4 +21,13 @@ export const shortID = (_id: string) => {
   } else {
     return _id.slice(0, 4) + ".." + _id.slice(-3);
   }
+};
+
+export const eventName = (eventId: number) => {
+  const event = supportingEvents.find((v) => v.eventId == eventId);
+  if (!event) return "";
+  const i18n = useI18n();
+  const locl: keyof typeof event.name = i18n.locale
+    .value as keyof typeof event.name;
+  return event?.name[locl] ? event.name[locl] : "";
 };

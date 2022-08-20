@@ -18,6 +18,12 @@ const lang = {
     trynow: "Start!",
     tryphoto: "Upload now!",
     requestNFT: "Request to make NFT!",
+    sharePhoto: "Tweet photo",
+    editPhotoInfo: "Edit photo metadata",
+    deletePhoto: "Delete photo",
+    save: "Save",
+    delete: "Delete",
+    cancel: "Cancel",
   },
   label: {
     name: "title",
@@ -77,6 +83,7 @@ const lang = {
     justMint: "Thank you for minting. Please wait a little bit...",
     errorAccount:
       "You haven't loign with valid wallet, Please  Click top-right User menu, and logout once, and then login with MetaMask",
+    deletePhotoConfirm: "Are you sure you want to delete this photo?",
   },
   languages,
 };
