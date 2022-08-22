@@ -16,7 +16,7 @@ function pause(seconds) {
   return new Promise((res) => setTimeout(res, 1000 * seconds));
 }
 
-describe("Nounsmap-user", () => {
+describe("Nounsmap-user-wallet", () => {
   beforeAll(async () => {
     //browser = await dappeteer.launch(puppeteer, { metamaskVersion: 'v10.15.0', defaultViewport: null });
     browser = await dappeteer.launch(puppeteer, {
