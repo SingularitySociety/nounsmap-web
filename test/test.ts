@@ -1,10 +1,6 @@
 import puppeteer from "puppeteer";
 import { jest, describe, beforeAll, afterAll, it, expect } from "@jest/globals";
-import { catchConsoleError } from "./puppeteerUtil";
-
-//for 1st call to firebase eumulator tooks more than 60 secs.
-const testWaitTime = 70; //secs
-jest.setTimeout((testWaitTime+10) * 1000);
+import { testWaitTime, catchConsoleError } from "./puppeteerUtil";
 
 let browser;
 let page;
@@ -18,7 +14,7 @@ describe("Nounsmap-emulator-user", () => {
     browser = await puppeteer.launch({ headless: true });
     page = await browser.newPage();
     catchConsoleError(page);
-    page.setDefaultTimeout(testWaitTime*1000);
+    page.setDefaultTimeout(testWaitTime);
   });
   afterAll(async () => {
     browser.close();
