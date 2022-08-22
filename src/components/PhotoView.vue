@@ -8,37 +8,13 @@
       class="col-start-2 row-span-1 col-span-3 flex justify-center items-center mt-16 text-white"
     >
       <div v-if="isEditInfo">
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.name") }}:
-          </span>
-          <input
-            type="text"
-            id="PhotoTitleEdit"
-            ref="titleRef"
-            maxlength="128"
-            minlength="1"
-            class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
-          />
-        </div>
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.event") }}:
-          </span>
-          <select
-            v-model="eventIdRef"
-            id="postEvent"
-            class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
-          >
-            <option
-              v-for="event in supportingEvents"
-              :value="event.eventId"
-              :key="event.eventId"
-            >
-              {{ eventName(event.eventId) }}
-            </option>
-          </select>
-        </div>
+        <InputText
+          ref="titleRef"
+          label="label.name"
+          testId="PhotoTitleEdit"
+          :initText="clickedPhoto.title"
+        />
+        <EventSelector ref="eventSelectorRef" :event-id="eventId" />
       </div>
       <div v-else>
         <div class="flex flex-row justify-center items-center m-4">
@@ -253,8 +229,14 @@ import { PhotoPubData } from "@/models/photo";
 import { getLocaleName } from "@/i18n/utils";
 import { eventName } from "@/utils/utils";
 import { photoInfoUpdated, photoDeleted } from "@/utils/functions";
+import EventSelector from "./EventSelector.vue";
+import InputText from "./InputText.vue";
 
 export default defineComponent({
+  components: {
+    EventSelector,
+    InputText,
+  },
   emits: {},
   setup() {
     const store = useStore();
@@ -275,7 +257,8 @@ export default defineComponent({
     const isDelete = ref(false);
     const processing = ref("");
     const titleRef = ref();
-    const eventIdRef = ref<number>(0);
+    const eventId = ref<number>(0);
+    const eventSelectorRef = ref();
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
       computed({
         get: () => store.state.clickedPhoto as PhotoPubData,
@@ -284,7 +267,7 @@ export default defineComponent({
     watch(clickedPhoto, () => {
       checkUser();
       if (clickedPhoto.value) {
-        eventIdRef.value = clickedPhoto.value.eventId;
+        eventId.value = clickedPhoto.value.eventId;
       }
     });
     const close = () => {
@@ -308,8 +291,8 @@ export default defineComponent({
       }
       processing.value = "saving";
       const photoId = clickedPhoto.value.photoId;
-      const title = titleRef.value?.value ? titleRef.value.value : "";
-      const eventId = eventIdRef.value;
+      const title = titleRef.value.getText();
+      const eventId = eventSelectorRef.value.getEventId();
       console.log({ title, eventId });
 
       try {
@@ -384,7 +367,8 @@ export default defineComponent({
       isEditInfo,
       isDelete,
       titleRef,
-      eventIdRef,
+      eventId,
+      eventSelectorRef,
       supportingEvents,
       processing,
       close,
