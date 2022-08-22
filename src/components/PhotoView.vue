@@ -101,16 +101,39 @@
       class="row-start-4 col-start-5 col-span-1 row-span-2 shrink-0 py-2 flex flex-col justify-center items-center"
       v-if="isOwner"
     >
-      <div
-        class="flex flex-row items-center"
-        @click="savePhotoInfo()"
-        id="PhotoInfoSave"
-        v-if="isEditInfo"
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >save</i
+      <div class="flex flex-row items-center" v-if="isEditInfo">
+        <span
+          class="text-white text-large"
+          id="PhotoInfoSaving"
+          v-if="processing == 'saving'"
         >
-        <span class="text-white text-large">{{ $t("function.save") }}</span>
+          <i
+            class="animate-spin text-5xl material-icons text-white hover:animate-pulse mr-2"
+            >sync</i
+          >
+          {{ $t("function.save") }}</span
+        >
+        <span
+          class="text-white text-large"
+          id="PhotoInfoSaveComplete"
+          v-else-if="processing == 'saveComplete'"
+        >
+          <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+            >save</i
+          >
+          {{ $t("function.saveComplete") }}</span
+        >
+        <span
+          class="text-white text-large"
+          @click="savePhotoInfo()"
+          id="PhotoInfoSave"
+          v-else
+        >
+          <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
+            >save</i
+          >
+          {{ $t("function.save") }}</span
+        >
       </div>
       <div
         class="flex flex-row items-center"
@@ -164,10 +187,28 @@
       <div class="grid-cols-1">
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2">
-            {{ $t("message.deletePhotoConfirm") }}
+            <span id="DelPhotoComplete" v-if="processing == 'deleteComplete'">
+              {{ $t("message.deletePhotoComplete") }}
+            </span>
+            <span v-else>
+              {{ $t("message.deletePhotoConfirm") }}
+            </span>
           </label>
         </div>
-        <div class="flex justify-between mt-8">
+        <div
+          class="flex justify-between mt-8"
+          v-if="processing == 'deleteComplete'"
+        >
+          <button
+            @click="close()"
+            id="DelPhotoClose"
+            class="inline-block bg-gray-200 hover:bg-gray-400 rounded-full text-sm font-semibold text-gray-700 mx-4 p-3 py-1"
+            type="button"
+          >
+            {{ $t("function.close") }}
+          </button>
+        </div>
+        <div class="flex justify-between mt-8" v-else>
           <button
             @click="deletePhoto()"
             id="DelPhotoDo"
@@ -232,6 +273,7 @@ export default defineComponent({
     const isWalletUser = ref(false);
     const isEditInfo = ref(false);
     const isDelete = ref(false);
+    const processing = ref("");
     const titleRef = ref();
     const eventIdRef = ref<number>(0);
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
@@ -264,6 +306,7 @@ export default defineComponent({
         console.error("wrong sequence");
         return;
       }
+      processing.value = "saving";
       const photoId = clickedPhoto.value.photoId;
       const title = titleRef.value?.value ? titleRef.value.value : "";
       const eventId = eventIdRef.value;
@@ -282,7 +325,8 @@ export default defineComponent({
         // backend へ 全体共有情報更新依頼
         const ret = await photoInfoUpdated({ photoId, title, eventId });
         console.log(ret);
-        close();
+        processing.value = "saveComplete";
+        //close();
       } catch (e: unknown) {
         console.error(e);
       }
@@ -292,6 +336,7 @@ export default defineComponent({
         console.error("wrong sequence");
         return;
       }
+      processing.value = "deleting";
       const photoId = clickedPhoto.value.photoId;
       console.log({ photoId }, "delete");
 
@@ -307,7 +352,7 @@ export default defineComponent({
         // backend へ 全体共有情削除依頼
         const ret = await photoDeleted({ photoId });
         console.log(ret);
-        close();
+        processing.value = "deleteComplete";
       } catch (e: unknown) {
         console.error(e);
       }
@@ -341,6 +386,7 @@ export default defineComponent({
       titleRef,
       eventIdRef,
       supportingEvents,
+      processing,
       close,
       savePhotoInfo,
       deletePhoto,

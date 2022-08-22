@@ -1,17 +1,11 @@
 import puppeteer from "puppeteer";
-import {
-  jest,
-  describe,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  afterEach,
-  it,
-  expect,
-} from "@jest/globals";
+import { jest, describe, beforeAll, afterAll, it, expect } from "@jest/globals";
 import { catchConsoleError } from "./puppeteerUtil";
 
-jest.setTimeout(30000);
+//for 1st call to firebase eumulator tooks more than 60 secs.
+const testWaitTime = 70; //secs
+jest.setTimeout((testWaitTime+10) * 1000);
+
 let browser;
 let page;
 let photoId1, photoId2;
@@ -24,6 +18,7 @@ describe("Nounsmap-emulator-user", () => {
     browser = await puppeteer.launch({ headless: true });
     page = await browser.newPage();
     catchConsoleError(page);
+    page.setDefaultTimeout(testWaitTime*1000);
   });
   afterAll(async () => {
     browser.close();
@@ -59,10 +54,13 @@ describe("Nounsmap-emulator-user", () => {
     await page.waitForXPath('//button[@id="SignOutTwitter"]');
     const _close = await page.$x('//button[@id="Close"]');
     await _close[0].click();
+    // to avoid following error on next test case, will wait 0.5 secs
+    // @firebase/firestore: Firestore (9.9.1): Could not reach Cloud Firestore backend.
+    await pause(0.5);
   });
 
   it('upload photo"', async () => {
-    await pause(2);
+    await page.goto("http://localhost:8080/map");
     await page.waitForXPath('//a[@id="UploadMenu"]');
     const _guide = await page.$x('//button[@id="GuidePhoto"]');
     const _uploadM = _guide.length
@@ -75,7 +73,7 @@ describe("Nounsmap-emulator-user", () => {
     ]);
     //console.log("clicked upload", fileChooser);
     await fileChooser.accept(["./test/resource/test1.jpg"]);
-    await page.waitForXPath('//button[@id="UploadImage"]');
+    await page.waitForXPath('//input[@id="photo_title"]');
     await page.type("#photo_title", "testTitle1");
     await page.select("#postEvent", "1");
     const _upload = await page.$x('//button[@id="UploadImage"]');
@@ -113,9 +111,10 @@ describe("Nounsmap-emulator-user", () => {
     await page.waitForXPath('//input[@id="PhotoTitleEdit"]');
     await page.type("#PhotoTitleEdit", "testTitle2");
     await page.select("#postEvent", "2");
-    const _save = await page.$x('//div[@id="PhotoInfoSave"]');
+    const _save = await page.$x('//span[@id="PhotoInfoSave"]');
     _save[0].click();
-    await pause(1);
+    await page.waitForXPath('//span[@id="PhotoInfoSaveComplete"]');
+    //await pause(0.5);
     await page.goto(`http://localhost:8080/p/${photoId1}`);
     await page.waitForXPath('//div[@id="photoView"]');
     const _titleView2 = await page.$x('//span[@id="PhotoTitleView"]');
@@ -158,17 +157,21 @@ describe("Nounsmap-emulator-user", () => {
     const _do = await page.$x('//button[@id="DelPhotoDo"]');
     expect(_do[0]).not.toBeFalsy();
     _do[0].click();
-    await pause(2);
+    await page.waitForXPath('//span[@id="DelPhotoComplete"]');
+    const _close = await page.$x('//button[@id="DelPhotoClose"]');
+    expect(_close[0]).not.toBeFalsy();
+    _close[0].click();
+    await pause(0.5);
     expect(page.url()).toMatch("http://localhost:8080/map");
     //削除済みなのでURL指定してもphotoviewは開かない
     await page.goto(`http://localhost:8080/p/${photoId1}`);
+    await pause(0.5);
     const _view = await page.$x('//div[@id="photoView"]');
     expect(_view[0]).toBeFalsy();
-    await page.goto(`http://localhost:8080/`);
   });
   it("upload photo again", async () => {
     await page.goto(`http://localhost:8080/`);
-    await pause(1);
+    await pause(0.5);
     await page.waitForXPath('//a[@id="UploadMenu"]');
     const _guide = await page.$x('//button[@id="GuidePhoto"]');
     const _uploadM = _guide.length
@@ -213,7 +216,7 @@ describe("Nounsmap-no-log-in", () => {
     await page.waitForXPath('//button[@id="tryNow"]');
     const _start = await page.$x('//button[@id="tryNow"]');
     await _start[0].click();
-    await pause(2);
+    await pause(0.5);
     expect(page.url()).toEqual(expect.stringContaining("/user"));
   });
 
@@ -230,20 +233,20 @@ describe("Nounsmap-no-log-in", () => {
     await page.waitForXPath('//div[@id="CloseGuideLogin"]');
     const _closeGuide = await page.$x('//div[@id="CloseGuideLogin"]');
     await _closeGuide[0].click();
-    await pause(1);
+    await pause(0.5);
   });
 
   it('can select event "', async () => {
     await page.goto("http://localhost:8080");
     await page.waitForXPath('//select[@id="viewEventSelect"]');
     await page.select("#viewEventSelect", "1");
-    await pause(1);
+    await pause(0.5);
     expect(page.url()).toEqual(expect.stringContaining("/map/1"));
     await page.select("#viewEventSelect", "2");
-    await pause(1);
+    await pause(0.5);
     expect(page.url()).toEqual(expect.stringContaining("/map/2"));
     await page.select("#viewEventSelect", "0");
-    await pause(1);
+    await pause(0.5);
     expect(page.url()).toMatch("http://localhost:8080/map");
   });
 });

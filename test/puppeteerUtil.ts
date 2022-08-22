@@ -15,6 +15,7 @@ export const catchConsoleError = (page) => {
     if (msg.type() != "error") {
       return;
     }
+    console.error(msg.text());
     const args = await Promise.all(msg.args().map((arg) => describe(arg)));
     let text = "";
     for (let i = 0; i < args.length; ++i) {
