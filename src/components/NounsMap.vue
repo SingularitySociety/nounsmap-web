@@ -1,34 +1,17 @@
 <template>
   <div class="flex flex-col p-6" align="center" v-if="photoLocal">
-    <div>
-      <div class="flex flex-row justify-center items-center m-4">
-        <span class="block text-gray-700 text-sm font-bold m-2">
-          {{ $t("label.name") }}:
-        </span>
-        <input
-          type="text"
-          id="photo_title"
-          ref="nameRef"
-          maxlength="128"
-          minlength="1"
-          class="shadow appearance-none border rounded w-auto py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-      <div class="flex flex-row justify-center items-center m-4">
-        <span class="block text-gray-700 text-sm font-bold m-2">
-          {{ $t("label.event") }}:
-        </span>
-        <select v-model="eventId" id="postEvent">
-          <option
-            v-for="event in supportingEvents"
-            :value="event.eventId"
-            :key="event.eventId"
-          >
-            {{ eventName(event.eventId) }}
-          </option>
-        </select>
-      </div>
-    </div>
+    <InputText
+      ref="nameRef"
+      label="label.name"
+      testId="photo_title"
+      text-color="text-gray-700"
+      initText="title"
+    />
+    <EventSelector
+      ref="eventSelectorRef"
+      textColor="text-gray-700"
+      :eventId="eventId"
+    />
     <div>
       {{ $t("message.selectPhotoLocation") }}<br />
       <label>{{ $t("message.spotPrivacyLevel") }} : </label>
@@ -61,24 +44,13 @@
     </button>
   </div>
   <div class="fixed z-20 inset-x-0 .text-justify" v-else>
-    <div class="flex flex-row justify-left mt-2">
-      <span class="block text-gray-700 text-sm m-2">
-        {{ $t("label.viewEvent") }}:
-      </span>
-      <select
-        v-model="viewEventId"
-        id="viewEventSelect"
-        class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
-      >
-        <option
-          v-for="event in supportingEvents"
-          :value="event.eventId"
-          :key="event.eventId"
-        >
-          {{ eventName(event.eventId) }}
-        </option>
-      </select>
-    </div>
+    <EventSelector
+      ref="viewEventSelectorRef"
+      @updated="viewEventUpdated"
+      textColor="text-gray-700"
+      testId="viewEventSelect"
+      :eventId="viewEventId"
+    />
     <div class="flex flex-row justify-left">
       <label class="text-gray-700 text-sm m-2"
         >{{ $t("label.showPhoto") }}:</label
@@ -90,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed,  watch } from "vue";
+import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
@@ -118,33 +90,42 @@ import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
 import { shortID, eventName } from "@/utils/utils";
-import {Pin} from "@/utils/mapPin";
+import { Pin } from "@/utils/mapPin";
+import EventSelector from "./EventSelector.vue";
+import InputText from "./InputText.vue";
 
 export default defineComponent({
+  components: {
+    EventSelector,
+    InputText,
+  },
   setup() {
     const route = useRoute();
     const store = useStore();
     const mapRef = ref();
     const pLevel = ref();
-
     const mapInstance = ref();
     const mapObj = ref();
-
-    const pins: { [id: string]: Pin } = {};
+    const pins: {
+      [id: string]: Pin;
+    } = {};
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
     const processing = ref();
     const nameRef = ref();
     const descRef = ref();
+    const eventSelectorRef = ref();
     const eventId = ref<number>(0);
     const viewEventId = ref<number>(0);
-    watch(viewEventId, () => {
+    const viewEventUpdated = (updateId: number) => {
+      console.log({ updateId });
+      viewEventId.value = updateId;
       router.push({
         name: getLocaleName(router, "eventmap"),
-        params: { eventId: viewEventId.value },
+        params: { eventId: String(updateId) },
       });
-    });
+    };
     const isShowPicture = ref(true);
     watch(isShowPicture, (cur) => {
       console.log(cur);
@@ -156,9 +137,7 @@ export default defineComponent({
         }
       }
     });
-
     let locationCircle: google.maps.Circle | null;
-
     const user = computed<User>(() => store.state.user);
     const nft = computed<NFT>(() => store.state.nft);
     watch(nft, (cur, prev) => {
@@ -170,7 +149,6 @@ export default defineComponent({
       console.log({ cur }, { prev });
       photoSelected(localPhoto.value);
     });
-
     watch(
       () => route.path,
       () => {
@@ -197,7 +175,6 @@ export default defineComponent({
         loadUserPhotos();
       }
     };
-
     onMounted(async () => {
       const loader = new Loader({
         apiKey: defaultMapConfig.mapkey,
@@ -221,7 +198,6 @@ export default defineComponent({
       );
       routeCheck();
     });
-
     const photoSelected = async (info: PhotoInfo) => {
       if (!info) {
         photoLocal.value = null;
@@ -288,7 +264,6 @@ export default defineComponent({
         );
       }
     };
-
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
       if (nft.value) {
         const _id =
@@ -337,7 +312,6 @@ export default defineComponent({
       processing.value = true;
       const _uid = user.value.uid;
       const [iconId, iconURL] = await uploadIcon(_uid);
-
       //generate random id  "hoge" is not created actually
       const _pid = doc(collection(db, "hoge")).id;
       const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
@@ -348,9 +322,9 @@ export default defineComponent({
       )) as string;
       pins["upload"]?.update({ photoURL });
       pins["upload"]?.showPhoto();
-      const _title = nameRef.value?.value ? nameRef.value.value : "";
+      const _title = nameRef.value.getText();
       const _desc = descRef.value?.value ? descRef.value.value : "";
-      const _eventid = eventId.value ? eventId.value : 0;
+      const _eventid = eventSelectorRef.value.getEventId();
       const pdata = generateNewPhotoData(
         _pid,
         _title,
@@ -396,7 +370,6 @@ export default defineComponent({
       pins["demo"]?.update({ icon: defaultIcon() });
       pins["upload"]?.update({ icon: defaultIcon() });
     };
-
     const defaultIcon = () => {
       const _size = defaultMapConfig.icon_size;
       const _nouns_h = defaultMapConfig.nouns_icon_h;
@@ -418,7 +391,6 @@ export default defineComponent({
         console.info("no user info");
         return;
       }
-
       const q = query(
         collection(db, `users/${user.value.uid}/public_photos`),
         where("deletedFlag", "==", false)
@@ -434,7 +406,6 @@ export default defineComponent({
         pin.delete();
         delete pins[key];
       }
-
       if (photos.size) {
         store.commit("setUserPhotoState", "exist");
       } else {
@@ -643,11 +614,13 @@ export default defineComponent({
       processing,
       nameRef,
       descRef,
+      eventSelectorRef,
       eventId,
       viewEventId,
       supportingEvents,
       isShowPicture,
       eventName,
+      viewEventUpdated,
       photoSelected,
       uploadPhoto,
       locationUpdated,

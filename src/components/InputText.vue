@@ -1,8 +1,6 @@
 <template>
-  <div class="flex flex-row justify-center items-center m-4">
-    <span class="block text-white text-sm font-bold m-2">
-      {{ $t(label) }}:
-    </span>
+  <div class="flex flex-row justify-center items-center text-sm font-bold m-4">
+    <span :class="textColor"> {{ $t(label) }}: </span>
     <input
       type="text"
       :id="testId"
@@ -23,6 +21,10 @@ export default defineComponent({
     initText: {
       type: String,
       default: "",
+    },
+    textColor: {
+      type: String,
+      default: "text-white",
     },
     testId: String,
     label: String,

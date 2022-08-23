@@ -14,7 +14,7 @@
           testId="PhotoTitleEdit"
           :initText="clickedPhoto.title"
         />
-        <EventSelector ref="eventSelectorRef" :event-id="eventId" />
+        <EventSelector ref="eventSelectorRef" :eventId="eventId" />
       </div>
       <div v-else>
         <div class="flex flex-row justify-center items-center m-4">

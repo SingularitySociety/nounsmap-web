@@ -245,4 +245,24 @@ describe("Nounsmap-no-log-in", () => {
     await pause(0.5);
     expect(page.url()).toMatch("http://localhost:8080/map");
   });
+  it('can direct link to event "', async () => {
+    await page.goto("http://localhost:8080/map/1");
+    await page.waitForXPath('//select[@id="viewEventSelect"]');
+    let _event = await page.$x('//select[@id="viewEventSelect"]');
+    let id = await (await _event[0].getProperty("value")).jsonValue();
+    console.log(id);
+    expect(parseInt(id)).toEqual(1);
+    await page.goto("http://localhost:8080/map/2");
+    await page.waitForXPath('//select[@id="viewEventSelect"]');
+    _event = await page.$x('//select[@id="viewEventSelect"]');
+    id = await (await _event[0].getProperty("value")).jsonValue();
+    console.log(id);
+    expect(parseInt(id)).toEqual(2);
+    await page.goto("http://localhost:8080/map");
+    await page.waitForXPath('//select[@id="viewEventSelect"]');
+    _event = await page.$x('//select[@id="viewEventSelect"]');
+    id = await (await _event[0].getProperty("value")).jsonValue();
+    console.log(id);
+    expect(parseInt(id)).toEqual(0);
+  });
 });
