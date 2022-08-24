@@ -41,10 +41,10 @@ export default defineComponent({
     },
   },
   setup(props, context) {
-    const {eventId} = toRefs(props);
-    watch (eventId, ()=>{
-        selectedId.value = eventId.value;
-    })
+    const { eventId } = toRefs(props);
+    watch(eventId, () => {
+      selectedId.value = eventId.value;
+    });
     const selectedId = ref<number>(0);
     watch(
       () => selectedId.value,

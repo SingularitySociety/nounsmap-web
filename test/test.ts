@@ -109,9 +109,9 @@ describe("Nounsmap-emulator-user", () => {
     await page.waitForXPath('//input[@id="PhotoTitleEdit"]');
     await page.type("#PhotoTitleEdit", "testTitleTemp");
     await page.select("#postEvent", "1");
-    let _save = await page.$x('//span[@id="PhotoInfoSave"]');
+    let _save = await page.$x('//div[@id="PhotoInfoSave"]');
     _save[0].click();
-    await page.waitForXPath('//span[@id="PhotoInfoSaveComplete"]');
+    await page.waitForXPath('//div[@id="PhotoInfoSaveComplete"]');
   });
 
   it('self upload photo can 2nd edit"', async () => {
@@ -121,9 +121,9 @@ describe("Nounsmap-emulator-user", () => {
     await page.keyboard.press("Tab");    
     await pause(0.5);
     await page.select("#postEvent", "2");
-    const _save = await page.$x('//span[@id="PhotoInfoSave"]');
+    const _save = await page.$x('//div[@id="PhotoInfoSave"]');
     _save[0].click();
-    await page.waitForXPath('//span[@id="PhotoInfoSaveComplete"]');
+    await page.waitForXPath('//div[@id="PhotoInfoSaveComplete"]');
 
     await page.goto(`http://localhost:8080/p/${photoId1}`);
     await page.waitForXPath('//div[@id="photoView"]');

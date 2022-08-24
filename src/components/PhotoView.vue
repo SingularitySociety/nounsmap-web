@@ -36,10 +36,13 @@
     </div>
     <div
       class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
-      @click="close"
-      id="ClosePhotoView"
     >
-      <i class="text-6xl material-icons text-white mr-2">cancel</i>
+      <IconButton
+        testId="ClosePhotoView"
+        icon="scancel"
+        @clicked="close"
+        label=""
+      />
     </div>
     <div
       class="row-start-2 col-start-2 col-span-3 row-span-3 justify-center items-center"
@@ -62,16 +65,12 @@
           alt="nft icon"
         />
       </div>
-      <div
-        class="flex flex-column items-center"
-        @click="openTweetPopup(clickedPhoto.photoId)"
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >share</i
-        >
-        <span class="text-white text-large">{{
-          $t("function.sharePhoto")
-        }}</span>
+      <div class="flex flex-column items-center">
+        <IconButton
+          icon="share"
+          @clicked="openTweetPopup(clickedPhoto.photoId)"
+          label="function.sharePhoto"
+        />
       </div>
     </div>
     <div
@@ -79,63 +78,44 @@
       v-if="isOwner"
     >
       <div class="flex flex-row items-center" v-if="isEditInfo">
-        <span
-          class="text-white text-large"
-          id="PhotoInfoSaving"
+        <IconButton
+          testId="PhotoInfoSaving"
+          icon="sync"
+          animate="animate-spin"
+          label="function.save"
           v-if="processing == 'saving'"
-        >
-          <i
-            class="animate-spin text-5xl material-icons text-white hover:animate-pulse mr-2"
-            >sync</i
-          >
-          {{ $t("function.save") }}</span
-        >
-        <span
-          class="text-white text-large"
-          id="PhotoInfoSaveComplete"
+        />
+        <IconButton
+          testId="PhotoInfoSaveComplete"
+          icon="save"
+          label="function.saveComplete"
           v-else-if="processing == 'saveComplete'"
-        >
-          <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-            >save</i
-          >
-          {{ $t("function.saveComplete") }}</span
-        >
-        <span
-          class="text-white text-large"
-          @click="savePhotoInfo()"
-          id="PhotoInfoSave"
+        />
+        <IconButton
+          @clicked="savePhotoInfo"
+          testId="PhotoInfoSave"
+          icon="save"
+          label="function.save"
           v-else
-        >
-          <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-            >save</i
-          >
-          {{ $t("function.save") }}</span
-        >
+        />
+      </div>
+      <div class="flex flex-row items-center" v-else>
+        <IconButton
+          testId="EditInfo"
+          icon="edit"
+          label="function.editPhotoInfo"
+          @clicked="isEditInfo = true"
+        />
       </div>
       <div
         class="flex flex-row items-center"
-        @click="isEditInfo = true"
-        id="EditInfo"
-        v-else
       >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >edit</i
-        >
-        <span class="text-white text-large">{{
-          $t("function.editPhotoInfo")
-        }}</span>
-      </div>
-      <div
-        class="flex flex-row items-center"
-        @click="isDelete = true"
-        id="DelPhoto"
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >delete</i
-        >
-        <span class="text-white text-large">{{
-          $t("function.deletePhoto")
-        }}</span>
+        <IconButton
+          testId="DelPhoto"
+          icon="delete"
+          label="function.deletePhoto"
+          @clicked="isDelete = true"
+        />
       </div>
     </div>
 
@@ -232,11 +212,13 @@ import { eventName } from "@/utils/utils";
 import { photoInfoUpdated, photoDeleted } from "@/utils/functions";
 import EventSelector from "./EventSelector.vue";
 import InputText from "./InputText.vue";
+import IconButton from "./IconButton.vue";
 
 export default defineComponent({
   components: {
     EventSelector,
     InputText,
+    IconButton,
   },
   emits: {},
   setup() {

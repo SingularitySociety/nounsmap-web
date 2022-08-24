@@ -23,7 +23,7 @@ export default defineComponent({
         return false;
       }
       return true;
-    },    
+    },
   },
   props: {
     initText: {
@@ -37,13 +37,13 @@ export default defineComponent({
     testId: String,
     label: String,
   },
-  setup(props,context) {
+  setup(props, context) {
     const textRef = ref();
     const getText = () => {
       return textRef.value.value;
     };
     const changed = () => {
-        context.emit("changed", textRef.value.value);
+      context.emit("changed", textRef.value.value);
     };
     onMounted(() => {
       textRef.value.value = props.initText;
