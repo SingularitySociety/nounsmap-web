@@ -12,6 +12,7 @@
           ref="titleRef"
           label="label.name"
           testId="PhotoTitleEdit"
+          @changed="updateTitle"
           :initText="clickedPhoto.title"
         />
         <EventSelector ref="eventSelectorRef" :eventId="eventId" />
@@ -257,6 +258,10 @@ export default defineComponent({
     const isDelete = ref(false);
     const processing = ref("");
     const titleRef = ref();
+    const updateTitle = (title: string) => {
+      console.log(title);
+      processing.value = "";
+    };
     const eventId = ref<number>(0);
     const eventSelectorRef = ref();
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
@@ -377,6 +382,7 @@ export default defineComponent({
       nftRequest,
       openTweetPopup,
       eventName,
+      updateTitle,
     };
   },
 });

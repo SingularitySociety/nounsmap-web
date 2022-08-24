@@ -8,6 +8,7 @@
       maxlength="128"
       minlength="1"
       class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
+      @change="changed"
     />
   </div>
 </template>
@@ -16,7 +17,14 @@
 import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
-  emits: {},
+  emits: {
+    changed: (param: string) => {
+      if (param === null) {
+        return false;
+      }
+      return true;
+    },    
+  },
   props: {
     initText: {
       type: String,
@@ -29,16 +37,20 @@ export default defineComponent({
     testId: String,
     label: String,
   },
-  setup(props) {
+  setup(props,context) {
     const textRef = ref();
     const getText = () => {
       return textRef.value.value;
+    };
+    const changed = () => {
+        context.emit("changed", textRef.value.value);
     };
     onMounted(() => {
       textRef.value.value = props.initText;
     });
     return {
       textRef,
+      changed,
       getText,
     };
   },

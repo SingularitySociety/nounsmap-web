@@ -101,16 +101,30 @@ describe("Nounsmap-emulator-user", () => {
       await _titleView[0].getProperty("textContent")
     ).jsonValue();
     expect(_title1).toMatch("testTitle1");
-    const _edit = await page.$x('//div[@id="EditInfo"]');
+
+    // 1st edit
+    let _edit = await page.$x('//div[@id="EditInfo"]');
     expect(_edit[0]).not.toBeFalsy();
     _edit[0].click();
     await page.waitForXPath('//input[@id="PhotoTitleEdit"]');
+    await page.type("#PhotoTitleEdit", "testTitleTemp");
+    await page.select("#postEvent", "1");
+    let _save = await page.$x('//span[@id="PhotoInfoSave"]');
+    _save[0].click();
+    await page.waitForXPath('//span[@id="PhotoInfoSaveComplete"]');
+  });
+
+  it('self upload photo can 2nd edit"', async () => {
+    // 2nd edit again
+    await page.waitForXPath('//input[@id="PhotoTitleEdit"]');
     await page.type("#PhotoTitleEdit", "testTitle2");
+    await page.keyboard.press("Tab");    
+    await pause(0.5);
     await page.select("#postEvent", "2");
     const _save = await page.$x('//span[@id="PhotoInfoSave"]');
     _save[0].click();
     await page.waitForXPath('//span[@id="PhotoInfoSaveComplete"]');
-    //await pause(0.5);
+
     await page.goto(`http://localhost:8080/p/${photoId1}`);
     await page.waitForXPath('//div[@id="photoView"]');
     const _titleView2 = await page.$x('//span[@id="PhotoTitleView"]');
@@ -119,7 +133,6 @@ describe("Nounsmap-emulator-user", () => {
     ).jsonValue();
     expect(_title2).toMatch("testTitle2");
   });
-
   it('self upload photo can delete(canel)"', async () => {
     await page.goto(`http://localhost:8080/p/${photoId1}`);
     await page.waitForXPath('//div[@id="photoView"]');
@@ -250,19 +263,31 @@ describe("Nounsmap-no-log-in", () => {
     await page.waitForXPath('//select[@id="viewEventSelect"]');
     let _event = await page.$x('//select[@id="viewEventSelect"]');
     let id = await (await _event[0].getProperty("value")).jsonValue();
-    console.log(id);
     expect(parseInt(id)).toEqual(1);
     await page.goto("http://localhost:8080/map/2");
     await page.waitForXPath('//select[@id="viewEventSelect"]');
     _event = await page.$x('//select[@id="viewEventSelect"]');
     id = await (await _event[0].getProperty("value")).jsonValue();
-    console.log(id);
     expect(parseInt(id)).toEqual(2);
     await page.goto("http://localhost:8080/map");
     await page.waitForXPath('//select[@id="viewEventSelect"]');
     _event = await page.$x('//select[@id="viewEventSelect"]');
     id = await (await _event[0].getProperty("value")).jsonValue();
-    console.log(id);
     expect(parseInt(id)).toEqual(0);
   });
+
+  it('can playback event "', async () => {
+    await page.goto("http://localhost:8080/map/1");
+    await page.waitForXPath('//select[@id="viewEventSelect"]');
+    const _count = await page.$x('//span[@id="photoCount"]');
+    const _countInt = parseInt(await (await _count[0].getProperty("value")).jsonValue());
+    expect(_countInt).toBeGreaterThan(2);
+    const _play = await page.$x('//div[@id="playback"]');
+    await _play[0].click();    
+    await page.waitForXPath('//span[@id="photoPlayIndex"]');
+    const _index = await page.$x('//span[@id="phooPlayIndex"]');
+    const _indexInt = parseInt(await (await _index[0].getProperty("value")).jsonValue());
+    expect(_indexInt ).toEqual(1);
+  });
+  
 });
