@@ -18,20 +18,16 @@
         <EventSelector ref="eventSelectorRef" :eventId="eventId" />
       </div>
       <div v-else>
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.name") }}:
-          </span>
-          <span id="PhotoTitleView">
-            {{ clickedPhoto.title }}
-          </span>
-        </div>
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.event") }}:
-          </span>
-          {{ eventName(clickedPhoto.eventId) }}
-        </div>
+        <LabelText
+          testId="PhotoTitleView"
+          label="label.name"
+          :text="clickedPhoto.title"
+        />
+        <LabelText
+          testId="PhotoEventView"
+          label="label.event"
+          :text="eventName(clickedPhoto.eventId)"
+        />
       </div>
     </div>
     <div
@@ -107,9 +103,7 @@
           @clicked="isEditInfo = true"
         />
       </div>
-      <div
-        class="flex flex-row items-center"
-      >
+      <div class="flex flex-row items-center">
         <IconButton
           testId="DelPhoto"
           icon="delete"
@@ -213,12 +207,14 @@ import { photoInfoUpdated, photoDeleted } from "@/utils/functions";
 import EventSelector from "./EventSelector.vue";
 import InputText from "./InputText.vue";
 import IconButton from "./IconButton.vue";
+import LabelText from "./LabelText.vue";
 
 export default defineComponent({
   components: {
     EventSelector,
     InputText,
     IconButton,
+    LabelText,
   },
   emits: {},
   setup() {
