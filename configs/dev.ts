@@ -124,3 +124,10 @@ export const supportingEvents = [
     expired: 1,
   },
 ];
+
+export const playbackConfig = {
+  wait: 8, //secs
+  defaultZoom: 7,
+  animateStep: 15,
+  animateSec: 1,
+};

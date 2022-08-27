@@ -33,6 +33,8 @@ const lang = {
     event: "event",
     viewEvent: "viewing",
     showPhoto: "photos",
+    photoIndex: "id",
+    totalCount: "total",
     creator: "creator",
     mint: "Mint",
     mintNotHasAuthority: "Mint(AuthorityToken needed)",

@@ -30,3 +30,7 @@ export const catchConsoleError = (page) => {
     throw msg.text() + text;
   });
 };
+
+export function pause(seconds) {
+  return new Promise((res) => setTimeout(res, 1000 * seconds));
+}

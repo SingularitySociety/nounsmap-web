@@ -1,10 +1,8 @@
 <template>
-  <div class="flex flex-row justify-center items-center m-4">
-    <div :class="textColor">
-      <span class="text-sm font-bold m-2"> {{ $t(label) }}: </span>
-      <span :id="testId">
-        {{ text }}
-      </span>
+  <div class="flex-row justify-center m-4">
+    <div :class="formatClass">
+      <span class="text-sm font-bold m-2"> {{ $t(label) }}:</span>
+      <span :id="testId">{{ text }} </span>
     </div>
   </div>
 </template>
@@ -17,12 +15,21 @@ export default defineComponent({
     clicked: null,
   },
   props: {
-    label: String,
-    testId: String,
-    text: String,
-    textColor: {
+    label: {
       type: String,
-      default: "text-white",
+      default: "",
+    },
+    testId: {
+      type: String,
+      default: "",
+    },
+    text: {
+      type: String,
+      default: "",
+    },
+    formatClass: {
+      type: String,
+      default: "",
     },
   },
   setup(props, context) {

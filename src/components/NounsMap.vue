@@ -9,7 +9,7 @@
     />
     <EventSelector
       ref="eventSelectorRef"
-      textColor="text-gray-700"
+      formatClass="text-gray-700"
       :eventId="eventId"
     />
     <div>
@@ -43,26 +43,44 @@
       {{ $t("message.processing") }}
     </button>
   </div>
-  <div class="fixed z-20 inset-x-0 .text-justify" v-else>
-    <EventSelector
-      ref="viewEventSelectorRef"
-      @updated="viewEventUpdated"
-      textColor="text-gray-700"
-      testId="viewEventSelect"
-      :eventId="viewEventId"
-    />
-    <div class="flex flex-row justify-left">
-      <label class="text-gray-700 text-sm m-2"
-        >{{ $t("label.showPhoto") }}:</label
-      >
-      <input type="checkbox" id="showPicture" v-model="isShowPicture" />
+  <div v-else>
+    <div class="fixed z-20 inset-x-0 .text-justify">
+      <div class="flex flex-col justify-start text-gray-700 font-bold">
+        <EventSelector
+          ref="viewEventSelectorRef"
+          @updated="viewEventUpdated"
+          testId="viewEventSelect"
+          :eventId="viewEventId"
+        />
+        <div class="flex flex-row">
+          <label class="text-sm m-2">{{ $t("label.showPhoto") }}:</label>
+          <input type="checkbox" id="showPicture" v-model="isShowPicture" />
+        </div>
+      </div>
+      <div class="fixed z-20 inset-x-0 bottom-0 p-8">
+        <PhotoPlayback
+          :total="pinsCount"
+          :wait="playbackConfig.wait"
+          :title="playingTitle"
+          @updated="playbackUpdate"
+          @stopped="playbackStop"
+          ref="playbackRef"
+        />
+      </div>
     </div>
   </div>
   <div ref="mapRef" class="nouns-map" />
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, watch } from "vue";
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  computed,
+  watch,
+  reactive,
+} from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
@@ -82,6 +100,7 @@ import {
   defaultMapConfig,
   privacyCircleConfig,
   supportingEvents,
+  playbackConfig,
 } from "@/config/project";
 import { NFT } from "@/models/SmartContract";
 import { uploadFile, getFileDownloadURL } from "@/utils/storage";
@@ -89,15 +108,17 @@ import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
-import { shortID, eventName } from "@/utils/utils";
-import { Pin } from "@/utils/mapPin";
+import { shortID, eventName, pause } from "@/utils/utils";
+import { Pin, PinsType } from "@/utils/mapPin";
 import EventSelector from "./EventSelector.vue";
 import InputText from "./InputText.vue";
+import PhotoPlayback from "./PhotoPlayback.vue";
 
 export default defineComponent({
   components: {
     EventSelector,
     InputText,
+    PhotoPlayback,
   },
   setup() {
     const route = useRoute();
@@ -106,9 +127,8 @@ export default defineComponent({
     const pLevel = ref();
     const mapInstance = ref();
     const mapObj = ref();
-    const pins: {
-      [id: string]: Pin;
-    } = {};
+    const pins = reactive<PinsType>({});
+    const pinsCount = computed(() => Object.keys(pins).length);
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
@@ -137,6 +157,8 @@ export default defineComponent({
         }
       }
     });
+    const playbackRef = ref();
+
     let locationCircle: google.maps.Circle | null;
     const user = computed<User>(() => store.state.user);
     const nft = computed<NFT>(() => store.state.nft);
@@ -162,6 +184,7 @@ export default defineComponent({
     const routeCheck = () => {
       console.log(route.path, route.params, pins);
       if (route.params.photoId != null) {
+        playbackRef.value?.stop();
         loadPhoto(route.params.photoId as string);
       } else if (route.params.eventId != null) {
         const _event = parseInt(route.params.eventId as string);
@@ -216,10 +239,12 @@ export default defineComponent({
         mapObj,
         {
           pid: null,
+          title: null,
           icon: defaultIcon(),
           photoURL: "",
           lat: location.lat,
           lng: location.lng,
+          zoom: mapObj.value.getZoom(),
           visibility: true,
         },
         0
@@ -415,7 +440,7 @@ export default defineComponent({
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
-        const { iconURL, images, lat, lng } = doc.data();
+        const { title, iconURL, images, lat, lng, zoom } = doc.data();
         const imageUrl = images?.resizedImages?.["600"]?.url;
         if (!imageUrl) {
           console.log("photoid skipped", doc.id);
@@ -431,6 +456,7 @@ export default defineComponent({
           mapObj,
           {
             pid: doc.id,
+            title,
             icon: {
               url: _iconurl,
               scaledSize: new mapInstance.value.maps.Size(_size, _hsize),
@@ -438,6 +464,7 @@ export default defineComponent({
             photoURL: imageUrl,
             lat,
             lng,
+            zoom,
             visibility: true,
           },
           0
@@ -481,7 +508,7 @@ export default defineComponent({
         .then((doc) => {
           if (doc.exists()) {
             store.commit("setClickedPhoto", doc.data());
-            const { iconURL, photoURL, lat, lng, zoom } = doc.data();
+            const { title, iconURL, photoURL, lat, lng, zoom } = doc.data();
             const _size = defaultMapConfig.icon_size;
             const _nouns_h = defaultMapConfig.nouns_icon_h;
             const size = iconURL.match(/red160px/)
@@ -492,6 +519,7 @@ export default defineComponent({
               mapObj,
               {
                 pid: doc.id,
+                title,
                 icon: {
                   url: iconURL,
                   scaledSize: size,
@@ -499,6 +527,7 @@ export default defineComponent({
                 photoURL,
                 lat,
                 lng,
+                zoom,
                 visibility: true,
               },
               0
@@ -542,7 +571,7 @@ export default defineComponent({
         for (const doc of photos.docs) {
           // doc.data() is never undefined for query doc snapshots
           console.log(doc.id, " => ", doc.data());
-          const { iconURL, photoURL, lat, lng } = doc.data();
+          const { title, iconURL, photoURL, lat, lng, zoom } = doc.data();
           if (!iconURL || !photoURL) {
             continue;
           }
@@ -561,6 +590,7 @@ export default defineComponent({
             mapObj,
             {
               pid: doc.id,
+              title,
               icon: {
                 url: _iconurl,
                 scaledSize: size,
@@ -568,6 +598,7 @@ export default defineComponent({
               photoURL,
               lat,
               lng,
+              zoom,
               visibility: true,
             },
             _id
@@ -604,6 +635,79 @@ export default defineComponent({
       }
       lockedLoadEventPhotos = false;
     };
+    const playingTitle = ref("");
+    const playbackUpdate = async (index: number) => {
+      // latitude descending
+      const latpins = Object.values(pins).sort(
+        (p1, p2) => p2.data().lat - p1.data().lat
+      );
+      if (index < 1 || latpins.length < index) {
+        console.error(`wrong index:${index} lenghth:${latpins.length}`);
+        return;
+      }
+      if (index == 1) {
+        for (const pin of Object.values(pins)) {
+          pin.hidePhoto();
+        }
+      }
+      //playback animation
+      //1.  panaout => 2. move to next photo location => 3. zoom in
+      //1. pan aout
+      await changeZoomAnimation(
+        mapObj.value.getZoom(),
+        playbackConfig.defaultZoom
+      );
+
+      //2. move next photo location
+      const pin = latpins[index - 1];
+      pin.setContentLarge();
+      pin.showPhoto();
+      playingTitle.value = pin.data().title ? (pin.data().title as string) : "";
+      const center = mapObj.value.getCenter();
+      await changeLocationAnimation(
+        center.lat(),
+        center.lng(),
+        pin.data().lat,
+        pin.data().lng
+      );
+
+      //3. zoom in
+      const zoom = pin.data().zoom;
+      if (zoom) {
+        await changeZoomAnimation(mapObj.value.getZoom(), zoom);
+      }
+    };
+    const changeZoomAnimation = async (from: number, to: number) => {
+      //console.log(from, to);
+      //steps to takes 1sec to change
+      const delta = (to - from) / playbackConfig.animateStep;
+      const pauseSec = playbackConfig.animateSec / playbackConfig.animateStep;
+      for (let i = 1; i <= playbackConfig.animateStep; i++) {
+        mapObj.value.setZoom(from + Math.trunc(delta * i));
+        await pause(pauseSec);
+      }
+    };
+    const changeLocationAnimation = async (
+      fromLat: number,
+      fromLng: number,
+      toLat: number,
+      toLng: number
+    ) => {
+      const deltaLat = (toLat - fromLat) / playbackConfig.animateStep;
+      const deltaLng = (toLng - fromLng) / playbackConfig.animateStep;
+      const pauseSec = playbackConfig.animateSec / playbackConfig.animateStep;
+      for (let i = 1; i <= playbackConfig.animateStep; i++) {
+        mapObj.value.setCenter(
+          new google.maps.LatLng(fromLat + deltaLat * i, fromLng + deltaLng * i)
+        );
+        await pause(pauseSec);
+      }
+    };
+    const playbackStop = async () => {
+      for (const pin of Object.values(pins)) {
+        pin.setContent();
+      }
+    };
     return {
       mapRef,
       user,
@@ -619,6 +723,11 @@ export default defineComponent({
       viewEventId,
       supportingEvents,
       isShowPicture,
+      pins,
+      pinsCount,
+      playbackRef,
+      playbackConfig,
+      playingTitle,
       eventName,
       viewEventUpdated,
       photoSelected,
@@ -626,6 +735,8 @@ export default defineComponent({
       locationUpdated,
       loadUserPhotos,
       nftUpdate,
+      playbackUpdate,
+      playbackStop,
     };
   },
 });

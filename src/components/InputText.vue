@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-row justify-center items-center text-sm font-bold m-4">
-    <span :class="textColor"> {{ $t(label) }}: </span>
+    <span :class="formatClass"> {{ $t(label) }}: </span>
     <input
       type="text"
       :id="testId"
@@ -30,7 +30,7 @@ export default defineComponent({
       type: String,
       default: "",
     },
-    textColor: {
+    formatClass: {
       type: String,
       default: "text-white",
     },

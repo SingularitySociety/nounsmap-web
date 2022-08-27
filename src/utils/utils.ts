@@ -31,3 +31,7 @@ export const eventName = (eventId: number) => {
     .value as keyof typeof event.name;
   return event?.name[locl] ? event.name[locl] : "";
 };
+
+export function pause(seconds: number) {
+  return new Promise((res) => setTimeout(res, 1000 * seconds));
+}

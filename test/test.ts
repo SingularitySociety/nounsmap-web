@@ -1,13 +1,11 @@
 import puppeteer from "puppeteer";
 import { jest, describe, beforeAll, afterAll, it, expect } from "@jest/globals";
-import { testWaitTime, catchConsoleError } from "./puppeteerUtil";
-
+import { testWaitTime, catchConsoleError, pause } from "./puppeteerUtil";
+import { playbackConfig } from "../src/config/project";
 let browser;
 let page;
-let photoId1, photoId2;
-function pause(seconds) {
-  return new Promise((res) => setTimeout(res, 1000 * seconds));
-}
+let photoId1, photoId2, photoId3;
+
 describe("Nounsmap-emulator-user", () => {
   beforeAll(async () => {
     //browser = await dappeteer.launch(puppeteer, { metamaskVersion: 'v10.15.0', defaultViewport: null });
@@ -118,7 +116,7 @@ describe("Nounsmap-emulator-user", () => {
     // 2nd edit again
     await page.waitForXPath('//input[@id="PhotoTitleEdit"]');
     await page.type("#PhotoTitleEdit", "testTitle2");
-    await page.keyboard.press("Tab");    
+    await page.keyboard.press("Tab");
     await pause(0.5);
     await page.select("#postEvent", "2");
     const _save = await page.$x('//div[@id="PhotoInfoSave"]');
@@ -178,7 +176,7 @@ describe("Nounsmap-emulator-user", () => {
     const _view = await page.$x('//div[@id="photoView"]');
     expect(_view[0]).toBeFalsy();
   });
-  it("upload photo again", async () => {
+  it("upload photo again1", async () => {
     await page.goto(`http://localhost:8080/`);
     await pause(0.5);
     await page.waitForXPath('//a[@id="UploadMenu"]');
@@ -200,7 +198,59 @@ describe("Nounsmap-emulator-user", () => {
     _upload[0].click();
     await page.waitForXPath('//div[@id="photoView"]');
     const urls = page.url().split("/");
+    photoId1 = urls.slice(-1)[0];
+    console.log(urls, photoId2);
+    expect(page.url()).toEqual(expect.stringContaining("/p/"));
+  });
+  it("upload photo again2", async () => {
+    await page.goto(`http://localhost:8080/`);
+    await pause(0.5);
+    await page.waitForXPath('//a[@id="UploadMenu"]');
+    const _guide = await page.$x('//button[@id="GuidePhoto"]');
+    const _uploadM = _guide.length
+      ? _guide
+      : await page.$x('//a[@id="UploadMenu"]');
+    //console.log("_uploadM", _uploadM);
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser(),
+      _uploadM[0].click(),
+    ]);
+    //console.log("clicked upload", fileChooser);
+    await fileChooser.accept(["./test/resource/test2.jpg"]);
+    await page.waitForXPath('//button[@id="UploadImage"]');
+    await page.type("#photo_title", "testTitle1");
+    await page.select("#postEvent", "1");
+    const _upload = await page.$x('//button[@id="UploadImage"]');
+    _upload[0].click();
+    await page.waitForXPath('//div[@id="photoView"]');
+    const urls = page.url().split("/");
     photoId2 = urls.slice(-1)[0];
+    console.log(urls, photoId2);
+    expect(page.url()).toEqual(expect.stringContaining("/p/"));
+  });
+  it("upload photo again3", async () => {
+    await page.goto(`http://localhost:8080/`);
+    await pause(0.5);
+    await page.waitForXPath('//a[@id="UploadMenu"]');
+    const _guide = await page.$x('//button[@id="GuidePhoto"]');
+    const _uploadM = _guide.length
+      ? _guide
+      : await page.$x('//a[@id="UploadMenu"]');
+    //console.log("_uploadM", _uploadM);
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser(),
+      _uploadM[0].click(),
+    ]);
+    //console.log("clicked upload", fileChooser);
+    await fileChooser.accept(["./test/resource/test2.jpg"]);
+    await page.waitForXPath('//button[@id="UploadImage"]');
+    await page.type("#photo_title", "testTitle1");
+    await page.select("#postEvent", "1");
+    const _upload = await page.$x('//button[@id="UploadImage"]');
+    _upload[0].click();
+    await page.waitForXPath('//div[@id="photoView"]');
+    const urls = page.url().split("/");
+    photoId3 = urls.slice(-1)[0];
     console.log(urls, photoId2);
     expect(page.url()).toEqual(expect.stringContaining("/p/"));
   });
@@ -212,6 +262,8 @@ describe("Nounsmap-no-log-in", () => {
     browser = await puppeteer.launch({ headless: true });
     page = await browser.newPage();
     catchConsoleError(page);
+    // this tes should fail fast for test driven develop so 5 sec.
+    page.setDefaultTimeout(5 * 1000);
   });
   afterAll(async () => {
     browser.close();
@@ -280,14 +332,70 @@ describe("Nounsmap-no-log-in", () => {
     await page.goto("http://localhost:8080/map/1");
     await page.waitForXPath('//select[@id="viewEventSelect"]');
     const _count = await page.$x('//span[@id="photoCount"]');
-    const _countInt = parseInt(await (await _count[0].getProperty("value")).jsonValue());
+    console.log(_count[0]);
+    const _countInt = parseInt(
+      await (await _count[0].getProperty("textContent")).jsonValue()
+    );
     expect(_countInt).toBeGreaterThan(2);
+    //should not show playback index  until playback start.
+    const _index0 = await page.$x('//span[@id="phooPlayIndex"]');
+    expect(_index0[0]).toBeFalsy();
     const _play = await page.$x('//div[@id="playback"]');
-    await _play[0].click();    
+    await _play[0].click();
     await page.waitForXPath('//span[@id="photoPlayIndex"]');
-    const _index = await page.$x('//span[@id="phooPlayIndex"]');
-    const _indexInt = parseInt(await (await _index[0].getProperty("value")).jsonValue());
-    expect(_indexInt ).toEqual(1);
+    const _index = await page.$x('//span[@id="photoPlayIndex"]');
+    expect(_index[0]).not.toBeFalsy();
+    const _indexInt = parseInt(
+      await (await _index[0].getProperty("textContent")).jsonValue()
+    );
+    expect(_indexInt).toEqual(1);
   });
-  
+  it('can playback auto "', async () => {
+    await pause(playbackConfig.wait);
+    const _index = await page.$x('//span[@id="photoPlayIndex"]');
+    const _indexInt = parseInt(
+      await (await _index[0].getProperty("textContent")).jsonValue()
+    );
+    expect(_indexInt).toEqual(2);
+  });
+  it('can playback show title "', async () => {
+    const _title = await page.$x('//span[@id="photoPlayTitle"]');
+    expect(_title[0]).not.toBeFalsy();
+  });
+  it('can playback pause "', async () => {
+    const _playstop = await page.$x('//div[@id="playbackPause"]');
+    await _playstop[0].click();
+    await pause(playbackConfig.wait);
+    const _index = await page.$x('//span[@id="photoPlayIndex"]');
+    const _indexInt = parseInt(
+      await (await _index[0].getProperty("textContent")).jsonValue()
+    );
+    expect(_indexInt).toEqual(2);
+  });
+  it('can playback skip "', async () => {
+    const _play = await page.$x('//div[@id="playbackNext"]');
+    await _play[0].click();
+    await pause(0.5);
+    const _index = await page.$x('//span[@id="photoPlayIndex"]');
+    const _indexInt = parseInt(
+      await (await _index[0].getProperty("textContent")).jsonValue()
+    );
+    expect(_indexInt).toEqual(3);
+  });
+  it('can playback previous "', async () => {
+    const _play = await page.$x('//div[@id="playbackPrevious"]');
+    await _play[0].click();
+    await pause(0.5);
+    const _index = await page.$x('//span[@id="photoPlayIndex"]');
+    const _indexInt = parseInt(
+      await (await _index[0].getProperty("textContent")).jsonValue()
+    );
+    expect(_indexInt).toEqual(2);
+  });
+  it('can playback stop "', async () => {
+    const _playstop = await page.$x('//div[@id="playbackStop"]');
+    await _playstop[0].click();
+    const _index = await page.$x('//span[@id="photoPlayIndex"]');
+    expect(_index[0]).toBeFalsy();
+  });
 });

@@ -33,6 +33,8 @@ const lang = {
     event: "イベント",
     viewEvent: "表示イベント",
     showPhoto: "写真表示",
+    photoIndex: "表示中",
+    totalCount: "全枚数",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",

@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-row justify-center items-center text-sm font-bold m-4">
-    <span :class="textColor"> {{ $t("label.event") }}: </span>
+  <div class="flex flex-row items-center text-sm font-bold m-4">
+    <span :class="formatClass"> {{ $t("label.event") }}: </span>
     <select
       v-model="selectedId"
       :id="testId"
@@ -35,9 +35,9 @@ export default defineComponent({
       type: String,
       default: "postEvent",
     },
-    textColor: {
+    formatClass: {
       type: String,
-      default: "text-white",
+      default: "",
     },
   },
   setup(props, context) {
@@ -45,7 +45,7 @@ export default defineComponent({
     watch(eventId, () => {
       selectedId.value = eventId.value;
     });
-    const selectedId = ref<number>(0);
+    const selectedId = ref<number>(props.eventId);
     watch(
       () => selectedId.value,
       () => {

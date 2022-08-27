@@ -1,14 +1,13 @@
 <template>
   <div class="text-large" @click="clicked" :id="testId">
-    <span :class="textColor">
+    <div :class="formatClass">
       <div :class="animate">
-        <i
-          class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >{{ icon }}</i
-        >
+        <i class="text-5xl material-icons hover:animate-pulse mr-2">{{
+          icon
+        }}</i>
       </div>
-      {{ $t(label) }}</span
-    >
+      <span v-if="label">{{ $t(label) }}</span>
+    </div>
   </div>
 </template>
 
@@ -20,12 +19,22 @@ export default defineComponent({
     clicked: null,
   },
   props: {
-    icon: String,
-    testId: String,
-    label: String,
-    textColor: {
+    icon: {
       type: String,
-      default: "text-white",
+      default: "",
+    },
+    testId: {
+      type: String,
+      default: "",
+    },
+    label: {
+      type: String,
+      default: "",
+    },
+
+    formatClass: {
+      type: String,
+      default: "",
     },
     animate: {
       type: String,

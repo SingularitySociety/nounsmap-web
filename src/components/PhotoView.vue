@@ -51,7 +51,7 @@
       />
     </div>
     <div
-      class="row-start-5 col-start-2 col-span-2 row-span-1 shrink-0 py-2 flex justify-center items-center"
+      class="row-start-5 col-start-2 col-span-2 row-span-1 shrink-0 py-2 flex justify-center items-center text-white"
     >
       <div class="flex flex-column items-center">
         <img
@@ -70,7 +70,7 @@
       </div>
     </div>
     <div
-      class="row-start-4 col-start-5 col-span-1 row-span-2 shrink-0 py-2 flex flex-col justify-center items-center"
+      class="row-start-4 col-start-5 col-span-1 row-span-2 shrink-0 py-2 flex flex-col justify-center items-center text-white"
       v-if="isOwner"
     >
       <div class="flex flex-row items-center" v-if="isEditInfo">
