@@ -50,6 +50,20 @@ Build and deploy the app to the Firebase cloud. Now only deploy web assets to ho
 
 Run Prettier, rewrite code as code formatting.
 
+### `yarn test`
+
+to Run browser automated test with puppeteer and @chainsafe/dappeteer. for login with wallet,  Metamask chrome-extension will be needed, and puppeteer doesn't support headless mode with chrome-extension(https://github.com/puppeteer/puppeteer/blob/main/website/versioned_docs/version-16.1.0/index.md#working-with-chrome-extensions).
+
+** So we can use this test command for local, but cannot use for CI.
+
+#### Test pre-condition 
+1. run `yarn serve` on /functions/ (this will run firebase-emulator on local, to test with same-condition )
+2. edit src/config/project.ts `emulator: false => true`
+3. run  `yarn serve` on /(top directory). (this will serve nouns-map web with localhost:8080)
+4. run  you can run `yarn test` on /. 
+
+you can re-try, re-test step 4 only.(On 1st time to test it fails randomly,because firebase emulator took much time to preplare backend,, so please retry `yarn test` again, on that case.)
+
 ## Firebase Hosting GitHub Action
 
 ### Get that service account's key and add it to your repository as a secret

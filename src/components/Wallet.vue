@@ -88,6 +88,7 @@
       <span v-if="user && user.userType == 'wallet'">
         <button
           class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+          id="SignOut"
           @click="signOut"
         >
           {{ $t("function.signout") }}
@@ -109,6 +110,7 @@
         <button
           v-else
           @click="signIn"
+          id="SignInWallet"
           class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         >
           {{ $t("function.signinWallet") }}
@@ -130,6 +132,7 @@
         <button
           v-else
           @click="connect"
+          id="ConnectMetamask"
           class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         >
           {{ $t("function.requestAccount") }}

@@ -1,33 +1,15 @@
 <template>
-  <div class="flex flex-col p-6" align="center" v-if="photoLocal">
-    <div>
-      <div class="flex flex-row justify-center items-center m-4">
-        <span class="block text-gray-700 text-sm font-bold m-2">
-          {{ $t("label.name") }}:
-        </span>
-        <input
-          type="text"
-          ref="nameRef"
-          maxlength="128"
-          minlength="1"
-          class="shadow appearance-none border rounded w-auto py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-      <div class="flex flex-row justify-center items-center m-4">
-        <span class="block text-gray-700 text-sm font-bold m-2">
-          {{ $t("label.event") }}:
-        </span>
-        <select v-model="eventId">
-          <option
-            v-for="event in supportingEvents"
-            :value="event.eventId"
-            :key="event.eventId"
-          >
-            {{ eventName(event.eventId) }}
-          </option>
-        </select>
-      </div>
-    </div>
+  <div
+    class="flex flex-col justify-center items-center text-gray-700 p-6"
+    align="center"
+    v-if="photoLocal"
+  >
+    <InputText
+      label="label.name"
+      testId="photo_title"
+      v-model:text="photoTitle"
+    />
+    <EventSelector v-model:eventId="eventId" />
     <div>
       {{ $t("message.selectPhotoLocation") }}<br />
       <label>{{ $t("message.spotPrivacyLevel") }} : </label>
@@ -42,6 +24,7 @@
     <button
       v-if="!processing"
       @click="uploadPhoto"
+      id="UploadImage"
       class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
     >
       {{ $t("message.uploadImage") }}
@@ -58,36 +41,42 @@
       {{ $t("message.processing") }}
     </button>
   </div>
-  <div class="fixed z-20 inset-x-0 .text-justify" v-else>
-    <div class="flex flex-row justify-left mt-2">
-      <span class="block text-gray-700 text-sm m-2">
-        {{ $t("label.viewEvent") }}:
-      </span>
-      <select
-        v-model="viewEventId"
-        class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
+  <div v-else>
+    <div class="fixed z-20 .text-justify">
+      <div
+        class="flex flex-col inset-x-0 justify-start text-gray-700 font-bold"
       >
-        <option
-          v-for="event in supportingEvents"
-          :value="event.eventId"
-          :key="event.eventId"
-        >
-          {{ eventName(event.eventId) }}
-        </option>
-      </select>
+        <EventSelector testId="viewEventSelect" v-model:eventId="viewEventId" />
+        <div class="flex flex-row">
+          <label class="text-sm m-2">{{ $t("label.showPhoto") }}:</label>
+          <input type="checkbox" id="showPicture" v-model="isShowPicture" />
+        </div>
+      </div>
     </div>
-    <div class="flex flex-row justify-left">
-      <label class="text-gray-700 text-sm m-2"
-        >{{ $t("label.showPhoto") }}:</label
-      >
-      <input type="checkbox" id="showPicture" v-model="isShowPicture" />
+    <div class="fixed z-20 inset-x-0 bottom-0 w-4/5 place-self-center p-8">
+      <PhotoPlayback
+        :total="pinsCount"
+        :wait="playbackConfig.wait"
+        :title="playingTitle"
+        @updated="playbackUpdate"
+        @stopped="playbackStop"
+        ref="playbackRef"
+      />
     </div>
   </div>
+
   <div ref="mapRef" class="nouns-map" />
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, Ref, watch } from "vue";
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  computed,
+  watch,
+  reactive,
+} from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { db } from "@/utils/firebase";
@@ -107,161 +96,53 @@ import {
   defaultMapConfig,
   privacyCircleConfig,
   supportingEvents,
+  playbackConfig,
 } from "@/config/project";
 import { NFT } from "@/models/SmartContract";
-import { useI18n } from "vue-i18n";
 import { uploadFile, getFileDownloadURL } from "@/utils/storage";
 import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
-import { shortID } from "@/utils/utils";
-interface PinData {
-  pid: string | null;
-  icon?: google.maps.Icon;
-  photoURL: string;
-  lat: number;
-  lng: number;
-  visibility: boolean;
-}
-
-class Pin {
-  protected _mapInstance: Ref<typeof google>;
-  protected _mapObj: Ref<google.maps.Map>;
-  protected _marker: google.maps.Marker;
-  protected _infoWindow: google.maps.InfoWindow;
-  protected _data: PinData;
-
-  protected contentString(photoURL: string) {
-    return (
-      '<div id="content">' +
-      '<div  id="siteNotice">' +
-      '<img  class="w-16 lg:w-32 xl:w-32" src="' +
-      photoURL +
-      '" />' +
-      "</div>" +
-      "</div>"
-    );
-  }
-
-  constructor(
-    mapInstance: Ref<typeof google>,
-    mapObj: Ref<google.maps.Map>,
-    data: PinData,
-    eventId: number
-  ) {
-    this._mapInstance = mapInstance;
-    this._mapObj = mapObj;
-    this._marker = new mapInstance.value.maps.Marker({
-      icon: data.icon,
-      position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
-      map: mapObj.value,
-      visible: data.visibility,
-    });
-    this._infoWindow = new mapInstance.value.maps.InfoWindow({
-      content: this.contentString(data.photoURL),
-    });
-    this._infoWindow.setContent(this.contentString(data.photoURL));
-    this.showPhoto();
-    this._marker.addListener("click", () => {
-      this._infoWindow.open({
-        anchor: this._marker,
-        map: mapObj.value,
-        shouldFocus: false,
-      });
-      if (data.pid) {
-        if (eventId > 0) {
-          router.push({
-            name: getLocaleName(router, "eventphoto"),
-            params: { eventId, photoId: data.pid },
-          });
-        } else {
-          router.push({
-            name: getLocaleName(router, "photo"),
-            params: { photoId: data.pid },
-          });
-        }
-      }
-    });
-    this._data = data;
-  }
-  showPhoto() {
-    this._infoWindow.open({
-      anchor: this._marker,
-      map: this._mapObj.value,
-      shouldFocus: false,
-    });
-  }
-  hidePhoto() {
-    this._infoWindow.close();
-  }
-
-  update(data: Partial<PinData>) {
-    this._data = { ...this._data, ...data };
-
-    if (data.icon != null) {
-      this._marker.setIcon(data.icon);
-    }
-
-    if (data.photoURL != null) {
-      this._infoWindow.setContent(this.contentString(data.photoURL));
-    }
-    if (data.lat != null || data.lng != null) {
-      const latlng = new this._mapInstance.value.maps.LatLng(
-        data.lat ?? this._data.lat,
-        data.lng ?? this._data.lng
-      );
-      this._marker.setPosition(latlng);
-    }
-
-    if (data.visibility != null) {
-      this._marker.setVisible(data.visibility);
-      if (!data.visibility) {
-        this.hidePhoto();
-      }
-    }
-  }
-  delete() {
-    this.hidePhoto();
-    this._marker.setMap(null);
-  }
-}
+import { shortID, eventName, pause } from "@/utils/utils";
+import { Pin, PinsType } from "@/utils/mapPin";
+import EventSelector from "./EventSelector.vue";
+import InputText from "./InputText.vue";
+import PhotoPlayback from "./PhotoPlayback.vue";
 
 export default defineComponent({
+  components: {
+    EventSelector,
+    InputText,
+    PhotoPlayback,
+  },
   setup() {
     const route = useRoute();
     const store = useStore();
     const mapRef = ref();
     const pLevel = ref();
-
     const mapInstance = ref();
     const mapObj = ref();
-
-    const pins: { [id: string]: Pin } = {};
+    const pins = reactive<PinsType>({});
+    const pinsCount = computed(() => Object.keys(pins).length);
     const photoLocal = ref();
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
     const processing = ref();
-    const nameRef = ref();
+    const photoTitle = ref<string>("title");
     const descRef = ref();
-    const i18n = useI18n();
     const eventId = ref<number>(0);
     const viewEventId = ref<number>(0);
     watch(viewEventId, () => {
+      console.log("event:", viewEventId.value);
       router.push({
         name: getLocaleName(router, "eventmap"),
-        params: { eventId: viewEventId.value },
+        params: { eventId: String(viewEventId.value) },
       });
     });
-    const eventName = (eventId: number) => {
-      const event = supportingEvents.filter((v) => v.eventId == eventId)[0];
-      const locl: keyof typeof event.name = i18n.locale
-        .value as keyof typeof event.name;
-      return event?.name[locl] ? event.name[locl] : "";
-    };
     const isShowPicture = ref(true);
     watch(isShowPicture, (cur) => {
-      console.log(cur);
+      //console.log(cur);
       for (const pin of Object.values(pins)) {
         if (cur) {
           pin.showPhoto();
@@ -270,9 +151,9 @@ export default defineComponent({
         }
       }
     });
+    const playbackRef = ref();
 
     let locationCircle: google.maps.Circle | null;
-
     const user = computed<User>(() => store.state.user);
     const nft = computed<NFT>(() => store.state.nft);
     watch(nft, (cur, prev) => {
@@ -284,7 +165,6 @@ export default defineComponent({
       console.log({ cur }, { prev });
       photoSelected(localPhoto.value);
     });
-
     watch(
       () => route.path,
       () => {
@@ -298,6 +178,7 @@ export default defineComponent({
     const routeCheck = () => {
       console.log(route.path, route.params, pins);
       if (route.params.photoId != null) {
+        playbackRef.value?.stop();
         loadPhoto(route.params.photoId as string);
       } else if (route.params.eventId != null) {
         const _event = parseInt(route.params.eventId as string);
@@ -311,7 +192,6 @@ export default defineComponent({
         loadUserPhotos();
       }
     };
-
     onMounted(async () => {
       const loader = new Loader({
         apiKey: defaultMapConfig.mapkey,
@@ -335,7 +215,6 @@ export default defineComponent({
       );
       routeCheck();
     });
-
     const photoSelected = async (info: PhotoInfo) => {
       if (!info) {
         photoLocal.value = null;
@@ -354,10 +233,12 @@ export default defineComponent({
         mapObj,
         {
           pid: null,
+          title: null,
           icon: defaultIcon(),
           photoURL: "",
           lat: location.lat,
           lng: location.lng,
+          zoom: mapObj.value.getZoom(),
           visibility: true,
         },
         0
@@ -402,7 +283,6 @@ export default defineComponent({
         );
       }
     };
-
     const uploadIcon = async (_uid: string): Promise<[string, string]> => {
       if (nft.value) {
         const _id =
@@ -451,7 +331,6 @@ export default defineComponent({
       processing.value = true;
       const _uid = user.value.uid;
       const [iconId, iconURL] = await uploadIcon(_uid);
-
       //generate random id  "hoge" is not created actually
       const _pid = doc(collection(db, "hoge")).id;
       const storage_path = `images/users/${_uid}/public_photos/${_pid}/original.jpg`;
@@ -462,9 +341,9 @@ export default defineComponent({
       )) as string;
       pins["upload"]?.update({ photoURL });
       pins["upload"]?.showPhoto();
-      const _title = nameRef.value?.value ? nameRef.value.value : "";
+      const _title = photoTitle.value;
       const _desc = descRef.value?.value ? descRef.value.value : "";
-      const _eventid = eventId.value ? eventId.value : 0;
+      const _eventid = eventId.value;
       const pdata = generateNewPhotoData(
         _pid,
         _title,
@@ -510,7 +389,6 @@ export default defineComponent({
       pins["demo"]?.update({ icon: defaultIcon() });
       pins["upload"]?.update({ icon: defaultIcon() });
     };
-
     const defaultIcon = () => {
       const _size = defaultMapConfig.icon_size;
       const _nouns_h = defaultMapConfig.nouns_icon_h;
@@ -532,9 +410,11 @@ export default defineComponent({
         console.info("no user info");
         return;
       }
-      const photos = await getDocs(
-        collection(db, `users/${user.value.uid}/public_photos/`)
+      const q = query(
+        collection(db, `users/${user.value.uid}/public_photos`),
+        where("deletedFlag", "==", false)
       );
+      const photos = await getDocs(q);
       if (photos.size && photos.size == Object.keys(pins).length) {
         console.log("already loaded so skipped,,", photos.size);
         //Object.keys(pins).forEach((key: string) => pins[key].showPhoto());
@@ -545,7 +425,6 @@ export default defineComponent({
         pin.delete();
         delete pins[key];
       }
-
       if (photos.size) {
         store.commit("setUserPhotoState", "exist");
       } else {
@@ -555,7 +434,7 @@ export default defineComponent({
       await photos.forEach((doc: DocumentData) => {
         // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
-        const { iconURL, images, lat, lng } = doc.data();
+        const { title, iconURL, images, lat, lng, zoom } = doc.data();
         const imageUrl = images?.resizedImages?.["600"]?.url;
         if (!imageUrl) {
           console.log("photoid skipped", doc.id);
@@ -571,6 +450,7 @@ export default defineComponent({
           mapObj,
           {
             pid: doc.id,
+            title,
             icon: {
               url: _iconurl,
               scaledSize: new mapInstance.value.maps.Size(_size, _hsize),
@@ -578,6 +458,7 @@ export default defineComponent({
             photoURL: imageUrl,
             lat,
             lng,
+            zoom,
             visibility: true,
           },
           0
@@ -621,7 +502,7 @@ export default defineComponent({
         .then((doc) => {
           if (doc.exists()) {
             store.commit("setClickedPhoto", doc.data());
-            const { iconURL, photoURL, lat, lng, zoom } = doc.data();
+            const { title, iconURL, photoURL, lat, lng, zoom } = doc.data();
             const _size = defaultMapConfig.icon_size;
             const _nouns_h = defaultMapConfig.nouns_icon_h;
             const size = iconURL.match(/red160px/)
@@ -632,6 +513,7 @@ export default defineComponent({
               mapObj,
               {
                 pid: doc.id,
+                title,
                 icon: {
                   url: iconURL,
                   scaledSize: size,
@@ -639,6 +521,7 @@ export default defineComponent({
                 photoURL,
                 lat,
                 lng,
+                zoom,
                 visibility: true,
               },
               0
@@ -682,7 +565,10 @@ export default defineComponent({
         for (const doc of photos.docs) {
           // doc.data() is never undefined for query doc snapshots
           console.log(doc.id, " => ", doc.data());
-          const { iconURL, photoURL, lat, lng } = doc.data();
+          const { title, iconURL, photoURL, lat, lng, zoom } = doc.data();
+          if (!iconURL || !photoURL) {
+            continue;
+          }
           const _size = defaultMapConfig.icon_size;
           const _nouns_h = defaultMapConfig.nouns_icon_h;
           const size = iconURL.match(/red160px/)
@@ -698,6 +584,7 @@ export default defineComponent({
             mapObj,
             {
               pid: doc.id,
+              title,
               icon: {
                 url: _iconurl,
                 scaledSize: size,
@@ -705,6 +592,7 @@ export default defineComponent({
               photoURL,
               lat,
               lng,
+              zoom,
               visibility: true,
             },
             _id
@@ -741,6 +629,81 @@ export default defineComponent({
       }
       lockedLoadEventPhotos = false;
     };
+    const playingTitle = ref("");
+    let zIndex = 0;
+    const playbackUpdate = async (index: number) => {
+      // latitude descending
+      const latpins = Object.values(pins).sort(
+        (p1, p2) => p2.data().lat - p1.data().lat
+      );
+      if (index < 1 || latpins.length < index) {
+        console.error(`wrong index:${index} lenghth:${latpins.length}`);
+        return;
+      }
+      if (index == 1) {
+        for (const pin of Object.values(pins)) {
+          pin.hidePhoto();
+        }
+      }
+      //playback animation
+      //1.  panaout => 2. move to next photo location => 3. zoom in
+      //1. pan aout
+      await changeZoomAnimation(
+        mapObj.value.getZoom(),
+        playbackConfig.defaultZoom
+      );
+
+      //2. move next photo location
+      const pin = latpins[index - 1];
+      pin.setContentLarge();
+      pin.setZ(zIndex++);
+      pin.showPhoto();
+      playingTitle.value = pin.data().title ? (pin.data().title as string) : "";
+      const center = mapObj.value.getCenter();
+      await changeLocationAnimation(
+        center.lat(),
+        center.lng(),
+        pin.data().lat,
+        pin.data().lng
+      );
+
+      //3. zoom in
+      const zoom = pin.data().zoom;
+      if (zoom) {
+        await changeZoomAnimation(mapObj.value.getZoom(), zoom);
+      }
+    };
+    const changeZoomAnimation = async (from: number, to: number) => {
+      //console.log(from, to);
+      //steps to takes 1sec to change
+      const delta = (to - from) / playbackConfig.animateStep;
+      const pauseSec = playbackConfig.animateSec / playbackConfig.animateStep;
+      for (let i = 1; i <= playbackConfig.animateStep; i++) {
+        mapObj.value.setZoom(from + Math.trunc(delta * i));
+        await pause(pauseSec);
+      }
+    };
+    const changeLocationAnimation = async (
+      fromLat: number,
+      fromLng: number,
+      toLat: number,
+      toLng: number
+    ) => {
+      const deltaLat = (toLat - fromLat) / playbackConfig.animateStep;
+      const deltaLng = (toLng - fromLng) / playbackConfig.animateStep;
+      const pauseSec = playbackConfig.animateSec / playbackConfig.animateStep;
+      for (let i = 1; i <= playbackConfig.animateStep; i++) {
+        mapObj.value.setCenter(
+          new google.maps.LatLng(fromLat + deltaLat * i, fromLng + deltaLng * i)
+        );
+        await pause(pauseSec);
+      }
+    };
+    const playbackStop = async () => {
+      for (const pin of Object.values(pins)) {
+        pin.setContent();
+      }
+    };
     return {
       mapRef,
       user,
@@ -749,18 +712,25 @@ export default defineComponent({
       pictureURL,
       photoLocal,
       processing,
-      nameRef,
+      photoTitle,
       descRef,
       eventId,
       viewEventId,
       supportingEvents,
       isShowPicture,
+      pins,
+      pinsCount,
+      playbackRef,
+      playbackConfig,
+      playingTitle,
       eventName,
       photoSelected,
       uploadPhoto,
       locationUpdated,
       loadUserPhotos,
       nftUpdate,
+      playbackUpdate,
+      playbackStop,
     };
   },
 });

@@ -30,6 +30,7 @@
         <a
           class="flex justify-center items-center border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-2 px-4"
           @click="showUpload"
+          id="UploadMenu"
         >
           {{ $t("menu.upload") }}</a
         >
