@@ -2,7 +2,7 @@
   <div class="flex flex-row items-center text-sm font-bold m-4">
     <span :class="formatClass"> {{ $t("label.event") }}: </span>
     <select
-      v-model="selectedId"
+      v-model="myEventId"
       :id="testId"
       class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
     >
@@ -23,9 +23,7 @@ import { defineComponent, watch, ref, toRefs } from "vue";
 import { eventName } from "@/utils/utils";
 
 export default defineComponent({
-  emits: {
-    updated: null,
-  },
+  emits: ['update:eventId'],
   props: {
     eventId: {
       type: Number,
@@ -42,21 +40,22 @@ export default defineComponent({
   },
   setup(props, context) {
     const { eventId } = toRefs(props);
+    //this watch needed for the case direct link to event page (event ID updated has delay)
     watch(eventId, () => {
-      selectedId.value = eventId.value;
+        console.log("prop update",eventId.value);
+        myEventId.value = eventId.value;
     });
-    const selectedId = ref<number>(props.eventId);
-    watch(
-      () => selectedId.value,
-      () => {
-        context.emit("updated", selectedId.value);
+    const myEventId = ref<number>(props.eventId);
+    watch(myEventId, () => {
+        console.log("selected",myEventId.value);
+        context.emit("update:eventId", myEventId.value);
       }
     );
     const getEventId = () => {
-      return selectedId.value;
+      return myEventId.value;
     };
     return {
-      selectedId,
+      myEventId,
       supportingEvents,
       getEventId,
       eventName,

@@ -6,9 +6,7 @@
       v-model:text="photoTitle"
     />
     <EventSelector
-      ref="eventSelectorRef"
-      formatClass="text-gray-700"
-      :eventId="eventId"
+      v-model:eventId="eventId"
     />
     <div>
       {{ $t("message.selectPhotoLocation") }}<br />
@@ -45,10 +43,8 @@
     <div class="fixed z-20 inset-x-0 .text-justify">
       <div class="flex flex-col justify-start text-gray-700 font-bold">
         <EventSelector
-          ref="viewEventSelectorRef"
-          @updated="viewEventUpdated"
           testId="viewEventSelect"
-          :eventId="viewEventId"
+          v-model:eventId="viewEventId"
         />
         <div class="flex flex-row">
           <label class="text-sm m-2">{{ $t("label.showPhoto") }}:</label>
@@ -133,17 +129,15 @@ export default defineComponent({
     const processing = ref();
     const photoTitle = ref<string>("title");
     const descRef = ref();
-    const eventSelectorRef = ref();
     const eventId = ref<number>(0);
     const viewEventId = ref<number>(0);
-    const viewEventUpdated = (updateId: number) => {
-      console.log({ updateId });
-      viewEventId.value = updateId;
+    watch(viewEventId,()=>{
+      console.log("event:",viewEventId.value);
       router.push({
         name: getLocaleName(router, "eventmap"),
-        params: { eventId: String(updateId) },
+        params: { eventId: String(viewEventId.value) },
       });
-    };
+    });
     const isShowPicture = ref(true);
     watch(isShowPicture, (cur) => {
       console.log(cur);
@@ -347,7 +341,7 @@ export default defineComponent({
       pins["upload"]?.showPhoto();
       const _title = photoTitle.value;
       const _desc = descRef.value?.value ? descRef.value.value : "";
-      const _eventid = eventSelectorRef.value.getEventId();
+      const _eventid = eventId.value;
       const pdata = generateNewPhotoData(
         _pid,
         _title,
@@ -716,7 +710,6 @@ export default defineComponent({
       processing,
       photoTitle,
       descRef,
-      eventSelectorRef,
       eventId,
       viewEventId,
       supportingEvents,
@@ -727,7 +720,6 @@ export default defineComponent({
       playbackConfig,
       playingTitle,
       eventName,
-      viewEventUpdated,
       photoSelected,
       uploadPhoto,
       locationUpdated,
