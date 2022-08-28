@@ -1,19 +1,6 @@
 <template>
   <div class="text-center justify-center">
-    <div v-if="playbackState == 'playing'">
-      <LabelText testId="photoPlayTitle" label="label.name" :text="title" />
-      <span id="photoPlayIndex"> {{ playbackIndex }} </span>/<span
-        id="photoCount"
-      >
-        {{ total }}
-      </span>
-      <div class="flex flex-row justify-center">
-        <IconButton testId="playbackPrevious" icon="skip_previous" />
-        <IconButton testId="playbackPause" icon="pause" @clicked="pause()" />
-        <IconButton testId="playbackNext" icon="skip_next" />
-      </div>
-    </div>
-    <div v-else-if="playbackState == 'paused'">
+    <div v-if="playbackState == 'playing' || playbackState == 'paused'">
       <LabelText testId="photoPlayTitle" label="label.name" :text="title" />
       <span id="photoPlayIndex"> {{ playbackIndex }} </span>/<span
         id="photoCount"
@@ -26,8 +13,24 @@
           icon="skip_previous"
           @clicked="previous()"
         />
-        <IconButton testId="playbackStop" icon="stop" @clicked="stop()" />
-        <IconButton testId="playback" icon="play_arrow" @clicked="playback()" />
+        <IconButton
+          testId="playbackPause"
+          icon="pause"
+          @clicked="pause()"
+          v-if="playbackState == 'playing'"
+        />
+        <IconButton
+          testId="playbackStop"
+          icon="stop"
+          @clicked="stop()"
+          v-if="playbackState == 'paused'"
+        />
+        <IconButton
+          testId="playback"
+          icon="play_arrow"
+          @clicked="playback()"
+          v-if="playbackState == 'paused'"
+        />
         <IconButton testId="playbackNext" icon="skip_next" @clicked="next()" />
       </div>
     </div>
@@ -130,7 +133,7 @@ export default defineComponent({
       update();
     };
     const update = () => {
-      console.log(playbackIndex.value);
+      //console.log(playbackIndex.value);
       context.emit("updated", playbackIndex.value);
     };
     const next = () => {
