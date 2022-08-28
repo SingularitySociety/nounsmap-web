@@ -11,9 +11,6 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  emits: {
-    clicked: null,
-  },
   props: {
     label: {
       type: String,
@@ -31,14 +28,6 @@ export default defineComponent({
       type: String,
       default: "",
     },
-  },
-  setup(props, context) {
-    const clicked = () => {
-      context.emit("clicked");
-    };
-    return {
-      clicked,
-    };
   },
 });
 </script>
