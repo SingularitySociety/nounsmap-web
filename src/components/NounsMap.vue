@@ -1,5 +1,9 @@
 <template>
-  <div class="flex flex-col text-gray-700 p-6" align="center" v-if="photoLocal">
+  <div
+    class="flex flex-col justify-center items-center text-gray-700 p-6"
+    align="center"
+    v-if="photoLocal"
+  >
     <InputText
       label="label.name"
       testId="photo_title"
@@ -38,15 +42,16 @@
     </button>
   </div>
   <div v-else>
-    <div class="fixed z-20 inset-x-0 .text-justify">
-      <div class="flex flex-col justify-start text-gray-700 font-bold">
+    <div class="fixed z-20 .text-justify">
+      <div class="flex flex-col inset-x-0  justify-start text-gray-700 font-bold">
         <EventSelector testId="viewEventSelect" v-model:eventId="viewEventId" />
         <div class="flex flex-row">
           <label class="text-sm m-2">{{ $t("label.showPhoto") }}:</label>
           <input type="checkbox" id="showPicture" v-model="isShowPicture" />
         </div>
       </div>
-      <div class="fixed z-20 inset-x-0 bottom-0 p-8">
+    </div>
+      <div class="fixed z-20 inset-x-0 bottom-0  w-4/5  place-self-center justify-center p-8">
         <PhotoPlayback
           :total="pinsCount"
           :wait="playbackConfig.wait"
@@ -57,7 +62,7 @@
         />
       </div>
     </div>
-  </div>
+
   <div ref="mapRef" class="nouns-map" />
 </template>
 
@@ -623,6 +628,7 @@ export default defineComponent({
       lockedLoadEventPhotos = false;
     };
     const playingTitle = ref("");
+    let zIndex = 0;
     const playbackUpdate = async (index: number) => {
       // latitude descending
       const latpins = Object.values(pins).sort(
@@ -648,6 +654,7 @@ export default defineComponent({
       //2. move next photo location
       const pin = latpins[index - 1];
       pin.setContentLarge();
+      pin.setZ(zIndex++);
       pin.showPhoto();
       playingTitle.value = pin.data().title ? (pin.data().title as string) : "";
       const center = mapObj.value.getCenter();

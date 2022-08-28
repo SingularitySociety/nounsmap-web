@@ -93,6 +93,10 @@ export class Pin {
   setContentLarge() {
     this._infoWindow.setContent(this.contentStringLarge(this._data.photoURL));
   }
+  setZ(index: number) {
+    this._marker.setZIndex(index);
+    this._infoWindow.setZIndex(index);
+  }
   showPhoto() {
     this._infoWindow.open({
       anchor: this._marker,

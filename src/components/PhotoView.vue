@@ -24,7 +24,7 @@
         <LabelText
           testId="PhotoEventView"
           label="label.event"
-          :text="eventName(clickedPhoto.eventId)"
+          :text="eventName(photoEventId)"
         />
       </div>
     </div>
@@ -235,10 +235,14 @@ export default defineComponent({
     const processing = ref("");
     const photoTitle = ref<string>("");
     watch(photoTitle, () => {
-      console.log(photoTitle.value);
+      //console.log(photoTitle.value);
       processing.value = "";
     });
     const photoEventId = ref<number>(0);
+    watch(photoEventId, () => {
+      //console.log(photoEventId.value);
+      processing.value = "";
+    });
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
       computed({
         get: () => store.state.clickedPhoto as PhotoPubData,
@@ -250,7 +254,10 @@ export default defineComponent({
         photoTitle.value = clickedPhoto.value.title
           ? clickedPhoto.value.title
           : "";
-        photoEventId.value = clickedPhoto.value.eventId;
+        photoEventId.value = clickedPhoto.value.eventId
+          ? clickedPhoto.value.eventId
+          : 0;
+        console.log(photoTitle.value,photoEventId.value);
       }
     });
     const close = () => {
