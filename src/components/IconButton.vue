@@ -31,7 +31,6 @@ export default defineComponent({
       type: String,
       default: "",
     },
-
     formatClass: {
       type: String,
       default: "",

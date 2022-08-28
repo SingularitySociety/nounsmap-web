@@ -13,7 +13,7 @@
           testId="PhotoTitleEdit"
           v-model:text="photoTitle"
         />
-        <EventSelector  v-model:eventId="photoEventId" />
+        <EventSelector v-model:eventId="photoEventId" />
       </div>
       <div v-else>
         <LabelText
@@ -234,10 +234,10 @@ export default defineComponent({
     const isDelete = ref(false);
     const processing = ref("");
     const photoTitle = ref<string>("");
-    watch(photoTitle,()=>{
+    watch(photoTitle, () => {
       console.log(photoTitle.value);
       processing.value = "";
-    })
+    });
     const photoEventId = ref<number>(0);
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
       computed({
@@ -247,7 +247,9 @@ export default defineComponent({
     watch(clickedPhoto, () => {
       checkUser();
       if (clickedPhoto.value) {
-        photoTitle.value = clickedPhoto.value.title ? clickedPhoto.value.title : "";
+        photoTitle.value = clickedPhoto.value.title
+          ? clickedPhoto.value.title
+          : "";
         photoEventId.value = clickedPhoto.value.eventId;
       }
     });

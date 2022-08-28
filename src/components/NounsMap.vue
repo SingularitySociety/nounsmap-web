@@ -5,9 +5,7 @@
       testId="photo_title"
       v-model:text="photoTitle"
     />
-    <EventSelector
-      v-model:eventId="eventId"
-    />
+    <EventSelector v-model:eventId="eventId" />
     <div>
       {{ $t("message.selectPhotoLocation") }}<br />
       <label>{{ $t("message.spotPrivacyLevel") }} : </label>
@@ -42,10 +40,7 @@
   <div v-else>
     <div class="fixed z-20 inset-x-0 .text-justify">
       <div class="flex flex-col justify-start text-gray-700 font-bold">
-        <EventSelector
-          testId="viewEventSelect"
-          v-model:eventId="viewEventId"
-        />
+        <EventSelector testId="viewEventSelect" v-model:eventId="viewEventId" />
         <div class="flex flex-row">
           <label class="text-sm m-2">{{ $t("label.showPhoto") }}:</label>
           <input type="checkbox" id="showPicture" v-model="isShowPicture" />
@@ -131,8 +126,8 @@ export default defineComponent({
     const descRef = ref();
     const eventId = ref<number>(0);
     const viewEventId = ref<number>(0);
-    watch(viewEventId,()=>{
-      console.log("event:",viewEventId.value);
+    watch(viewEventId, () => {
+      console.log("event:", viewEventId.value);
       router.push({
         name: getLocaleName(router, "eventmap"),
         params: { eventId: String(viewEventId.value) },
@@ -140,7 +135,7 @@ export default defineComponent({
     });
     const isShowPicture = ref(true);
     watch(isShowPicture, (cur) => {
-      console.log(cur);
+      //console.log(cur);
       for (const pin of Object.values(pins)) {
         if (cur) {
           pin.showPhoto();

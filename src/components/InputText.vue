@@ -17,7 +17,7 @@
 import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
-  emits: ['update:text'],
+  emits: ["update:text"],
   props: {
     text: {
       type: String,

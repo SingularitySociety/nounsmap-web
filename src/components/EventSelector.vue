@@ -23,7 +23,7 @@ import { defineComponent, watch, ref, toRefs } from "vue";
 import { eventName } from "@/utils/utils";
 
 export default defineComponent({
-  emits: ['update:eventId'],
+  emits: ["update:eventId"],
   props: {
     eventId: {
       type: Number,
@@ -42,15 +42,14 @@ export default defineComponent({
     const { eventId } = toRefs(props);
     //this watch needed for the case direct link to event page (event ID updated has delay)
     watch(eventId, () => {
-        console.log("prop update",eventId.value);
-        myEventId.value = eventId.value;
+      console.log("prop update", eventId.value);
+      myEventId.value = eventId.value;
     });
     const myEventId = ref<number>(props.eventId);
     watch(myEventId, () => {
-        console.log("selected",myEventId.value);
-        context.emit("update:eventId", myEventId.value);
-      }
-    );
+      //console.log("selected",myEventId.value);
+      context.emit("update:eventId", myEventId.value);
+    });
     const getEventId = () => {
       return myEventId.value;
     };
