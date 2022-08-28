@@ -9,11 +9,9 @@
     >
       <div v-if="isEditInfo">
         <InputText
-          ref="titleRef"
           label="label.name"
           testId="PhotoTitleEdit"
-          @changed="updateTitle"
-          :initText="clickedPhoto.title"
+          v-model:text="photoTitle"
         />
         <EventSelector ref="eventSelectorRef" :eventId="eventId" />
       </div>
@@ -235,11 +233,11 @@ export default defineComponent({
     const isEditInfo = ref(false);
     const isDelete = ref(false);
     const processing = ref("");
-    const titleRef = ref();
-    const updateTitle = (title: string) => {
-      console.log(title);
+    const photoTitle = ref<string>("");
+    watch(photoTitle,()=>{
+      console.log(photoTitle.value);
       processing.value = "";
-    };
+    })
     const eventId = ref<number>(0);
     const eventSelectorRef = ref();
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
@@ -250,6 +248,7 @@ export default defineComponent({
     watch(clickedPhoto, () => {
       checkUser();
       if (clickedPhoto.value) {
+        photoTitle.value = clickedPhoto.value.title ? clickedPhoto.value.title : "";
         eventId.value = clickedPhoto.value.eventId;
       }
     });
@@ -274,7 +273,7 @@ export default defineComponent({
       }
       processing.value = "saving";
       const photoId = clickedPhoto.value.photoId;
-      const title = titleRef.value.getText();
+      const title = photoTitle.value;
       const eventId = eventSelectorRef.value.getEventId();
       console.log({ title, eventId });
 
@@ -349,7 +348,7 @@ export default defineComponent({
       isWalletUser,
       isEditInfo,
       isDelete,
-      titleRef,
+      photoTitle,
       eventId,
       eventSelectorRef,
       supportingEvents,
@@ -360,7 +359,6 @@ export default defineComponent({
       nftRequest,
       openTweetPopup,
       eventName,
-      updateTitle,
     };
   },
 });

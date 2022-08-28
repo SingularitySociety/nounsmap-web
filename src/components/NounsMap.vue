@@ -1,11 +1,9 @@
 <template>
-  <div class="flex flex-col p-6" align="center" v-if="photoLocal">
+  <div class="flex flex-col text-gray-700 p-6" align="center" v-if="photoLocal">
     <InputText
-      ref="nameRef"
       label="label.name"
       testId="photo_title"
-      text-color="text-gray-700"
-      initText="title"
+      v-model:text="photoTitle"
     />
     <EventSelector
       ref="eventSelectorRef"
@@ -133,7 +131,7 @@ export default defineComponent({
     const dataURL = ref<string>();
     const pictureURL = ref<string>();
     const processing = ref();
-    const nameRef = ref();
+    const photoTitle = ref<string>("title");
     const descRef = ref();
     const eventSelectorRef = ref();
     const eventId = ref<number>(0);
@@ -347,7 +345,7 @@ export default defineComponent({
       )) as string;
       pins["upload"]?.update({ photoURL });
       pins["upload"]?.showPhoto();
-      const _title = nameRef.value.getText();
+      const _title = photoTitle.value;
       const _desc = descRef.value?.value ? descRef.value.value : "";
       const _eventid = eventSelectorRef.value.getEventId();
       const pdata = generateNewPhotoData(
@@ -716,7 +714,7 @@ export default defineComponent({
       pictureURL,
       photoLocal,
       processing,
-      nameRef,
+      photoTitle,
       descRef,
       eventSelectorRef,
       eventId,

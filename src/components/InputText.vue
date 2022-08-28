@@ -17,16 +17,9 @@
 import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
-  emits: {
-    changed: (param: string) => {
-      if (param === null) {
-        return false;
-      }
-      return true;
-    },
-  },
+  emits: ['update:text'],
   props: {
-    initText: {
+    text: {
       type: String,
       default: "",
     },
@@ -43,10 +36,10 @@ export default defineComponent({
       return textRef.value.value;
     };
     const changed = () => {
-      context.emit("changed", textRef.value.value);
+      context.emit("update:text", textRef.value.value);
     };
     onMounted(() => {
-      textRef.value.value = props.initText;
+      textRef.value.value = props.text;
     });
     return {
       textRef,
