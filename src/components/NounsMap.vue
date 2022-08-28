@@ -43,7 +43,9 @@
   </div>
   <div v-else>
     <div class="fixed z-20 .text-justify">
-      <div class="flex flex-col inset-x-0  justify-start text-gray-700 font-bold">
+      <div
+        class="flex flex-col inset-x-0 justify-start text-gray-700 font-bold"
+      >
         <EventSelector testId="viewEventSelect" v-model:eventId="viewEventId" />
         <div class="flex flex-row">
           <label class="text-sm m-2">{{ $t("label.showPhoto") }}:</label>
@@ -51,17 +53,17 @@
         </div>
       </div>
     </div>
-      <div class="fixed z-20 inset-x-0 bottom-0  w-4/5  place-self-center justify-center p-8">
-        <PhotoPlayback
-          :total="pinsCount"
-          :wait="playbackConfig.wait"
-          :title="playingTitle"
-          @updated="playbackUpdate"
-          @stopped="playbackStop"
-          ref="playbackRef"
-        />
-      </div>
+    <div class="fixed z-20 inset-x-0 bottom-0 w-4/5 place-self-center p-8">
+      <PhotoPlayback
+        :total="pinsCount"
+        :wait="playbackConfig.wait"
+        :title="playingTitle"
+        @updated="playbackUpdate"
+        @stopped="playbackStop"
+        ref="playbackRef"
+      />
     </div>
+  </div>
 
   <div ref="mapRef" class="nouns-map" />
 </template>

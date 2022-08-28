@@ -257,7 +257,7 @@ export default defineComponent({
         photoEventId.value = clickedPhoto.value.eventId
           ? clickedPhoto.value.eventId
           : 0;
-        console.log(photoTitle.value,photoEventId.value);
+        console.log(photoTitle.value, photoEventId.value);
       }
     });
     const close = () => {
