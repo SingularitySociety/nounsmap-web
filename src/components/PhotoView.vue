@@ -8,61 +8,35 @@
       class="col-start-2 row-span-1 col-span-3 flex justify-center items-center mt-16 text-white"
     >
       <div v-if="isEditInfo">
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.name") }}:
-          </span>
-          <input
-            type="text"
-            id="PhotoTitleEdit"
-            ref="titleRef"
-            maxlength="128"
-            minlength="1"
-            class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
-          />
-        </div>
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.event") }}:
-          </span>
-          <select
-            v-model="eventIdRef"
-            id="postEvent"
-            class="text-sm rounded-md py-1 font-semibold text-gray-800 border border-gray-800 text-center"
-          >
-            <option
-              v-for="event in supportingEvents"
-              :value="event.eventId"
-              :key="event.eventId"
-            >
-              {{ eventName(event.eventId) }}
-            </option>
-          </select>
-        </div>
+        <InputText
+          label="label.name"
+          testId="PhotoTitleEdit"
+          v-model:text="photoTitle"
+        />
+        <EventSelector v-model:eventId="photoEventId" />
       </div>
       <div v-else>
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.name") }}:
-          </span>
-          <span id="PhotoTitleView">
-            {{ clickedPhoto.title }}
-          </span>
-        </div>
-        <div class="flex flex-row justify-center items-center m-4">
-          <span class="block text-white text-sm font-bold m-2">
-            {{ $t("label.event") }}:
-          </span>
-          {{ eventName(clickedPhoto.eventId) }}
-        </div>
+        <LabelText
+          testId="PhotoTitleView"
+          label="label.name"
+          :text="clickedPhoto.title"
+        />
+        <LabelText
+          testId="PhotoEventView"
+          label="label.event"
+          :text="eventName(photoEventId)"
+        />
       </div>
     </div>
     <div
       class="col-start-5 row-span-1 col-span-1 flex justify-center items-center"
-      @click="close"
-      id="ClosePhotoView"
     >
-      <i class="text-6xl material-icons text-white mr-2">cancel</i>
+      <IconButton
+        testId="ClosePhotoView"
+        icon="scancel"
+        @clicked="close"
+        label=""
+      />
     </div>
     <div
       class="row-start-2 col-start-2 col-span-3 row-span-3 justify-center items-center"
@@ -75,7 +49,7 @@
       />
     </div>
     <div
-      class="row-start-5 col-start-2 col-span-2 row-span-1 shrink-0 py-2 flex justify-center items-center"
+      class="row-start-5 col-start-2 col-span-2 row-span-1 shrink-0 py-2 flex justify-center items-center text-white"
     >
       <div class="flex flex-column items-center">
         <img
@@ -85,57 +59,55 @@
           alt="nft icon"
         />
       </div>
-      <div
-        class="flex flex-column items-center"
-        @click="openTweetPopup(clickedPhoto.photoId)"
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >share</i
-        >
-        <span class="text-white text-large">{{
-          $t("function.sharePhoto")
-        }}</span>
+      <div class="flex flex-column items-center">
+        <IconButton
+          icon="share"
+          @clicked="openTweetPopup(clickedPhoto.photoId)"
+          label="function.sharePhoto"
+        />
       </div>
     </div>
     <div
-      class="row-start-4 col-start-5 col-span-1 row-span-2 shrink-0 py-2 flex flex-col justify-center items-center"
+      class="row-start-4 col-start-5 col-span-1 row-span-2 shrink-0 py-2 flex flex-col justify-center items-center text-white"
       v-if="isOwner"
     >
-      <div
-        class="flex flex-row items-center"
-        @click="savePhotoInfo()"
-        id="PhotoInfoSave"
-        v-if="isEditInfo"
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >save</i
-        >
-        <span class="text-white text-large">{{ $t("function.save") }}</span>
+      <div class="flex flex-row items-center" v-if="isEditInfo">
+        <IconButton
+          testId="PhotoInfoSaving"
+          icon="sync"
+          animate="animate-spin"
+          label="function.save"
+          v-if="processing == 'saving'"
+        />
+        <IconButton
+          testId="PhotoInfoSaveComplete"
+          icon="save"
+          label="function.saveComplete"
+          v-else-if="processing == 'saveComplete'"
+        />
+        <IconButton
+          @clicked="savePhotoInfo"
+          testId="PhotoInfoSave"
+          icon="save"
+          label="function.save"
+          v-else
+        />
       </div>
-      <div
-        class="flex flex-row items-center"
-        @click="isEditInfo = true"
-        id="EditInfo"
-        v-else
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >edit</i
-        >
-        <span class="text-white text-large">{{
-          $t("function.editPhotoInfo")
-        }}</span>
+      <div class="flex flex-row items-center" v-else>
+        <IconButton
+          testId="EditInfo"
+          icon="edit"
+          label="function.editPhotoInfo"
+          @clicked="isEditInfo = true"
+        />
       </div>
-      <div
-        class="flex flex-row items-center"
-        @click="isDelete = true"
-        id="DelPhoto"
-      >
-        <i class="text-5xl material-icons text-white hover:animate-pulse mr-2"
-          >delete</i
-        >
-        <span class="text-white text-large">{{
-          $t("function.deletePhoto")
-        }}</span>
+      <div class="flex flex-row items-center">
+        <IconButton
+          testId="DelPhoto"
+          icon="delete"
+          label="function.deletePhoto"
+          @clicked="isDelete = true"
+        />
       </div>
     </div>
 
@@ -164,10 +136,28 @@
       <div class="grid-cols-1">
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2">
-            {{ $t("message.deletePhotoConfirm") }}
+            <span id="DelPhotoComplete" v-if="processing == 'deleteComplete'">
+              {{ $t("message.deletePhotoComplete") }}
+            </span>
+            <span v-else>
+              {{ $t("message.deletePhotoConfirm") }}
+            </span>
           </label>
         </div>
-        <div class="flex justify-between mt-8">
+        <div
+          class="flex justify-between mt-8"
+          v-if="processing == 'deleteComplete'"
+        >
+          <button
+            @click="close()"
+            id="DelPhotoClose"
+            class="inline-block bg-gray-200 hover:bg-gray-400 rounded-full text-sm font-semibold text-gray-700 mx-4 p-3 py-1"
+            type="button"
+          >
+            {{ $t("function.close") }}
+          </button>
+        </div>
+        <div class="flex justify-between mt-8" v-else>
           <button
             @click="deletePhoto()"
             id="DelPhotoDo"
@@ -212,8 +202,18 @@ import { PhotoPubData } from "@/models/photo";
 import { getLocaleName } from "@/i18n/utils";
 import { eventName } from "@/utils/utils";
 import { photoInfoUpdated, photoDeleted } from "@/utils/functions";
+import EventSelector from "./EventSelector.vue";
+import InputText from "./InputText.vue";
+import IconButton from "./IconButton.vue";
+import LabelText from "./LabelText.vue";
 
 export default defineComponent({
+  components: {
+    EventSelector,
+    InputText,
+    IconButton,
+    LabelText,
+  },
   emits: {},
   setup() {
     const store = useStore();
@@ -232,8 +232,17 @@ export default defineComponent({
     const isWalletUser = ref(false);
     const isEditInfo = ref(false);
     const isDelete = ref(false);
-    const titleRef = ref();
-    const eventIdRef = ref<number>(0);
+    const processing = ref("");
+    const photoTitle = ref<string>("");
+    watch(photoTitle, () => {
+      //console.log(photoTitle.value);
+      processing.value = "";
+    });
+    const photoEventId = ref<number>(0);
+    watch(photoEventId, () => {
+      //console.log(photoEventId.value);
+      processing.value = "";
+    });
     const clickedPhoto: WritableComputedRef<PhotoPubData | undefined> =
       computed({
         get: () => store.state.clickedPhoto as PhotoPubData,
@@ -242,7 +251,13 @@ export default defineComponent({
     watch(clickedPhoto, () => {
       checkUser();
       if (clickedPhoto.value) {
-        eventIdRef.value = clickedPhoto.value.eventId;
+        photoTitle.value = clickedPhoto.value.title
+          ? clickedPhoto.value.title
+          : "";
+        photoEventId.value = clickedPhoto.value.eventId
+          ? clickedPhoto.value.eventId
+          : 0;
+        console.log(photoTitle.value, photoEventId.value);
       }
     });
     const close = () => {
@@ -264,9 +279,10 @@ export default defineComponent({
         console.error("wrong sequence");
         return;
       }
+      processing.value = "saving";
       const photoId = clickedPhoto.value.photoId;
-      const title = titleRef.value?.value ? titleRef.value.value : "";
-      const eventId = eventIdRef.value;
+      const title = photoTitle.value;
+      const eventId = photoEventId.value;
       console.log({ title, eventId });
 
       try {
@@ -282,7 +298,8 @@ export default defineComponent({
         // backend へ 全体共有情報更新依頼
         const ret = await photoInfoUpdated({ photoId, title, eventId });
         console.log(ret);
-        close();
+        processing.value = "saveComplete";
+        //close();
       } catch (e: unknown) {
         console.error(e);
       }
@@ -292,6 +309,7 @@ export default defineComponent({
         console.error("wrong sequence");
         return;
       }
+      processing.value = "deleting";
       const photoId = clickedPhoto.value.photoId;
       console.log({ photoId }, "delete");
 
@@ -307,7 +325,7 @@ export default defineComponent({
         // backend へ 全体共有情削除依頼
         const ret = await photoDeleted({ photoId });
         console.log(ret);
-        close();
+        processing.value = "deleteComplete";
       } catch (e: unknown) {
         console.error(e);
       }
@@ -338,9 +356,10 @@ export default defineComponent({
       isWalletUser,
       isEditInfo,
       isDelete,
-      titleRef,
-      eventIdRef,
+      photoTitle,
+      photoEventId,
       supportingEvents,
+      processing,
       close,
       savePhotoInfo,
       deletePhoto,

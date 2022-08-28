@@ -1,15 +1,6 @@
 import puppeteer from "puppeteer";
-import {
-  jest,
-  describe,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  afterEach,
-  it,
-  expect,
-} from "@jest/globals";
-import { catchConsoleError } from "./puppeteerUtil";
+import { jest, describe, beforeAll, afterAll, it, expect } from "@jest/globals";
+import { testWaitTime, catchConsoleError } from "./puppeteerUtil";
 
 jest.setTimeout(30000);
 let browser;
@@ -24,6 +15,7 @@ describe("Nounsmap-actual-twitter-user", () => {
     browser = await puppeteer.launch({ headless: false });
     page = await browser.newPage();
     catchConsoleError(page);
+    page.setDefaultTimeout(testWaitTime);
   });
   afterAll(async () => {
     browser.close();

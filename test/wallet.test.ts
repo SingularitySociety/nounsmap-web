@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import { jest, describe, beforeAll, afterAll, it, expect } from "@jest/globals";
 import { RECOMMENDED_METAMASK_VERSION } from "@chainsafe/dappeteer";
 import * as dappeteer from "@chainsafe/dappeteer";
-import { catchConsoleError } from "./puppeteerUtil";
+import { testWaitTime, catchConsoleError } from "./puppeteerUtil";
 /*
 dappeteer depends on LANG=en  (to wait some button, using englisht text matcher)
 On mac OS,  you need to change system language setting to change locale to en.
@@ -16,7 +16,7 @@ function pause(seconds) {
   return new Promise((res) => setTimeout(res, 1000 * seconds));
 }
 
-describe("Nounsmap-user", () => {
+describe("Nounsmap-user-wallet", () => {
   beforeAll(async () => {
     //browser = await dappeteer.launch(puppeteer, { metamaskVersion: 'v10.15.0', defaultViewport: null });
     browser = await dappeteer.launch(puppeteer, {
@@ -26,6 +26,7 @@ describe("Nounsmap-user", () => {
     metamask = await dappeteer.setupMetamask(browser, {});
     page = await browser.newPage();
     catchConsoleError(page);
+    page.setDefaultTimeout(testWaitTime);
     await page.goto("http://localhost:8080");
   });
   afterAll(async () => {

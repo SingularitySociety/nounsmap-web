@@ -22,8 +22,10 @@ const lang = {
     editPhotoInfo: "写真の情報を編集",
     deletePhoto: "写真を削除",
     save: "保存",
+    saveComplete: "保存完了",
     delete: "削除",
     cancel: "キャンセル",
+    close: "閉じる",
   },
   label: {
     name: "タイトル",
@@ -31,6 +33,8 @@ const lang = {
     event: "イベント",
     viewEvent: "表示イベント",
     showPhoto: "写真表示",
+    photoIndex: "表示中",
+    totalCount: "全枚数",
     creator: "作者",
     owner: "所有者",
     mint: "ミント",
@@ -88,6 +92,7 @@ const lang = {
     errorAccount:
       "有効なWalletでログインしていません。一度右上のユーザーメニューから、ログアウトを選択して、MetaMaskでログインしなおしてください。",
     deletePhotoConfirm: "この写真を削除してもよろしいでしょうか？",
+    deletePhotoComplete: "写真の削除は完了しました.",
   },
   languages,
 };
