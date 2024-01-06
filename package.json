@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint",
     "test": "jest --detectOpenHandles test/test.ts",
     "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev --only hosting",
+    "deploy-prod": "cp configs/prod.ts src/config/project.ts; yarn build;npx firebase deploy --project=prod --only hosting",
     "deploy-dev-all": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev",
     "deploy-prod-all": "cp configs/prod.ts src/config/project.ts; yarn build;npx firebase deploy --project=prod",
     "format": "prettier --write 'src/**/*.{js,ts,vue}'"

@@ -105,6 +105,9 @@ export const supportingEvents = [
       ja: "自分の記録",
       en: "self history",
     },
+    lat:35.9910113,
+    lng:139.769615,
+    zoom:8.4,    
     expired: 0,
   },
   {
@@ -113,6 +116,9 @@ export const supportingEvents = [
       ja: "nouns全国バトンリレー",
       en: "nousns All Japan baton relay",
     },
+    lat:35.9910113,
+    lng:139.769615,
+    zoom:8.4,    
     expired: 90,
   },
   {
@@ -121,8 +127,77 @@ export const supportingEvents = [
       ja: "今日のNouns",
       en: "Daily Nouns",
     },
+    lat:35.9910113,
+    lng:139.769615,
+    zoom:8.4,    
     expired: 1,
   },
+  {
+    eventId: 3,
+    name: {
+      ja: "nounsバトンリレー北海道・東北!",
+      en: "nousns baton relay HOKKAIDO/TOHOKU",
+    },
+    lat:40.8325873,
+    lng:140.3115816,
+    zoom:6.5,
+    expired: 90,
+  },
+  {
+    eventId: 5,
+    name: {
+      ja: "nounsバトンリレー関東!",
+      en: "nousns baton relay KANTO",
+    },
+    lat:35.9910113,
+    lng:139.769615,
+    zoom:8.4,
+    expired: 90,
+  },
+  {
+    eventId: 6,
+    name: {
+      ja: "nounsバトンリレー中部!",
+      en: "nousns baton relay CHUBU",
+    },
+    lat:36.153819,
+    lng:137.1862116,
+    zoom:8.1,
+    expired: 90,
+  },
+  {
+    eventId: 7,
+    name: {
+      ja: "nounsバトンリレー近畿!",
+      en: "nousns baton relay KINKI",
+    },
+    lat:34.9430808,
+    lng:135.7382852,
+    zoom:8.2,
+    expired: 90,
+  },
+  {
+    eventId: 8,
+    name: {
+      ja: "nounsバトンリレー中国、四国!",
+      en: "nousns baton relay CHUGOKU SIKOKU",
+    },
+    lat:34.3055142,
+    lng:133.3779946,
+    zoom:8.1,
+    expired: 90,
+  },
+  {
+    eventId: 9,
+    name: {
+      ja: "nounsバトンリレー九州・沖縄!",
+      en: "nousns baton relay KYUSHU OKINAWA",
+    },
+    lat:30.0528169,
+    lng:127.5497001,
+    zoom:6.7,
+    expired: 90,
+  },  
 ];
 
 export const playbackConfig = {

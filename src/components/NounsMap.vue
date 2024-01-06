@@ -104,7 +104,7 @@ import { photoPosted } from "@/utils/functions";
 import { generateNewPhotoData, PhotoInfo } from "@/models/photo";
 import router from "@/router";
 import { getLocalePath, getLocaleName } from "@/i18n/utils";
-import { shortID, eventName, pause } from "@/utils/utils";
+import { shortID, eventName, eventDefaultPoint, pause } from "@/utils/utils";
 import { Pin, PinsType } from "@/utils/mapPin";
 import EventSelector from "./EventSelector.vue";
 import InputText from "./InputText.vue";
@@ -609,7 +609,13 @@ export default defineComponent({
         const maxLng = Math.max.apply(null, lngarray);
         const minLng = Math.min.apply(null, lngarray);
         console.log(minLat, maxLat, minLng, maxLng);
-        if (photos.size == 1) {
+        if (photos.size == 0) {
+          const { lat, lng, zoom } = eventDefaultPoint(_id);
+          if (lat) mapObj.value.setCenter(new google.maps.LatLng(lat, lng));
+          if (zoom) {
+            mapObj.value.setZoom(zoom);
+          }
+        } else if (photos.size == 1) {
           mapObj.value.setCenter(
             new mapInstance.value.maps.LatLng(minLat, minLng)
           );
