@@ -8,6 +8,7 @@ const messages = {
 
 const config = {
   locale: "en",
+  legacy: false,
   messages,
 };
 
