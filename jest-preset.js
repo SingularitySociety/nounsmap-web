@@ -1,3 +1,3 @@
 {
-    preset: "@chainsafe/dappeteer"
+    "@chainsafe/dappeteer"
 }

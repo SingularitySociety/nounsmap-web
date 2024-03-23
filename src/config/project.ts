@@ -1,11 +1,11 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyD06LTp_w__4yULKReZYDQdPXH8FRVfeAg",
-  authDomain: "nounsmap-web-dev.firebaseapp.com",
-  projectId: "nounsmap-web-dev",
-  storageBucket: "nounsmap-web-dev.appspot.com",
-  messagingSenderId: "921564152867",
-  appId: "1:921564152867:web:f52be744b25a8648059d96",
-  measurementId: "G-8HBS0HJ881",
+  apiKey: "AIzaSyB6Rj9kOnPlKG_aSOQT5_lGDBP01JmR-7U",
+  authDomain: "nounsmap-web-prod.firebaseapp.com",
+  projectId: "nounsmap-web-prod",
+  storageBucket: "nounsmap-web-prod.appspot.com",
+  messagingSenderId: "297116670466",
+  appId: "1:297116670466:web:c00780dd6d818858bae51b",
+  measurementId: "G-2TR3L7VH0H",
 };
 
 export const nounsMapConfig = {
@@ -13,7 +13,7 @@ export const nounsMapConfig = {
   pageTitle: "NounsMap",
   siteDescription: "find world with Nouns",
   region: "JP",
-  hostName: "dev.nounsmap.com",
+  hostName: "nounsmap.com",
   introduction: "Comming soon. NOOOOOOOOOOOOOUNS map!!",
   useEmulator: false,
   alchemy: "9kNMUxVidDBUvCJUv41IUWE3_gXTZW9T",
@@ -23,7 +23,7 @@ export const defaultMapConfig = {
   lan: 35.6762, //tokyo
   lng: 139.6503, //tokyo
   zoom: 10, //for kanto area
-  mapkey: "AIzaSyC-sE86tDfCgxPjsx1heo2iwvDRgmOYsFo",
+  mapkey: "AIzaSyBmHcCaWNs095d-jz7iiCSOmNRCOFFYs4E",
   icon_size: 40,
   nouns_icon_h: 15,
 };
@@ -53,14 +53,6 @@ export const ethereumConfig = {
       chainId: "0x1",
       contractAddress: "0x34758B0D303608B05B0BF6A35714162ac8797DC2",
       openseaUrl: "https://opensea.io/assets/ethereum",
-      filter: null,
-      idmask: 0,
-    },
-    {
-      name: "NounsLove(testnets)",
-      chainId: "0x4",
-      contractAddress: "0x1602155eB091F863e7e776a83e1c330c828ede19",
-      openseaUrl: "https://testnets.opensea.io/assets/rinkeby",
       filter: null,
       idmask: 0,
     },
@@ -105,6 +97,9 @@ export const supportingEvents = [
       ja: "自分の記録",
       en: "self history",
     },
+    lat: 35.9910113,
+    lng: 139.769615,
+    zoom: 8.4,
     expired: 0,
   },
   {
@@ -113,6 +108,9 @@ export const supportingEvents = [
       ja: "nouns全国バトンリレー",
       en: "nousns All Japan baton relay",
     },
+    lat: 35.9910113,
+    lng: 139.769615,
+    zoom: 8.4,
     expired: 90,
   },
   {
@@ -121,7 +119,76 @@ export const supportingEvents = [
       ja: "今日のNouns",
       en: "Daily Nouns",
     },
+    lat: 35.9910113,
+    lng: 139.769615,
+    zoom: 8.4,
     expired: 1,
+  },
+  {
+    eventId: 3,
+    name: {
+      ja: "nounsバトンリレー北海道・東北!",
+      en: "nousns baton relay HOKKAIDO/TOHOKU",
+    },
+    lat: 40.8325873,
+    lng: 140.3115816,
+    zoom: 6.5,
+    expired: 90,
+  },
+  {
+    eventId: 5,
+    name: {
+      ja: "nounsバトンリレー関東!",
+      en: "nousns baton relay KANTO",
+    },
+    lat: 35.9910113,
+    lng: 139.769615,
+    zoom: 8.4,
+    expired: 90,
+  },
+  {
+    eventId: 6,
+    name: {
+      ja: "nounsバトンリレー中部!",
+      en: "nousns baton relay CHUBU",
+    },
+    lat: 36.153819,
+    lng: 137.1862116,
+    zoom: 8.1,
+    expired: 90,
+  },
+  {
+    eventId: 7,
+    name: {
+      ja: "nounsバトンリレー近畿!",
+      en: "nousns baton relay KINKI",
+    },
+    lat: 34.9430808,
+    lng: 135.7382852,
+    zoom: 8.2,
+    expired: 90,
+  },
+  {
+    eventId: 8,
+    name: {
+      ja: "nounsバトンリレー中国、四国!",
+      en: "nousns baton relay CHUGOKU SIKOKU",
+    },
+    lat: 34.3055142,
+    lng: 133.3779946,
+    zoom: 8.1,
+    expired: 90,
+  },
+  {
+    eventId: 9,
+    name: {
+      ja: "nounsバトンリレー九州・沖縄!",
+      en: "nousns baton relay KYUSHU OKINAWA",
+    },
+    lat: 30.0528169,
+    lng: 127.5497001,
+    zoom: 6.7,
+    expired: 90,
   },
 ];
 

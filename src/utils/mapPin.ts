@@ -51,6 +51,7 @@ export class Pin {
   ) {
     this._mapInstance = mapInstance;
     this._mapObj = mapObj;
+
     this._marker = new mapInstance.value.maps.Marker({
       icon: data.icon,
       position: new mapInstance.value.maps.LatLng(data.lat, data.lng),
@@ -119,7 +120,7 @@ export class Pin {
       this._infoWindow.setContent(this.contentString(data.photoURL));
     }
     if (data.lat != null || data.lng != null) {
-      const latlng = new this._mapInstance.value.maps.LatLng(
+      const latlng = new google.maps.LatLng(
         data.lat ?? this._data.lat,
         data.lng ?? this._data.lng
       );
