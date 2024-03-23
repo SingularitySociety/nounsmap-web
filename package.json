@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint",
     "test": "jest --detectOpenHandles test/test.ts",
     "deploy-dev": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev --only hosting",
+    "deploy-prod": "cp configs/prod.ts src/config/project.ts; yarn build;npx firebase deploy --project=prod --only hosting",
     "deploy-dev-all": "cp configs/dev.ts src/config/project.ts; yarn build;npx firebase deploy --project=dev",
     "deploy-prod-all": "cp configs/prod.ts src/config/project.ts; yarn build;npx firebase deploy --project=prod",
     "format": "prettier --write 'src/**/*.{js,ts,vue}'"
@@ -36,7 +37,7 @@
   "devDependencies": {
     "@babel/core": "^7.18.10",
     "@babel/preset-env": "^7.18.10",
-    "@chainsafe/dappeteer": "^3.0.0-rc.0",
+    "@chainsafe/dappeteer": "^5.2.0",
     "@types/google.maps": "^3.48.7",
     "@types/googlemaps": "^3.43.3",
     "@types/uuid": "^8.3.4",
