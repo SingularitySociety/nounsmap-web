@@ -32,6 +32,15 @@ export const eventName = (eventId: number) => {
   return event?.name[locl] ? event.name[locl] : "";
 };
 
+export const eventDefaultPoint = (eventId: number) => {
+  const event = supportingEvents.find((v) => v.eventId == eventId);
+  if (!event) {
+    return { lat: null, lng: null, zoom: null };
+  } else {
+    return { lat: event.lat, lng: event.lng, zoom: event.zoom };
+  }
+};
+
 export function pause(seconds: number) {
   return new Promise((res) => setTimeout(res, 1000 * seconds));
 }
